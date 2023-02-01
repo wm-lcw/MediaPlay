@@ -28,7 +28,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="250dp"
         android:orientation="vertical">
         <SeekBar
             android:layout_gravity="center"
@@ -40,38 +40,62 @@
     <LinearLayout
         android:layout_marginTop="50dp"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="50dp"
         android:orientation="horizontal">
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
             android:id="@+id/bt_loop"
             android:src="@mipmap/media_loop"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
             android:id="@+id/bt_pre"
             android:src="@mipmap/media_previous"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
             android:id="@+id/bt_play"
             android:src="@mipmap/media_play"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
             android:id="@+id/bt_next"
             android:src="@mipmap/media_next"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
             android:id="@+id/bt_list"
             android:src="@mipmap/medialist"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
 
     </LinearLayout>
 
