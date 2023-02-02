@@ -64,9 +64,13 @@ public class MusicAdapter extends BaseAdapter {
         return convertView;
     }
 
-
+    public void notifyItemChanged(int i) {
+        notifyDataSetChanged();
+    }
 
     static class ViewHolder {
         TextView tvName;
     }
+
+
 }

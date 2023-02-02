@@ -25,14 +25,26 @@
             android:layout_height="300dp"/>
     </LinearLayout>
 
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="250dp"
-        android:orientation="vertical">
+        android:layout_marginTop="220dp"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+        <TextView
+            android:id="@+id/tv_music_info"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:text="abc"
+            android:textColor="@color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <SeekBar
             android:layout_gravity="center"
             android:id="@+id/sb_progress"
+            android:layout_marginTop="15dp"
             android:layout_width="350dp"
             android:layout_height="wrap_content"/>
 

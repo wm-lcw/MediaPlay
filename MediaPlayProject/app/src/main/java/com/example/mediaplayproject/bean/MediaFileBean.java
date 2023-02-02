@@ -12,6 +12,15 @@ public class MediaFileBean {
     private String artist;//艺人
     private int duration;//音乐时长
     private long size;//音乐文件大小
+    private boolean isPlaying;
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
 
     public long getId() {
         return id;
