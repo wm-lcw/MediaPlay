@@ -44,7 +44,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     /**
      * 显示播放信息
      */
-    private TextView text;
+    private TextView text,currentTime,mediaTime;
 
     /**
      * 当前的播放歌曲信息
@@ -60,7 +60,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      *  @param
      *  @return
      */
-    public MusicPlayerHelper(SeekBar seekBar, TextView text) {
+    public MusicPlayerHelper(SeekBar seekBar, TextView text,TextView currentTime,TextView mediaTime) {
         mHandler = new MusicPlayerHelperHandler(this);
         player = new MediaPlayer();
         // 设置媒体流类型
@@ -72,6 +72,8 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         this.seekBar = seekBar;
         this.seekBar.setOnSeekBarChangeListener(this);
         this.text = text;
+        this.currentTime = currentTime;
+        this.mediaTime = mediaTime;
     }
 
     /**
@@ -335,7 +337,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                         // 计算进度（获取进度条最大刻度*当前音乐播放位置 / 当前音乐时长）
                         pos = (int) (weakReference.get().seekBar.getMax() * position / (duration * 1.0f));
                     }
-                    weakReference.get().text.setText(weakReference.get().getCurrentPlayingInfo(position, duration));
+                    weakReference.get().text.setText(weakReference.get().getCurrentPlayingInfo());
+                    weakReference.get().currentTime.setText(weakReference.get().getFormatTime(position));
+                    weakReference.get().mediaTime.setText(weakReference.get().getFormatTime(duration));
                 }
                 weakReference.get().seekBar.setProgress(pos);
                 sendEmptyMessageDelayed(MSG_CODE, MSG_TIME);
@@ -352,9 +356,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      *  @param
      *  @return 
      */
-    private String getCurrentPlayingInfo(int currentTime, int maxTime) {
-        String info = String.format("正在播放:  %s\t\t", mediaFileBean.getTitle());
-        return String.format("%s %s / %s", info, formatTime(currentTime), formatTime(maxTime));
+    private String getCurrentPlayingInfo() {
+        return String.format("%s", mediaFileBean.getTitle());
+    }
+
+    private String getFormatTime(int time){
+        return String.format("%s", formatTime(time));
     }
 
     /**

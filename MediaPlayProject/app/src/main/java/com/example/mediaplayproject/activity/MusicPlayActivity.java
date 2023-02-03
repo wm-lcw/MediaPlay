@@ -54,7 +54,7 @@ public class MusicPlayActivity extends AppCompatActivity {
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView;
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView;
-    private TextView tvCurrentMusicInfo;
+    private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
     private boolean  isShowList = false, mRegistered = false, firstPlay = true;
     private Context mContext;
     private List<MediaFileBean> musicInfo = new ArrayList<>();
@@ -151,6 +151,8 @@ public class MusicPlayActivity extends AppCompatActivity {
         sbVolume = findViewById(R.id.sb_volume);
         sbProgress = findViewById(R.id.sb_progress);
         tvCurrentMusicInfo = findViewById(R.id.tv_music_info);
+        tvCurrentPlayTime = findViewById(R.id.tv_music_current_time);
+        tvMediaTime = findViewById(R.id.tv_music_time);
 
         ivMediaLoop.setOnClickListener(mListener);
         ivMediaPre.setOnClickListener(mListener);
@@ -175,14 +177,18 @@ public class MusicPlayActivity extends AppCompatActivity {
     private void initPlayHelper() {
         if (musicInfo.size() > 0) {
             tvCurrentMusicInfo.setText(musicInfo.get(mPosition).getTitle());
+            tvCurrentPlayTime.setText("00:00");
+            tvMediaTime.setText(MusicPlayerHelper.formatTime(musicInfo.get(mPosition).getDuration()));
             ivMediaPlay.setEnabled(true);
         } else {
             //若列表为空，则播放按钮不可点击
             tvCurrentMusicInfo.setText("");
+            tvCurrentPlayTime.setText("");
+            tvMediaTime.setText("");
             ivMediaPlay.setEnabled(false);
         }
         //sbProgress为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
-        helper = new MusicPlayerHelper(sbProgress, tvCurrentMusicInfo);
+        helper = new MusicPlayerHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime);
         //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
         helper.setOnCompletionListener(mp -> {
             DebugLog.debug("setOnCompletionListener ");
@@ -359,8 +365,6 @@ public class MusicPlayActivity extends AppCompatActivity {
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_music_lit, null);
         //添加mFloatLayout
         mWindowManager.addView(mFloatLayout, wmParams);
-        //隐藏当前播放音乐的信息（与列表显示位置重叠）
-        tvCurrentMusicInfo.setVisibility(View.INVISIBLE);
 
         //浮动窗口关闭按钮
         ivCloseListView = mFloatLayout.findViewById(R.id.iv_list_close);
@@ -369,7 +373,6 @@ public class MusicPlayActivity extends AppCompatActivity {
             public void onClick(View v) {
                 DebugLog.debug("close list");
                 mWindowManager.removeView(mFloatLayout);
-                tvCurrentMusicInfo.setVisibility(View.VISIBLE);
             }
         });
 
@@ -394,7 +397,6 @@ public class MusicPlayActivity extends AppCompatActivity {
 //                switch (keyCode) {
 //                    case KeyEvent.KEYCODE_BACK:
 //                        mWindowManager.removeView(mFloatLayout);
-//                        tvCurrentMusicInfo.setVisibility(View.VISIBLE);
 //                        return true;
 //                    default:
 //                        return false;
@@ -418,7 +420,6 @@ public class MusicPlayActivity extends AppCompatActivity {
                 listWindow.getGlobalVisibleRect(rect);
                 if (!rect.contains(x, y) && isShowList) {
                     mWindowManager.removeView(mFloatLayout);
-                    tvCurrentMusicInfo.setVisibility(View.VISIBLE);
                 }
                 DebugLog.debug("onTouch : " + x + ", " + y + ", rect: " + rect);
                 return false;
