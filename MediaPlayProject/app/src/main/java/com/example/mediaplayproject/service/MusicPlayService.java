@@ -18,6 +18,9 @@ import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @ClassName: MusicPlayService
  * @Description: 音乐播放器service，用于支持后台播放
@@ -32,6 +35,9 @@ public class MusicPlayService extends Service {
 
     private Context mContext;
     private MusicPlayerHelper helper;
+    private Handler mHandler;
+    private List<MediaFileBean> musicInfo = new ArrayList<>();
+    private int mPosition = 0;
     private IBinder myBinder = new MyBinder();
 
     @Override
@@ -48,6 +54,8 @@ public class MusicPlayService extends Service {
 
     /**
      * @param
+     * @param musicInfo
+     * @param handler
      * @return
      * @version V1.0
      * @Title initPlayHelper
@@ -55,7 +63,11 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/4 14:50
      * @description 初始化音乐播放器辅助类
      */
-    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime) {
+    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, List<MediaFileBean> musicInfo, Handler handler) {
+        //保存歌曲列表
+        this.musicInfo = musicInfo;
+        //保存handler对象
+        mHandler = handler;
         //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
         helper = new MusicPlayerHelper(seekBar, currentMusicInfo, currentTime, mediaTime);
         //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
@@ -67,6 +79,7 @@ public class MusicPlayService extends Service {
 
     /**
      * @param
+     * @param mPosition
      * @return
      * @version V1.0
      * @Title play
@@ -74,8 +87,9 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/4 14:54
      * @description 播放
      */
-    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
+    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
         if (!TextUtils.isEmpty(mediaFileBean.getData())) {
+            this.mPosition = mPosition;
             DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
             //记录当前的播放状态
             boolean isPlayingStatus= false;
@@ -112,10 +126,23 @@ public class MusicPlayService extends Service {
 
     public void playPre() {
         DebugLog.debug("playPre");
+        //如果当前是第一首，则播放最后一首
+        if (mPosition <= 0) {
+            mPosition = musicInfo.size();
+        }
+        mPosition--;
+        play(musicInfo.get(mPosition), true, mHandler,mPosition);
     }
 
     public void playNext() {
         DebugLog.debug("playNext");
+        mPosition++;
+        //如果下一曲大于歌曲数量则取第一首
+        if (mPosition >= musicInfo.size()) {
+            mPosition = 0;
+        }
+        play(musicInfo.get(mPosition), true, mHandler,mPosition);
+
     }
 
     public boolean isPlaying() {

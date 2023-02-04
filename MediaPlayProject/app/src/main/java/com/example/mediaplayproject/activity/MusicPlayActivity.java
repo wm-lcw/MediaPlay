@@ -77,7 +77,7 @@ public class MusicPlayActivity extends AppCompatActivity {
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
 
-    private int mPosition = 1;
+    private int mPosition = 0;
 
     private MusicPlayService musicService;
 
@@ -216,51 +216,13 @@ public class MusicPlayActivity extends AppCompatActivity {
         tvCurrentMusicInfo.requestFocus();
     }
 
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title playPre
-     * @author wm
-     * @createTime 2023/2/3 18:11
-     * @description 播放上一首
-     */
-    private void playPre() {
-        DebugLog.debug("position  " + mPosition);
-        //如果当前是第一首，则播放最后一首
-        if (mPosition <= 0) {
-            mPosition = musicInfo.size();
-        }
-        mPosition--;
-        toPlayMusic(musicInfo.get(mPosition), true, handler);
-    }
-
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title playNext
-     * @author wm
-     * @createTime 2023/2/3 18:11
-     * @description 播放下一首
-     */
-    private void playNext() {
-        DebugLog.debug("position  " + mPosition);
-        mPosition++;
-        //如果下一曲大于歌曲数量则取第一首
-        if (mPosition >= musicInfo.size()) {
-            mPosition = 0;
-        }
-        toPlayMusic(musicInfo.get(mPosition), true, handler);
-    }
-
     private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
         DebugLog.debug("play isResetPlay " + isRestPlayer);
         if (musicService != null && !initPlayHelper) {
             initPlayHelper = true;
-            musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime);
+            musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, musicInfo, handler);
         }
-        musicService.play(mediaFileBean, isRestPlayer, handler);
+        musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
     }
 
     private View.OnClickListener mListener = new View.OnClickListener() {
@@ -270,14 +232,14 @@ public class MusicPlayActivity extends AppCompatActivity {
             if (view == ivMediaLoop) {
                 DebugLog.debug("onclick ivMediaLoop");
             } else if (view == ivMediaPre) {
-                playPre();
+                musicService.playPre();
             } else if (view == ivMediaPlay) {
                 DebugLog.debug("current position " + mPosition);
                 // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
                 toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
-                playNext();
+                musicService.playNext();
             } else if (view == ivMediaList) {
                 DebugLog.debug("onclick ivMediaList");
                 isShowList = true;
