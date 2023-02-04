@@ -62,7 +62,7 @@ public class MusicPlayActivity extends AppCompatActivity {
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
-    private boolean isShowList = false, mRegistered = false, firstPlay = true, initPlayHelper = false;
+    private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false;
     private Context mContext;
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private LinearLayout mFloatLayout;
@@ -216,12 +216,16 @@ public class MusicPlayActivity extends AppCompatActivity {
         tvCurrentMusicInfo.requestFocus();
     }
 
-    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
-        DebugLog.debug("play isResetPlay " + isRestPlayer);
-        if (musicService != null && !initPlayHelper) {
-            initPlayHelper = true;
+    private void initPlayHelper(){
+        if (musicService != null && !isInitPlayHelper) {
+            isInitPlayHelper = true;
             musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, musicInfo, handler);
         }
+    }
+
+    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
+        DebugLog.debug("play isResetPlay " + isRestPlayer);
+        initPlayHelper();
         musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
     }
 
@@ -232,6 +236,7 @@ public class MusicPlayActivity extends AppCompatActivity {
             if (view == ivMediaLoop) {
                 DebugLog.debug("onclick ivMediaLoop");
             } else if (view == ivMediaPre) {
+                initPlayHelper();
                 musicService.playPre();
             } else if (view == ivMediaPlay) {
                 DebugLog.debug("current position " + mPosition);
@@ -239,6 +244,7 @@ public class MusicPlayActivity extends AppCompatActivity {
                 toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
+                initPlayHelper();
                 musicService.playNext();
             } else if (view == ivMediaList) {
                 DebugLog.debug("onclick ivMediaList");
