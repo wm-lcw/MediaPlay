@@ -5,14 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
@@ -32,11 +36,13 @@ import android.widget.Toast;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.SearchFiles;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -51,11 +57,12 @@ import java.util.List;
  */
 public class MusicPlayActivity extends AppCompatActivity {
 
+
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView;
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
-    private boolean  isShowList = false, mRegistered = false, firstPlay = true;
+    private boolean isShowList = false, mRegistered = false, firstPlay = true, initPlayHelper = false;
     private Context mContext;
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private LinearLayout mFloatLayout;
@@ -63,15 +70,16 @@ public class MusicPlayActivity extends AppCompatActivity {
     private WindowManager mWindowManager;
     private AudioManager mAudioManager;
     private MusicAdapter musicAdapter;
-    private MusicPlayerHelper helper;
     private MusicBroadcastReceiver mMusicBroadcastReceiver;
     private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
     private final String VOLUME_CHANGE_ACTION = "android.media.VOLUME_CHANGED_ACTION";
     private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
+    public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
 
     private int mPosition = 1;
 
+    private MusicPlayService musicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +87,34 @@ public class MusicPlayActivity extends AppCompatActivity {
         setContentView(R.layout.activity_music_play);
         mContext = this;
         updateMusicFiles();
-        registerReceiver();
         initData();
-        initPlayHelper();
+        registerReceiver();
+        //启动MusicPlayService服务
+        Intent bindIntent = new Intent(MusicPlayActivity.this, MusicPlayService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
 
+    /**
+     * @version V1.0
+     * @Title
+     * @author wm
+     * @createTime 2023/2/4 15:02
+     * @description 创建service所需要的connection
+     * @param
+     * @return
+     */
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            DebugLog.debug("onServiceConnected");
+            musicService = ((MusicPlayService.MyBinder) service).getService(mContext);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicService = null;
+        }
+    };
 
     /**
      * @param
@@ -98,21 +129,25 @@ public class MusicPlayActivity extends AppCompatActivity {
         SearchFiles mSearcherFiles = SearchFiles.getInstance(mContext);
         musicInfo = mSearcherFiles.getMusicInfo();
         //打印输出音乐列表
-//        if (musicInfo.size() > 0) {
-//            Iterator<MediaFileBean> iterator = musicInfo.iterator();
-//            while (iterator.hasNext()) {
-//                MediaFileBean mediaFileBean = iterator.next();
-//                DebugLog.debug(mediaFileBean.getTitle() + " -- " + mediaFileBean.getData());
-//            }
-//        }
+        if (musicInfo.size() > 0) {
+            Iterator<MediaFileBean> iterator = musicInfo.iterator();
+            while (iterator.hasNext()) {
+                MediaFileBean mediaFileBean = iterator.next();
+                DebugLog.debug(mediaFileBean.getTitle());
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //进入界面时刷新播放状态按钮
-        ivMediaPlay.setImageResource(helper.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
+        if (musicService != null) {
+            //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
+            ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
+        }
         initVolume();
+        //检查是否是首次播放歌曲
+        DebugLog.debug("isFirstPlay " + firstPlay);
     }
 
     /**
@@ -134,13 +169,13 @@ public class MusicPlayActivity extends AppCompatActivity {
     }
 
     /**
-     *  @version V1.0
-     *  @Title initData
-     *  @author wm
-     *  @createTime 2023/2/3 17:58
-     *  @description 获取组件、初始化数据
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title initData
+     * @author wm
+     * @createTime 2023/2/3 17:58
+     * @description 获取组件、初始化数据
      */
     private void initData() {
         ivMediaLoop = findViewById(R.id.bt_loop);
@@ -159,123 +194,73 @@ public class MusicPlayActivity extends AppCompatActivity {
         ivMediaPlay.setOnClickListener(mListener);
         ivMediaNext.setOnClickListener(mListener);
         ivMediaList.setOnClickListener(mListener);
-
         sbVolume.setOnSeekBarChangeListener(mSeekBarListener);
-
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
-    }
-
-    /**
-     * @param
-     * @version V1.0
-     * @Title initPlayHelper
-     * @author wm
-     * @createTime 2023/2/2 11:00
-     * @description 初始化音乐播放辅助类
-     */
-    private void initPlayHelper() {
         if (musicInfo.size() > 0) {
             tvCurrentMusicInfo.setText(musicInfo.get(mPosition).getTitle());
             tvCurrentPlayTime.setText("00:00");
             tvMediaTime.setText(MusicPlayerHelper.formatTime(musicInfo.get(mPosition).getDuration()));
+            ivMediaPre.setEnabled(true);
             ivMediaPlay.setEnabled(true);
+            ivMediaNext.setEnabled(true);
         } else {
-            //若列表为空，则播放按钮不可点击
+            //若列表为空，则播放、上下曲都不可点击
             tvCurrentMusicInfo.setText("");
             tvCurrentPlayTime.setText("");
             tvMediaTime.setText("");
+            ivMediaPre.setEnabled(false);
             ivMediaPlay.setEnabled(false);
+            ivMediaNext.setEnabled(false);
         }
-        //sbProgress为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
-        helper = new MusicPlayerHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime);
-        //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
-        helper.setOnCompletionListener(mp -> {
-            DebugLog.debug("setOnCompletionListener ");
-            playNext();
-        });
+        tvCurrentMusicInfo.requestFocus();
     }
 
     /**
-     *  @version V1.0
-     *  @Title playPre
-     *  @author wm
-     *  @createTime 2023/2/3 18:11
-     *  @description 播放上一首
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title playPre
+     * @author wm
+     * @createTime 2023/2/3 18:11
+     * @description 播放上一首
      */
     private void playPre() {
-        DebugLog.debug("playPre -- position  " + mPosition);
+        DebugLog.debug("position  " + mPosition);
         //如果当前是第一首，则播放最后一首
         if (mPosition <= 0) {
             mPosition = musicInfo.size();
         }
         mPosition--;
-        play(musicInfo.get(mPosition), true);
+        toPlayMusic(musicInfo.get(mPosition), true, handler);
     }
 
     /**
-     *  @version V1.0
-     *  @Title playNext
-     *  @author wm
-     *  @createTime 2023/2/3 18:11
-     *  @description 播放下一首
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title playNext
+     * @author wm
+     * @createTime 2023/2/3 18:11
+     * @description 播放下一首
      */
     private void playNext() {
-        DebugLog.debug("playNext -- position  " + mPosition);
+        DebugLog.debug("position  " + mPosition);
         mPosition++;
         //如果下一曲大于歌曲数量则取第一首
         if (mPosition >= musicInfo.size()) {
             mPosition = 0;
         }
-        play(musicInfo.get(mPosition), true);
+        toPlayMusic(musicInfo.get(mPosition), true, handler);
     }
 
-    /**
-     *  @version V1.0
-     *  @Title play
-     *  @author wm
-     *  @createTime 2023/2/3 18:11
-     *  @description 播放音乐：mediaFileBean为歌曲文件对象，isRestPlayer是否从头开始播放
-     *  @param mediaFileBean,isRestPlayer
-     *  @return
-     */
-    private void play(MediaFileBean mediaFileBean, Boolean isRestPlayer) {
-        if (!TextUtils.isEmpty(mediaFileBean.getData())) {
-            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
-            // 当前若是播放，则进行暂停
-            if (!isRestPlayer && helper.isPlaying()) {
-                pause();
-                ivMediaPlay.setImageResource(R.mipmap.media_play);
-            } else {
-                //首次播放歌曲/切换歌曲播放
-                helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
-                ivMediaPlay.setImageResource(R.mipmap.media_pause);
-                // 正在播放的列表进行更新哪一首歌曲正在播放 主要是为了更新列表里面的显示
-//                 for (int i = 0; i < musicInfo.size(); i++) {
-//                     musicInfo.get(i).setPlaying(mPosition == i);
-//                     musicAdapter.notifyItemChanged(i);
-//                 }
-            }
-        } else {
-            Toast.makeText(mContext, "当前播放地址无效", Toast.LENGTH_SHORT).show();
+    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
+        DebugLog.debug("play isResetPlay " + isRestPlayer);
+        if (musicService != null && !initPlayHelper) {
+            initPlayHelper = true;
+            musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime);
         }
-    }
-
-    /**
-     *  @version V1.0
-     *  @Title pause
-     *  @author wm
-     *  @createTime 2023/2/3 18:17
-     *  @description 暂停
-     *  @param
-     *  @return
-     */
-    private void pause() {
-        helper.pause();
+        musicService.play(mediaFileBean, isRestPlayer, handler);
     }
 
     private View.OnClickListener mListener = new View.OnClickListener() {
@@ -285,15 +270,13 @@ public class MusicPlayActivity extends AppCompatActivity {
             if (view == ivMediaLoop) {
                 DebugLog.debug("onclick ivMediaLoop");
             } else if (view == ivMediaPre) {
-                DebugLog.debug("onclick ivMediaPre");
                 playPre();
             } else if (view == ivMediaPlay) {
                 DebugLog.debug("current position " + mPosition);
                 // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
-                play(musicInfo.get(mPosition), firstPlay);
+                toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
-                DebugLog.debug("onclick ivMediaNext");
                 playNext();
             } else if (view == ivMediaList) {
                 DebugLog.debug("onclick ivMediaList");
@@ -303,6 +286,15 @@ public class MusicPlayActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * @version V1.0
+     * @Title
+     * @author wm
+     * @createTime 2023/2/4 15:09
+     * @description 音量拖动条的监听处理
+     * @param
+     * @return
+     */
     private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -328,13 +320,13 @@ public class MusicPlayActivity extends AppCompatActivity {
     };
 
     /**
-     *  @version V1.0
-     *  @Title createFloatView
-     *  @author wm
-     *  @createTime 2023/2/3 18:19
-     *  @description 创建悬浮窗
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title createFloatView
+     * @author wm
+     * @createTime 2023/2/3 18:19
+     * @description 创建悬浮窗
      */
     private void createFloatView() {
         wmParams = new WindowManager.LayoutParams();
@@ -354,9 +346,7 @@ public class MusicPlayActivity extends AppCompatActivity {
         wmParams.x = 0;
         wmParams.y = 0;
 
-//          设置悬浮窗口长宽数据
-//        wmParams.width = 600;
-//        wmParams.height = 1100;
+        //设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
 
@@ -384,7 +374,7 @@ public class MusicPlayActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mPosition = position;
                 //点击歌曲播放
-                play((MediaFileBean) musicInfo.get(position), true);
+                toPlayMusic(musicInfo.get(mPosition), true, handler);
                 //若从列表点击播放，则暂停播放按钮就设置为非首次播放
                 firstPlay = false;
             }
@@ -430,6 +420,7 @@ public class MusicPlayActivity extends AppCompatActivity {
 
     /**
      * 注册音量广播接收器
+     *
      * @return
      */
     public void registerReceiver() {
@@ -442,35 +433,13 @@ public class MusicPlayActivity extends AppCompatActivity {
     }
 
     /**
-     * 解注册音量广播监听器，需要与 registerReceiver 成对使用
-     */
-    public void unregisterReceiver() {
-        if (mRegistered) {
-            try {
-                mContext.unregisterReceiver(mMusicBroadcastReceiver);
-                mMusicBroadcastReceiver = null;
-                mRegistered = false;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        helper.destroy();
-        unregisterReceiver();
-    }
-
-    /**
-     *  @version V1.0
-     *  @Title
-     *  @author wm
-     *  @createTime 2023/2/3 18:21
-     *  @description 创建广播接收器，接收音量(媒体音量)改变的广播
-     *  @param
-     *  @return
+     * @param
+     * @author wm
+     * @version V1.0
+     * @Title
+     * @createTime 2023/2/3 18:21
+     * @description 创建广播接收器，接收音量(媒体音量)改变的广播
+     * @return
      */
     private class MusicBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -492,27 +461,74 @@ public class MusicPlayActivity extends AppCompatActivity {
     }
 
     /**
-     *  @version V1.0
-     *  @Title
-     *  @author wm
-     *  @createTime 2023/2/3 18:22
-     *  @description 创建handler，用于更新音量拖动条
-     *  @param 
-     *  @return 
+     * 解注册音量广播监听器，需要与 registerReceiver 成对使用
+     */
+    public void unregisterReceiver() {
+        if (mRegistered) {
+            try {
+                mContext.unregisterReceiver(mMusicBroadcastReceiver);
+                mMusicBroadcastReceiver = null;
+                mRegistered = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onPause
+     * @author wm
+     * @createTime 2023/2/4 15:13
+     * @description 播放页面失去焦点时，将其放到后台
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        moveTaskToBack(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        musicService.destroy();
+        unregisterReceiver();
+        // 解绑服务：注意bindService后 必须要解绑服务，否则会报-连接资源异常
+        if (null != connection) {
+            unbindService(connection);
+        }
+    }
+
+
+    /**
+     * @version V1.0
+     * @Title
+     * @author wm
+     * @createTime 2023/2/3 18:22
+     * @description 创建handler，用于更新UI
+     * @param
+     * @return
      */
     final Handler handler = new Handler(Looper.myLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == HANDLER_MESSAGE_REFRESH_VOLUME) {
+                //媒体音量发生变化--更新音量条
                 int volume = msg.getData().getInt("volume");
                 if (volume >= 0 && volume <= 150) {
                     int afterVolume = (int) (volume / 1.5);
                     sbVolume.setProgress(afterVolume);
                 }
+            } else if (msg.what == HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
+                //service发送的信息，用于更新播放状态的图标
+                boolean isPlaying = msg.getData().getBoolean("iconType");
+                DebugLog.debug("refresh play icon , change playing icon " + isPlaying);
+                ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
             }
         }
     };
-
 
 }

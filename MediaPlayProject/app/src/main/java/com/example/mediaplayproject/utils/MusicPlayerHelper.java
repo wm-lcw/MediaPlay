@@ -30,6 +30,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private static int MSG_CODE = 0x01;
     private static long MSG_TIME = 1_000L;
 
+    public MusicPlayerHelper() {
+    }
+
     private MusicPlayerHelperHandler mHandler;
     /**
      * 播放器

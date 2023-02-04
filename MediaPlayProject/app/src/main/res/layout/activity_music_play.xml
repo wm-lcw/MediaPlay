@@ -14,12 +14,17 @@
         <TextView
             android:id="@+id/tv_music_info"
             android:layout_marginTop="30dp"
-            android:layout_gravity="center"
+            android:layout_marginLeft="15dp"
+            android:gravity="center"
             android:textSize="18sp"
             android:text="music"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true" />
         <SeekBar
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
