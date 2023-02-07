@@ -14,12 +14,10 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -31,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicAdapter;
@@ -92,6 +89,7 @@ public class MusicPlayActivity extends AppCompatActivity {
         //启动MusicPlayService服务
         Intent bindIntent = new Intent(MusicPlayActivity.this, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
+
     }
 
     /**
@@ -129,18 +127,19 @@ public class MusicPlayActivity extends AppCompatActivity {
         SearchFiles mSearcherFiles = SearchFiles.getInstance(mContext);
         musicInfo = mSearcherFiles.getMusicInfo();
         //打印输出音乐列表
-        if (musicInfo.size() > 0) {
-            Iterator<MediaFileBean> iterator = musicInfo.iterator();
-            while (iterator.hasNext()) {
-                MediaFileBean mediaFileBean = iterator.next();
-                DebugLog.debug(mediaFileBean.getTitle());
-            }
-        }
+//        if (musicInfo.size() > 0) {
+//            Iterator<MediaFileBean> iterator = musicInfo.iterator();
+//            while (iterator.hasNext()) {
+//                MediaFileBean mediaFileBean = iterator.next();
+//                DebugLog.debug(mediaFileBean.getTitle());
+//            }
+//        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        initPlayHelper();
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
@@ -235,6 +234,7 @@ public class MusicPlayActivity extends AppCompatActivity {
         public void onClick(View view) {
             if (view == ivMediaLoop) {
                 DebugLog.debug("onclick ivMediaLoop");
+
             } else if (view == ivMediaPre) {
                 initPlayHelper();
                 musicService.playPre();
@@ -455,13 +455,13 @@ public class MusicPlayActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        moveTaskToBack(true);
+        //需要注释下面代码，在音乐播放界面点击通知栏会跳回主页
+//        moveTaskToBack(true);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        musicService.destroy();
         unregisterReceiver();
         // 解绑服务：注意bindService后 必须要解绑服务，否则会报-连接资源异常
         if (null != connection) {
@@ -498,5 +498,11 @@ public class MusicPlayActivity extends AppCompatActivity {
             }
         }
     };
+
+
+
+
+
+
 
 }
