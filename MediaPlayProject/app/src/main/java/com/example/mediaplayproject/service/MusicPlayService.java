@@ -51,6 +51,7 @@ public class MusicPlayService extends Service {
     private int mPosition = 0;
     private IBinder myBinder = new MyBinder();
     private MusicReceiver musicReceiver;
+    private boolean firstPlay = true, isInitPlayHelper = false;
 
     /**
      * 歌曲播放
@@ -89,6 +90,7 @@ public class MusicPlayService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        DebugLog.debug("");
         return myBinder;
     }
 
@@ -97,6 +99,12 @@ public class MusicPlayService extends Service {
             mContext = context;
             return MusicPlayService.this;
         }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        DebugLog.debug("");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     /**
@@ -122,6 +130,9 @@ public class MusicPlayService extends Service {
             DebugLog.debug("setOnCompletionListener ");
             playNext();
         });
+
+        isInitPlayHelper = true;
+
     }
 
     /**
@@ -144,8 +155,9 @@ public class MusicPlayService extends Service {
             if (!isRestPlayer && helper.isPlaying()) {
                 pause();
             } else {
-                //首次播放歌曲、切换歌曲播放
+                //首次播放歌曲、切换歌曲播放、继续播放
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
+                firstPlay = false;
                 isPlayingStatus = true;
                 // 正在播放的列表进行更新哪一首歌曲正在播放 主要是为了更新列表里面的显示
 //                 for (int i = 0; i < musicInfo.size(); i++) {
@@ -194,6 +206,10 @@ public class MusicPlayService extends Service {
 
     public boolean isPlaying() {
         return helper.isPlaying();
+    }
+
+    public int getPosition(){
+        return mPosition;
     }
 
     @Override
@@ -309,12 +325,15 @@ public class MusicPlayService extends Service {
             switch (action) {
                 case PLAY:
                     DebugLog.debug(PLAY+" or "+PAUSE);
+                    play(musicInfo.get(mPosition), true, mHandler,mPosition);
                     break;
                 case PREV:
                     DebugLog.debug(PREV);
+                    playPre();
                     break;
                 case NEXT:
                     DebugLog.debug(NEXT);
+                    playNext();
                     break;
                 case CLOSE:
                     DebugLog.debug(CLOSE);
@@ -325,6 +344,12 @@ public class MusicPlayService extends Service {
         }
     }
 
+    public boolean getInitResult(){
+        return isInitPlayHelper;
+    }
 
+    public boolean getFirstPlay(){
+        return firstPlay;
+    }
 
 }

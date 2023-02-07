@@ -9,7 +9,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/play_icon"
+        android:src="@mipmap/ic_notify_icon"
         android:scaleType="centerCrop" />
 
     <RelativeLayout
@@ -81,7 +81,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:padding="8dp"
-                android:src="@mipmap/ic_pause" />
+                android:src="@mipmap/ic_play" />
 
             <ImageView
                 android:id="@+id/btn_play_next"

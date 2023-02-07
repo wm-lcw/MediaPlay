@@ -39,7 +39,6 @@ import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.SearchFiles;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -106,6 +105,9 @@ public class MusicPlayActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             DebugLog.debug("onServiceConnected");
             musicService = ((MusicPlayService.MyBinder) service).getService(mContext);
+            if (musicService != null){
+                initPlayHelper();
+            }
         }
 
         @Override
@@ -141,12 +143,18 @@ public class MusicPlayActivity extends AppCompatActivity {
         super.onResume();
         initPlayHelper();
         if (musicService != null) {
+
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
+            //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
+            isInitPlayHelper = musicService.getInitResult();
+            firstPlay = musicService.getFirstPlay();
+            mPosition = musicService.getPosition();
+
         }
         initVolume();
         //检查是否是首次播放歌曲
-        DebugLog.debug("isFirstPlay " + firstPlay);
+        DebugLog.debug("isInitPlayHelper " + isInitPlayHelper + "; firstPlay " + firstPlay);
     }
 
     /**
@@ -216,6 +224,7 @@ public class MusicPlayActivity extends AppCompatActivity {
     }
 
     private void initPlayHelper(){
+        DebugLog.debug("");
         if (musicService != null && !isInitPlayHelper) {
             isInitPlayHelper = true;
             musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, musicInfo, handler);
@@ -498,11 +507,5 @@ public class MusicPlayActivity extends AppCompatActivity {
             }
         }
     };
-
-
-
-
-
-
 
 }
