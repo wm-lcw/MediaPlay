@@ -6,17 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="@drawable/ic_main">
 
-    <Button
+    <ImageView
         android:id="@+id/bt_music"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@mipmap/music"
         android:text="music"/>
 
-    <Button
+    <ImageView
         android:id="@+id/bt_video"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="video"/>
+        android:src="@mipmap/video"
+        android:text="video"
+        android:visibility="gone"/>
+
+
 </LinearLayout>
