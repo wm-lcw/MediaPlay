@@ -87,7 +87,7 @@ public class MusicAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public void notifyItemChanged(int i) {
+    public void notifyItemChanged(int position) {
         notifyDataSetChanged();
     }
 

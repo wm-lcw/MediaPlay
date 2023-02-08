@@ -374,6 +374,7 @@ public class MusicPlayActivity extends AppCompatActivity {
                 toPlayMusic(musicInfo.get(mPosition), true, handler);
                 //若从列表点击播放，则暂停播放按钮就设置为非首次播放
                 firstPlay = false;
+                musicAdapter.setSelectPosition(mPosition);
             }
         });
         //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
