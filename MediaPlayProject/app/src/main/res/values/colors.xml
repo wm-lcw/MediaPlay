@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bg_selected">#ffff0000</color><!-- 红色 -->
+    <color name="bg_pressed">#ffFFB6C1</color><!-- 粉色 -->
+    <color name="bg_normal">#ff00ff00</color><!-- 绿色 -->
+    <!-- item中textview所需要的颜色值 -->
+    <color name="text_normal">#FFFFFFFF</color><!-- 白色 -->
+    <color name="text_pressed">#FF03DAC5</color><!-- 浅蓝色 -->
 </resources>

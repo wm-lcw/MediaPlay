@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -368,6 +369,11 @@ public class MusicPlayActivity extends AppCompatActivity {
                 firstPlay = false;
             }
         });
+        //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
+        musicAdapter.setSelectPosition(mPosition);
+        //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
+        mMusicListView.setSelection(mPosition);
+
 
         //监听返回键--隐藏悬浮窗口
 //        mFloatLayout.setOnKeyListener(new View.OnKeyListener() {
