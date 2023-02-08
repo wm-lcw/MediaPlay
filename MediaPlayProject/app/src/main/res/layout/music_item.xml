@@ -2,16 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
 
     <TextView
         android:id="@+id/tv_music_name"
         android:layout_marginLeft="15dp"
         android:lines="1"
-        android:textSize="18sp"
+        android:textSize="@dimen/dp_20"
         android:layout_weight="8"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dp_40"
         android:textColor="@color/white"
         android:text="musicList"/>
     <ImageView
