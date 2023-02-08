@@ -72,6 +72,11 @@ public class MusicPlayActivity extends AppCompatActivity {
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
     private int mPosition = 0;
     private MusicPlayService musicService;
+    /**
+     * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
+     * 主要是控制播放上下曲的position
+     */
+    private int playMode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +102,7 @@ public class MusicPlayActivity extends AppCompatActivity {
             isInitPlayHelper = musicService.getInitResult();
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
+            playMode = musicService.getPlayMode();
         }
         initVolume();
         //检查是否是首次播放歌曲
@@ -251,6 +257,7 @@ public class MusicPlayActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             if (view == ivMediaLoop) {
+                changePlayMode();
             } else if (view == ivMediaPre) {
                 initPlayHelper();
                 musicService.playPre();
@@ -415,6 +422,33 @@ public class MusicPlayActivity extends AppCompatActivity {
     }
 
     /**
+     * @version V1.0
+     * @Title changePlayMode
+     * @author wm
+     * @createTime 2023/2/8 18:12
+     * @description 更改播放模式；0->循环播放; 1->随机播放; 2->单曲播放;
+     */
+    private void changePlayMode() {
+        playMode++;
+        if (playMode >= 3) {
+            playMode = 0;
+        }
+        if (playMode == 0) {
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+        } else if (playMode == 1) {
+            ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
+        } else if (playMode == 2) {
+            ivMediaLoop.setImageResource(R.mipmap.media_single);
+        } else {
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+            playMode = 0;
+        }
+        if (musicService != null) {
+            musicService.setPlayMode(playMode);
+        }
+    }
+
+    /**
      * @param
      * @return
      * @version V1.0
@@ -513,6 +547,7 @@ public class MusicPlayActivity extends AppCompatActivity {
                 //接收到service发送的播放状态改变之后，刷新Activity的值（针对未刷新页面的情况）
                 firstPlay = false;
                 isInitPlayHelper = true;
+                mPosition = musicService.getPosition();
             }
         }
     };

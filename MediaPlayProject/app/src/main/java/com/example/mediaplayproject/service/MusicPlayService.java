@@ -31,6 +31,7 @@ import com.example.mediaplayproject.utils.MusicPlayerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @ClassName: MusicPlayService
@@ -61,6 +62,11 @@ public class MusicPlayService extends Service {
     public static final String PREV = "prev";
     public static final String NEXT = "next";
     public static final String CLOSE = "close";
+    /**
+     * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
+     * 主要是控制播放上下曲的position
+     */
+    private int playMode = 0;
 
 
     @Override
@@ -129,10 +135,10 @@ public class MusicPlayService extends Service {
         mHandler = handler;
         //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
         helper = new MusicPlayerHelper(seekBar, currentMusicInfo, currentTime, mediaTime);
-        //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
+        //实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
         helper.setOnCompletionListener(mp -> {
             DebugLog.debug("setOnCompletionListener ");
-            playNext();
+            playNextEnd();
         });
         isInitPlayHelper = true;
         //初始化之后再显示通知栏
@@ -206,12 +212,18 @@ public class MusicPlayService extends Service {
      * @description 播放上一首
      */
     public void playPre() {
-        DebugLog.debug("playPre");
-        //如果当前是第一首，则播放最后一首
-        if (mPosition <= 0) {
-            mPosition = musicInfo.size();
+        DebugLog.debug("playPre Mode " + playMode);
+        //单曲播放和循环播放，都是按照音乐列表的顺序播放
+        if (playMode == 0 || playMode == 2) {
+            //如果当前是第一首，则播放最后一首
+            if (mPosition <= 0) {
+                mPosition = musicInfo.size();
+            }
+            mPosition--;
+        } else if (playMode == 1) {
+            //随机播放
+            mPosition = getRandomPosition();
         }
-        mPosition--;
         play(musicInfo.get(mPosition), true, mHandler, mPosition);
     }
 
@@ -223,13 +235,59 @@ public class MusicPlayService extends Service {
      * @description 播放下一首
      */
     public void playNext() {
-        DebugLog.debug("playNext");
-        mPosition++;
-        //如果下一曲大于歌曲数量则取第一首
-        if (mPosition >= musicInfo.size()) {
-            mPosition = 0;
+        DebugLog.debug("playNext Mode " + playMode);
+        //单曲播放和循环播放，都是按照音乐列表的顺序播放
+        if (playMode == 0 || playMode == 2) {
+            mPosition++;
+            //如果下一曲大于歌曲数量则取第一首
+            if (mPosition >= musicInfo.size()) {
+                mPosition = 0;
+            }
+        } else if (playMode == 1) {
+            //随机播放
+            mPosition = getRandomPosition();
         }
         play(musicInfo.get(mPosition), true, mHandler, mPosition);
+    }
+
+    /**
+     * @version V1.0
+     * @Title playNextEnd
+     * @author wm
+     * @createTime 2023/2/8 18:26
+     * @description 播放完毕后自动播放下一曲，用于回调
+     */
+    private void playNextEnd() {
+        DebugLog.debug("playNextEnd Mode " + playMode);
+        //循环播放
+        if (playMode == 0) {
+            mPosition++;
+            //如果下一曲大于歌曲数量则取第一首
+            if (mPosition >= musicInfo.size()) {
+                mPosition = 0;
+            }
+        } else if (playMode == 1) {
+            //随机播放
+            mPosition = getRandomPosition();
+        }
+        //单曲播放，mPosition没有改变，直接重新开始播放
+        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+    }
+
+    /**
+     * @param
+     * @return
+     * @version V1.0
+     * @Title getRandomPosition
+     * @author wm
+     * @createTime 2023/2/8 18:11
+     * @description 从歌曲列表中获取随机数（0~musicInfo.size()）
+     */
+    private int getRandomPosition() {
+        Random random = new Random();
+        int randomNum = Math.abs(random.nextInt() % musicInfo.size() - 1);
+        DebugLog.debug("--" + randomNum);
+        return randomNum;
     }
 
     /**
@@ -276,6 +334,32 @@ public class MusicPlayService extends Service {
      */
     public boolean getFirstPlay() {
         return firstPlay;
+    }
+
+    /**
+     * @param
+     * @return getPlayMode
+     * @version V1.0
+     * @Title getPlayMode
+     * @author wm
+     * @createTime 2023/2/8 17:30
+     * @description 获取播放模式
+     */
+    public int getPlayMode() {
+        return playMode;
+    }
+
+    /**
+     * @param mode 播放模式
+     * @return
+     * @version V1.0
+     * @Title setPlayMode
+     * @author wm
+     * @createTime 2023/2/8 17:52
+     * @description 设置播放模式
+     */
+    public void setPlayMode(int mode) {
+        playMode = mode;
     }
 
     /**
