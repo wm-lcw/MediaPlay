@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,7 +52,7 @@ import java.util.List;
  * @Version: 1.0
  */
 public class MusicPlayActivity extends AppCompatActivity {
-    private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView;
+    private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView, ivLocalList;
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
@@ -353,6 +352,14 @@ public class MusicPlayActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mWindowManager.removeView(mFloatLayout);
+            }
+        });
+        //定位当前播放歌曲
+        ivLocalList = mFloatLayout.findViewById(R.id.iv_local_music);
+        ivLocalList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMusicListView.setSelection(mPosition);
             }
         });
 
