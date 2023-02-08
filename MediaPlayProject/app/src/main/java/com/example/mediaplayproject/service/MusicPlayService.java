@@ -1,5 +1,6 @@
 package com.example.mediaplayproject.service;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MusicPlayActivity;
@@ -52,40 +52,25 @@ public class MusicPlayService extends Service {
     private IBinder myBinder = new MyBinder();
     private MusicReceiver musicReceiver;
     private boolean firstPlay = true, isInitPlayHelper = false;
-
-    /**
-     * 歌曲播放
-     */
+    private RemoteViews remoteViews;
+    private static NotificationManager notificationManager;
+    private Notification notification;
+    private static final int NOTIFICATION_ID = 1;
     public static final String PLAY = "play";
-    /**
-     * 歌曲暂停
-     */
     public static final String PAUSE = "pause";
-    /**
-     * 上一曲
-     */
     public static final String PREV = "prev";
-    /**
-     * 下一曲
-     */
     public static final String NEXT = "next";
-    /**
-     * 关闭通知栏
-     */
     public static final String CLOSE = "close";
-    /**
-     * 进度变化
-     */
-    public static final String PROGRESS = "progress";
 
 
     @Override
     public void onCreate() {
         DebugLog.debug("");
         super.onCreate();
+        //创建通知栏通道
         createNotificationChannel();
+        //注册广播接收器
         registerMusicReceiver();
-        showNotify();
     }
 
     @Override
@@ -107,111 +92,6 @@ public class MusicPlayService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    /**
-     * @param
-     * @param musicInfo
-     * @param handler
-     * @return
-     * @version V1.0
-     * @Title initPlayHelper
-     * @author wm
-     * @createTime 2023/2/4 14:50
-     * @description 初始化音乐播放器辅助类
-     */
-    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, List<MediaFileBean> musicInfo, Handler handler) {
-        //保存歌曲列表
-        this.musicInfo = musicInfo;
-        //保存handler对象
-        mHandler = handler;
-        //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
-        helper = new MusicPlayerHelper(seekBar, currentMusicInfo, currentTime, mediaTime);
-        //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
-        helper.setOnCompletionListener(mp -> {
-            DebugLog.debug("setOnCompletionListener ");
-            playNext();
-        });
-
-        isInitPlayHelper = true;
-
-    }
-
-    /**
-     * @param
-     * @param mPosition
-     * @return
-     * @version V1.0
-     * @Title play
-     * @author wm
-     * @createTime 2023/2/4 14:54
-     * @description 播放
-     */
-    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
-        if (!TextUtils.isEmpty(mediaFileBean.getData())) {
-            this.mPosition = mPosition;
-            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
-            //记录当前的播放状态
-            boolean isPlayingStatus= false;
-            // 当前若是播放，则进行暂停
-            if (!isRestPlayer && helper.isPlaying()) {
-                pause();
-            } else {
-                //首次播放歌曲、切换歌曲播放、继续播放
-                helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
-                firstPlay = false;
-                isPlayingStatus = true;
-                // 正在播放的列表进行更新哪一首歌曲正在播放 主要是为了更新列表里面的显示
-//                 for (int i = 0; i < musicInfo.size(); i++) {
-//                     musicInfo.get(i).setPlaying(mPosition == i);
-//                     musicAdapter.notifyItemChanged(i);
-//                 }
-            }
-            //发送Meeage给MusicPlayActivity，用于更新播放图标
-            Message msg = new Message();
-            msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("iconType", isPlayingStatus);
-            msg.setData(bundle);
-            handler.sendMessage(msg);
-        } else {
-            DebugLog.debug("当前播放地址无效");
-            Toast.makeText(mContext, "当前播放地址无效", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void pause() {
-        DebugLog.debug("pause");
-        helper.pause();
-    }
-
-    public void playPre() {
-        DebugLog.debug("playPre");
-        //如果当前是第一首，则播放最后一首
-        if (mPosition <= 0) {
-            mPosition = musicInfo.size();
-        }
-        mPosition--;
-        play(musicInfo.get(mPosition), true, mHandler,mPosition);
-    }
-
-    public void playNext() {
-        DebugLog.debug("playNext");
-        mPosition++;
-        //如果下一曲大于歌曲数量则取第一首
-        if (mPosition >= musicInfo.size()) {
-            mPosition = 0;
-        }
-        play(musicInfo.get(mPosition), true, mHandler,mPosition);
-
-    }
-
-    public boolean isPlaying() {
-        return helper.isPlaying();
-    }
-
-    public int getPosition(){
-        return mPosition;
-    }
-
     @Override
     public void onDestroy() {
         DebugLog.debug("");
@@ -228,27 +108,213 @@ public class MusicPlayService extends Service {
         return super.onUnbind(intent);
     }
 
+    /**
+     * @param seekBar          歌曲播放进度条
+     * @param currentMusicInfo 当前歌曲信息
+     * @param currentTime      当前歌曲播放的时间
+     * @param mediaTime        当前歌曲的总时长
+     * @param musicInfo        音乐列表
+     * @param handler          用于给Activity发送消息的Handler
+     * @return
+     * @version V1.0
+     * @Title initPlayHelper
+     * @author wm
+     * @createTime 2023/2/8 15:58
+     * @description 初始化音乐播放器辅助类
+     */
+    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, List<MediaFileBean> musicInfo, Handler handler) {
+        //保存歌曲列表
+        this.musicInfo = musicInfo;
+        //保存handler对象
+        mHandler = handler;
+        //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
+        helper = new MusicPlayerHelper(seekBar, currentMusicInfo, currentTime, mediaTime);
+        //实现音乐播放完毕的回调函数，播放完毕自动播放下一首（可以拓展为单曲播放、随机播放）
+        helper.setOnCompletionListener(mp -> {
+            DebugLog.debug("setOnCompletionListener ");
+            playNext();
+        });
+        isInitPlayHelper = true;
+        //初始化之后再显示通知栏
+        showNotify();
+    }
+
+
+    /**
+     * @param mediaFileBean 当前播放的音乐对象
+     * @param isRestPlayer  是否重新开始播放
+     * @param handler       handler对象，用于给Activity发送消息
+     * @param mPosition     当前播放歌曲的下标
+     * @return
+     * @version V1.0
+     * @Title play
+     * @author wm
+     * @createTime 2023/2/8 16:02
+     * @description 播放音乐
+     */
+    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
+        if (!TextUtils.isEmpty(mediaFileBean.getData())) {
+            this.mPosition = mPosition;
+            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
+            //记录当前的播放状态,用于给Activity发送Message
+            boolean isPlayingStatus = false;
+            // 当前若是播放，则进行暂停
+            if (!isRestPlayer && helper.isPlaying()) {
+                pause();
+            } else {
+                //首次播放歌曲、切换歌曲播放、继续播放
+                helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
+                isPlayingStatus = true;
+                // 正在播放的列表进行更新哪一首歌曲正在播放 主要是为了更新列表里面的显示
+//                 for (int i = 0; i < musicInfo.size(); i++) {
+//                     musicInfo.get(i).setPlaying(mPosition == i);
+//                     musicAdapter.notifyItemChanged(i);
+//                 }
+            }
+            //发送Meeage给MusicPlayActivity，用于更新播放图标
+            Message msg = new Message();
+            msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("iconType", isPlayingStatus);
+            msg.setData(bundle);
+            handler.sendMessage(msg);
+            updateNotificationShow(mPosition, isPlayingStatus);
+            firstPlay = false;
+        } else {
+            DebugLog.debug("当前播放地址无效");
+            Toast.makeText(mContext, "当前播放地址无效", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * @version V1.0
+     * @Title pause
+     * @author wm
+     * @createTime 2023/2/8 14:34
+     * @description 暂停
+     */
+    public void pause() {
+        DebugLog.debug("pause");
+        helper.pause();
+    }
+
+    /**
+     * @version V1.0
+     * @Title playPre
+     * @author wm
+     * @createTime 2023/2/8 14:34
+     * @description 播放上一首
+     */
+    public void playPre() {
+        DebugLog.debug("playPre");
+        //如果当前是第一首，则播放最后一首
+        if (mPosition <= 0) {
+            mPosition = musicInfo.size();
+        }
+        mPosition--;
+        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+    }
+
+    /**
+     * @version V1.0
+     * @Title playNext
+     * @author wm
+     * @createTime 2023/2/8 16:11
+     * @description 播放下一首
+     */
+    public void playNext() {
+        DebugLog.debug("playNext");
+        mPosition++;
+        //如果下一曲大于歌曲数量则取第一首
+        if (mPosition >= musicInfo.size()) {
+            mPosition = 0;
+        }
+        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+    }
+
+    /**
+     * @version V1.0
+     * @Title isPlaying
+     * @author wm
+     * @createTime 2023/2/8 16:12
+     * @description 返回当前是否正在播放
+     */
+    public boolean isPlaying() {
+        return helper.isPlaying();
+    }
+
+    /**
+     * @version V1.0
+     * @Title getPosition
+     * @author wm
+     * @createTime 2023/2/8 16:12
+     * @description 描述该方法的功能
+     */
+    public int getPosition() {
+        return mPosition;
+    }
+
+    /**
+     * @version V1.0
+     * @Title getInitResult
+     * @author wm
+     * @createTime 2023/2/8 16:12
+     * @description 描述该方法的功能
+     */
+    public boolean getInitResult() {
+        return isInitPlayHelper;
+    }
+
+    /**
+     * @param
+     * @return
+     * @version V1.0
+     * @Title getFirstPlay
+     * @author wm
+     * @createTime 2023/2/8 16:12
+     * @description 描述该方法的功能
+     */
+    public boolean getFirstPlay() {
+        return firstPlay;
+    }
+
+    /**
+     * @version V1.0
+     * @Title createNotificationChannel
+     * @author wm
+     * @createTime 2023/2/8 14:33
+     * @description 创建通知栏通道
+     */
     private void createNotificationChannel() {
         DebugLog.debug("");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "channel_name";
+            String channelId = "9527";
+            CharSequence name = "PlayControl";
             String description = "通知栏";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("1", name, importance);
+            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
             channel.setDescription(description);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
 
-    private void showNotify(){
+    /**
+     * @version V1.0
+     * @Title showNotify
+     * @author wm
+     * @createTime 2023/2/8 14:32
+     * @description 显示通知栏
+     */
+    private void showNotify() {
         DebugLog.debug("");
+        remoteViews = getContentView();
         //设置PendingIntent
-        Intent it = new Intent(this,MusicPlayActivity.class);
+        Intent it = new Intent(this, MusicPlayActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 
         //创建通知栏信息
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "1")
+        notification = new NotificationCompat.Builder(this, "9527")
                 //设置图标
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setWhen(System.currentTimeMillis())
@@ -256,22 +322,30 @@ public class MusicPlayService extends Service {
                 //.setContentTitle("微信")
                 //正文消息
                 //.setContentText("你有一条新消息")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 //设置点击启动的Intent
                 .setContentIntent(pi)
                 //设置layout
-                .setCustomContentView(getContentView())
+                .setCustomContentView(remoteViews)
                 //点击后通知栏取消通知
                 //.setAutoCancel(true)
                 .setTicker("正在播放")
                 .setOngoing(true)
                 //优先级
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build();
 
-        //显示通知
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
+    /**
+     * @return RemoteViews
+     * @version V1.0
+     * @Title getContentView
+     * @author wm
+     * @createTime 2023/2/8 14:32
+     * @description 获取通知栏布局对象
+     */
     private RemoteViews getContentView() {
         RemoteViews mRemoteViews = new RemoteViews(this.getPackageName(), R.layout.layout_notify_view);
         //通知栏控制器上一首按钮广播操作
@@ -298,11 +372,20 @@ public class MusicPlayService extends Service {
 //        //为close控件注册事件
 //        mRemoteViews.setOnClickPendingIntent(R.id.btn_notification_close, closePendingIntent);
 
+        //若音乐列表不为空，初始化通知栏的歌曲信息
+        if (musicInfo.size() > 0) {
+            mRemoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(mPosition).getTitle());
+            mRemoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(mPosition).getArtist());
+        }
         return mRemoteViews;
     }
 
     /**
-     * 注册动态广播
+     * @version V1.0
+     * @Title registerMusicReceiver
+     * @author wm
+     * @createTime 2023/2/8 16:15
+     * @description 注册动态广播
      */
     private void registerMusicReceiver() {
         musicReceiver = new MusicReceiver();
@@ -314,9 +397,13 @@ public class MusicPlayService extends Service {
         registerReceiver(musicReceiver, intentFilter);
     }
 
-
     /**
-     * 广播接收器 （内部类）
+     * @author wm
+     * @version V1.0
+     * @Title
+     * @createTime 2023/2/8 16:15
+     * @description 广播接收器 , 接收来自通知栏的广播
+     * @return
      */
     public class MusicReceiver extends BroadcastReceiver {
         @Override
@@ -324,8 +411,8 @@ public class MusicPlayService extends Service {
             String action = intent.getAction();
             switch (action) {
                 case PLAY:
-                    DebugLog.debug(PLAY+" or "+PAUSE);
-                    play(musicInfo.get(mPosition), true, mHandler,mPosition);
+                    DebugLog.debug(PLAY + " or " + PAUSE);
+                    play(musicInfo.get(mPosition), firstPlay, mHandler, mPosition);
                     break;
                 case PREV:
                     DebugLog.debug(PREV);
@@ -344,12 +431,32 @@ public class MusicPlayService extends Service {
         }
     }
 
-    public boolean getInitResult(){
-        return isInitPlayHelper;
-    }
+    /**
+     * @param position     歌曲位置, changeToPlay 歌曲位置
+     * @param changeToPlay true表示接下来的状态是播放，false接下来的状态是暂停
+     * @return
+     * @version V1.0
+     * @Title updateNotificationShow
+     * @author wm
+     * @createTime 2023/2/8 16:16
+     * @description 更改通知的信息和UI
+     */
+    public void updateNotificationShow(int position, boolean changeToPlay) {
+        DebugLog.debug(" changePlay " + changeToPlay);
+        if (changeToPlay) {
+            remoteViews.setImageViewResource(R.id.btn_play, R.mipmap.ic_notify_pause);
+        } else {
+            remoteViews.setImageViewResource(R.id.btn_play, R.mipmap.ic_notify_play);
+        }
+        //封面专辑
+//        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
+        //歌曲名
+        remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
+        //歌手名
+        remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
 
-    public boolean getFirstPlay(){
-        return firstPlay;
+        //发送通知
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
 }

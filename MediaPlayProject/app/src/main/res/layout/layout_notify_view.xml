@@ -9,8 +9,8 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_vertical"
-        android:src="@mipmap/ic_notify_icon"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_notify_icon" />
 
     <RelativeLayout
         android:layout_width="0.0dp"
@@ -29,21 +29,21 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_custom_song_singer"
+                android:id="@+id/tv_song_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@+id/btn_custom_close"
                 android:ellipsize="end"
+                android:fadingEdge="horizontal"
                 android:lines="1"
-                android:singleLine="true"
                 android:text="MusicPlay"
                 android:textColor="#333437"
                 android:textSize="18sp"
                 android:textStyle="normal" />
 
             <TextView
-                android:id="@+id/tv_song_name"
+                android:id="@+id/tv_song_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -62,34 +62,31 @@
             android:layout_width="wrap_content"
             android:layout_height="160dp"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="12dp"
             android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/btn_play_prev"
-                android:layout_width="35dp"
+                android:layout_width="40dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:padding="8dp"
-                android:src="@mipmap/ic_back" />
+                android:src="@mipmap/ic_notify_pre" />
 
             <ImageView
                 android:id="@+id/btn_play"
-                android:layout_width="35dp"
+                android:layout_width="40dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:padding="8dp"
-                android:src="@mipmap/ic_play" />
+                android:src="@mipmap/ic_notify_play" />
 
             <ImageView
                 android:id="@+id/btn_play_next"
-                android:layout_width="35dp"
+                android:layout_width="40dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:padding="8dp"
-                android:src="@mipmap/ic_next" />
+                android:src="@mipmap/ic_notify_next" />
 
         </LinearLayout>
 
