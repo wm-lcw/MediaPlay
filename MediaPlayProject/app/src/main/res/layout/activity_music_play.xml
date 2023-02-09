@@ -13,7 +13,7 @@
         android:orientation="vertical">
         <TextView
             android:id="@+id/tv_music_info"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="50dp"
             android:layout_marginLeft="15dp"
             android:gravity="center"
             android:textSize="18sp"
@@ -27,7 +27,7 @@
             android:singleLine="true" />
         <SeekBar
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="25dp"
             android:id="@+id/sb_volume"
             android:layout_width="350dp"
             android:layout_height="wrap_content"/>
@@ -45,7 +45,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="290dp"
+        android:layout_marginTop="300dp"
         android:orientation="horizontal"
         android:layout_gravity="center">
         <TextView
@@ -87,7 +87,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_loop"
-            android:src="@drawable/set_media_loop_mode_style"/>
+            android:src="@mipmap/media_loop"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -97,7 +97,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_pre"
-            android:src="@drawable/set_media_pre_style"/>
+            android:src="@mipmap/media_previous"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -107,7 +107,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_play"
-            android:src="@drawable/set_media_play_style"/>
+            android:src="@mipmap/media_play"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -117,7 +117,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_next"
-            android:src="@drawable/set_media_next_style"/>
+            android:src="@mipmap/media_next"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -127,7 +127,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_list"
-            android:src="@drawable/set_media_list_style"/>
+            android:src="@mipmap/medialist"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
