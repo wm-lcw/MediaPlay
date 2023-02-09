@@ -87,7 +87,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_loop"
-            android:src="@mipmap/media_loop"/>
+            android:src="@drawable/set_media_loop_mode_style"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -97,7 +97,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_pre"
-            android:src="@mipmap/media_previous"/>
+            android:src="@drawable/set_media_pre_style"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -107,7 +107,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_play"
-            android:src="@mipmap/media_play"/>
+            android:src="@drawable/set_media_play_style"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -117,7 +117,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_next"
-            android:src="@mipmap/media_next"/>
+            android:src="@drawable/set_media_next_style"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -127,7 +127,7 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:id="@+id/bt_list"
-            android:src="@mipmap/medialist"/>
+            android:src="@drawable/set_media_list_style"/>
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"

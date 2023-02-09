@@ -97,7 +97,7 @@ public class MusicPlayActivity extends BasicActivity {
         initPlayHelper();
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
-            ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
+            ivMediaPlay.setImageResource(musicService.isPlaying() ? R.drawable.set_media_pause_style : R.drawable.set_media_play_style);
             //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
             isInitPlayHelper = musicService.getInitResult();
             firstPlay = musicService.getFirstPlay();
@@ -448,13 +448,13 @@ public class MusicPlayActivity extends BasicActivity {
             playMode = 0;
         }
         if (playMode == 0) {
-            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+            ivMediaLoop.setImageResource(R.drawable.set_media_loop_mode_style);
         } else if (playMode == 1) {
-            ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
+            ivMediaLoop.setImageResource(R.drawable.set_media_random_mode_style);
         } else if (playMode == 2) {
-            ivMediaLoop.setImageResource(R.mipmap.media_single);
+            ivMediaLoop.setImageResource(R.drawable.set_media_single_mode_style);
         } else {
-            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+            ivMediaLoop.setImageResource(R.drawable.set_media_loop_mode_style);
             playMode = 0;
         }
         if (musicService != null) {
@@ -562,7 +562,7 @@ public class MusicPlayActivity extends BasicActivity {
                 //service发送的信息，用于更新播放状态的图标
                 boolean isPlaying = msg.getData().getBoolean("iconType");
                 DebugLog.debug("refresh play icon , change playing icon " + isPlaying);
-                ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+                ivMediaPlay.setImageResource(isPlaying ? R.drawable.set_media_pause_style : R.drawable.set_media_play_style);
                 //接收到service发送的播放状态改变之后，刷新Activity的值（针对未刷新页面的情况）
                 firstPlay = false;
                 isInitPlayHelper = true;
