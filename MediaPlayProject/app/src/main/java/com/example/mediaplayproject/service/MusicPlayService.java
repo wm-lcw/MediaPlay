@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MusicPlayActivity;
+import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
@@ -69,6 +70,8 @@ public class MusicPlayService extends Service {
     private int playMode = 0;
 
 
+
+
     @Override
     public void onCreate() {
         DebugLog.debug("");
@@ -107,6 +110,7 @@ public class MusicPlayService extends Service {
             //解除动态注册的广播
             unregisterReceiver(musicReceiver);
         }
+        notificationManager.cancel(NOTIFICATION_ID);
     }
 
     @Override
@@ -449,12 +453,12 @@ public class MusicPlayService extends Service {
         PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this, 0, intentNext, 0);
         //为next控件注册事件
         mRemoteViews.setOnClickPendingIntent(R.id.btn_play_next, nextPendingIntent);
-//
-//        //通知栏控制器关闭按钮广播操作
-//        Intent intentClose = new Intent(CLOSE);
-//        PendingIntent closePendingIntent = PendingIntent.getBroadcast(this, 0, intentClose, 0);
-//        //为close控件注册事件
-//        mRemoteViews.setOnClickPendingIntent(R.id.btn_notification_close, closePendingIntent);
+
+        //通知栏控制器关闭按钮广播操作
+        Intent intentClose = new Intent(CLOSE);
+        PendingIntent closePendingIntent = PendingIntent.getBroadcast(this, 0, intentClose, 0);
+        //为close控件注册事件
+        mRemoteViews.setOnClickPendingIntent(R.id.iv_notify_close, closePendingIntent);
 
         //若音乐列表不为空，初始化通知栏的歌曲信息
         if (musicInfo.size() > 0) {
@@ -508,11 +512,17 @@ public class MusicPlayService extends Service {
                     break;
                 case CLOSE:
                     DebugLog.debug(CLOSE);
+                    closeApp();
                     break;
                 default:
                     break;
             }
         }
+    }
+
+    private void closeApp() {
+        DebugLog.debug("close all Activity");
+        BasicApplication.getActivityManager().finishAll();
     }
 
     /**
@@ -528,9 +538,9 @@ public class MusicPlayService extends Service {
     public void updateNotificationShow(int position, boolean changeToPlay) {
         DebugLog.debug(" changePlay " + changeToPlay);
         if (changeToPlay) {
-            remoteViews.setImageViewResource(R.id.btn_play, R.mipmap.ic_notify_pause);
+            remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
         } else {
-            remoteViews.setImageViewResource(R.id.btn_play, R.mipmap.ic_notify_play);
+            remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
         }
         //封面专辑
 //        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));

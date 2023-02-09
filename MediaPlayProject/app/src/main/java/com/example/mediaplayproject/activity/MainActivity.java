@@ -20,13 +20,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.utils.DebugLog;
 
 
 /**
  * @author wm
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BasicActivity {
 
     private static final int REQUEST_STORE_CODE = 1024;
     private static final int REQUEST_ALERT_CODE = 1025;
@@ -37,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         mContext = this;
         DebugLog.debug("onCreate---");
         requestPermission();
@@ -189,5 +189,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.bt_music).setOnClickListener(mListener);
         findViewById(R.id.bt_video).setOnClickListener(mListener);
 
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_main;
     }
 }

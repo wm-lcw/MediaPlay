@@ -9,18 +9,19 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.base.BasicActivity;
 
 /**
  * @author wm
  */
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends BasicActivity {
 
     private TranslateAnimation translateAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
+
         initView();
     }
 
@@ -63,4 +64,8 @@ public class SplashActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_splash;
+    }
 }

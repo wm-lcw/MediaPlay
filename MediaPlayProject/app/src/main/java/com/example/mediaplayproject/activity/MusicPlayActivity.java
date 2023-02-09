@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicAdapter;
+import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.DebugLog;
@@ -51,7 +52,7 @@ import java.util.List;
  * @UpdateRemark: 更新内容
  * @Version: 1.0
  */
-public class MusicPlayActivity extends AppCompatActivity {
+public class MusicPlayActivity extends BasicActivity {
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView, ivLocalList;
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView;
@@ -81,7 +82,6 @@ public class MusicPlayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_music_play);
         mContext = this;
         updateMusicFiles();
         initData();
@@ -478,6 +478,11 @@ public class MusicPlayActivity extends AppCompatActivity {
         filter.addAction(VOLUME_MUTE);
         mContext.registerReceiver(mMusicBroadcastReceiver, filter);
         mRegistered = true;
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_music_play;
     }
 
     /**
