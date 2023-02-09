@@ -8,10 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
 
@@ -61,13 +63,14 @@ public class MusicAdapter extends BaseAdapter {
 
     @SuppressLint("InflateParams")
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
             //获取LayoutInflater实例
             convertView = LayoutInflater.from(mContext).inflate(R.layout.music_item,null);
             holder = new ViewHolder();
-            holder.tvName = (TextView) convertView.findViewById(R.id.tv_music_name);
+            holder.tvName = convertView.findViewById(R.id.tv_music_name);
+            holder.ivLike = convertView.findViewById(R.id.iv_like_music);
             //将Holder存储到convertView中
             convertView.setTag(holder);
         } else {
@@ -75,6 +78,7 @@ public class MusicAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.tvName.setText(musicInfoList.get(position).getTitle());
+        holder.ivLike.setImageResource(musicInfoList.get(position).isLike() ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
         if (position == defaultSelection){
             //设置已选择选项的颜色
             holder.tvName.setTextColor(text_selected_color);
@@ -84,6 +88,17 @@ public class MusicAdapter extends BaseAdapter {
             //设置按压效果
             holder.tvName.setTextColor(colors);
         }
+        //监听item里面的收藏按钮事件，需要在自定义Adapter的getView方法首个参数前添加final关键字(final int position...)
+        convertView.findViewById(R.id.iv_like_music).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isLike = musicInfoList.get(position).isLike();
+                musicInfoList.get(position).setLike(!isLike);
+                holder.ivLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
+                DebugLog.debug("position " + position + "isLike " + isLike);
+                notifyItemChanged(position);
+            }
+        });
         return convertView;
     }
 
@@ -93,6 +108,8 @@ public class MusicAdapter extends BaseAdapter {
 
     static class ViewHolder {
         TextView tvName;
+        ImageView ivLike;
+
     }
 
     public void setSelectPosition(int position){

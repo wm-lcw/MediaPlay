@@ -13,6 +13,15 @@ public class MediaFileBean {
     private int duration;//音乐时长
     private long size;//音乐文件大小
     private boolean isPlaying;
+    private boolean isLike;
+
+    public boolean isLike() {
+        return isLike;
+    }
+
+    public void setLike(boolean like) {
+        isLike = like;
+    }
 
     public boolean isPlaying() {
         return isPlaying;

@@ -55,16 +55,27 @@ import java.util.List;
 public class MusicPlayActivity extends BasicActivity {
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView, ivLocalList;
     private SeekBar sbVolume, sbProgress;
-    private ListView mMusicListView;
-    private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
+    private ListView mMusicListView, mFavoriteListView;
+    private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, tvDefaultList, tvFavoriteList;
     private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false;
     private Context mContext;
+    /**
+     * 正在播放的列表
+     */
     private List<MediaFileBean> musicInfo = new ArrayList<>();
+    /**
+     * 默认的列表
+     */
+    private List<MediaFileBean> defaultList = new ArrayList<>();
+    /**
+     * 收藏的列表
+     */
+    private List<MediaFileBean> favoriteList = new ArrayList<>();
     private LinearLayout mFloatLayout;
     private WindowManager.LayoutParams wmParams;
     private WindowManager mWindowManager;
     private AudioManager mAudioManager;
-    private MusicAdapter musicAdapter;
+    private MusicAdapter musicAdapter, favoriteListAdapter;
     private MusicBroadcastReceiver mMusicBroadcastReceiver;
     private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
     private final String VOLUME_CHANGE_ACTION = "android.media.VOLUME_CHANGED_ACTION";
@@ -78,6 +89,11 @@ public class MusicPlayActivity extends BasicActivity {
      * 主要是控制播放上下曲的position
      */
     private int playMode = 0;
+
+    /**
+     * musicListMode:播放的来源 0->默认列表; 1->收藏列表; 后面可以扩展其他的列表
+     */
+    private int musicListMode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,9 +119,11 @@ public class MusicPlayActivity extends BasicActivity {
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
+            musicListMode = musicService.getMusicListMode();
         }
+        //重新进入界面之后都获取一下音量信息和当前音乐列表
         initVolume();
-        //检查是否是首次播放歌曲
+        switchMusicList();
         DebugLog.debug("isInitPlayHelper " + isInitPlayHelper + "; firstPlay " + firstPlay + "; position " + mPosition);
     }
 
@@ -158,7 +176,7 @@ public class MusicPlayActivity extends BasicActivity {
      */
     private void updateMusicFiles() {
         SearchFiles mSearcherFiles = SearchFiles.getInstance(mContext);
-        musicInfo = mSearcherFiles.getMusicInfo();
+        defaultList = mSearcherFiles.getMusicInfo();
         //打印输出音乐列表
 //        if (musicInfo.size() > 0) {
 //            Iterator<MediaFileBean> iterator = musicInfo.iterator();
@@ -167,6 +185,21 @@ public class MusicPlayActivity extends BasicActivity {
 //                DebugLog.debug(mediaFileBean.getTitle());
 //            }
 //        }
+    }
+
+    /**
+     * @version V1.0
+     * @Title switchMusicList
+     * @author wm
+     * @createTime 2023/2/9 17:59
+     * @description 改变当前的列表
+     */
+    private void switchMusicList() {
+        if (musicListMode == 0) {
+            musicInfo = defaultList;
+        } else if (musicListMode == 1) {
+            musicInfo = favoriteList;
+        }
     }
 
     /**
@@ -214,6 +247,9 @@ public class MusicPlayActivity extends BasicActivity {
         ivMediaList.setOnClickListener(mListener);
         sbVolume.setOnSeekBarChangeListener(mSeekBarListener);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        //首次进入app时先获取一次音乐列表信息（后面增加数据库后从数据库中获取）
+        switchMusicList();
 
         //获取音乐列表之后，若是列表为不空，则将当前下标的歌曲信息显示出来
         if (musicInfo.size() > 0) {
@@ -363,8 +399,26 @@ public class MusicPlayActivity extends BasicActivity {
             }
         });
 
+        mFloatLayout.findViewById(R.id.tv_favorite_list).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMusicListView.setVisibility(View.GONE);
+                mFavoriteListView.setVisibility(View.VISIBLE);
+            }
+        });
+        mFloatLayout.findViewById(R.id.tv_default_list).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMusicListView.setVisibility(View.VISIBLE);
+                mFavoriteListView.setVisibility(View.GONE);
+            }
+        });
+
+
+
         mMusicListView = mFloatLayout.findViewById(R.id.lv_musicList);
-        musicAdapter = new MusicAdapter(mContext, musicInfo);
+
+        musicAdapter = new MusicAdapter(mContext, defaultList);
         mMusicListView.setAdapter(musicAdapter);
         mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -382,6 +436,22 @@ public class MusicPlayActivity extends BasicActivity {
         //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
         mMusicListView.setSelection(mPosition);
 
+        //喜欢的列表
+        mFavoriteListView = mFloatLayout.findViewById(R.id.lv_favoriteList);
+        favoriteListAdapter = new MusicAdapter(mContext, favoriteList);
+        mFavoriteListView.setAdapter(favoriteListAdapter);
+        mFavoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mPosition = position;
+                //点击歌曲播放
+                toPlayMusic(musicInfo.get(mPosition), true, handler);
+                //若从列表点击播放，则暂停播放按钮就设置为非首次播放
+                firstPlay = false;
+                favoriteListAdapter.setSelectPosition(mPosition);
+
+            }
+        });
 
         //监听返回键--隐藏悬浮窗口
 //        mFloatLayout.setOnKeyListener(new View.OnKeyListener() {

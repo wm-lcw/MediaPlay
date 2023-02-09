@@ -366,6 +366,10 @@ public class MusicPlayService extends Service {
         playMode = mode;
     }
 
+    public int getMusicListMode(){
+        return 1;
+    }
+
     /**
      * @version V1.0
      * @Title createNotificationChannel
