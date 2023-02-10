@@ -30,8 +30,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private static int MSG_CODE = 0x01;
     private static long MSG_TIME = 1_000L;
 
-    public MusicPlayerHelper() {
-    }
 
     private MusicPlayerHelperHandler mHandler;
     /**
@@ -54,16 +52,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      */
     private MediaFileBean mediaFileBean;
 
-    /**
-     *  @version V1.0
-     *  @Title MusicPlayerHelper
-     *  @author wm
-     *  @createTime 2023/2/3 18:27
-     *  @description 初始化播放器
-     *  @param
-     *  @return
-     */
-    public MusicPlayerHelper(SeekBar seekBar, TextView text,TextView currentTime,TextView mediaTime) {
+    private static MusicPlayerHelper instance = new MusicPlayerHelper();
+
+    private MusicPlayerHelper(){
         mHandler = new MusicPlayerHelperHandler(this);
         player = new MediaPlayer();
         // 设置媒体流类型
@@ -71,7 +62,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         player.setOnBufferingUpdateListener(this);
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
+    }
 
+    public static MusicPlayerHelper getInstance(){
+        return instance;
+    }
+
+    public void initData(SeekBar seekBar, TextView text,TextView currentTime,TextView mediaTime){
         this.seekBar = seekBar;
         this.seekBar.setOnSeekBarChangeListener(this);
         this.text = text;

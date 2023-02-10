@@ -138,7 +138,8 @@ public class MusicPlayService extends Service {
         //保存handler对象
         mHandler = handler;
         //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
-        helper = new MusicPlayerHelper(seekBar, currentMusicInfo, currentTime, mediaTime);
+        helper = MusicPlayerHelper.getInstance();
+        helper.initData(seekBar, currentMusicInfo, currentTime, mediaTime);
         //实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
         helper.setOnCompletionListener(mp -> {
             DebugLog.debug("setOnCompletionListener ");
@@ -175,11 +176,6 @@ public class MusicPlayService extends Service {
                 //首次播放歌曲、切换歌曲播放、继续播放
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
-                // 正在播放的列表进行更新哪一首歌曲正在播放 主要是为了更新列表里面的显示
-//                 for (int i = 0; i < musicInfo.size(); i++) {
-//                     musicInfo.get(i).setPlaying(mPosition == i);
-//                     musicAdapter.notifyItemChanged(i);
-//                 }
             }
             //发送Meeage给MusicPlayActivity，用于更新播放图标
             Message msg = new Message();
@@ -314,6 +310,11 @@ public class MusicPlayService extends Service {
      */
     public int getPosition() {
         return mPosition;
+    }
+
+    public void setPosition(int position){
+        DebugLog.debug("---" + position);
+        this.mPosition = position;
     }
 
     /**

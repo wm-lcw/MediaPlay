@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author wm
  */
-public class MusicAdapter extends BaseAdapter {
+public class FavoriteMusicAdapter extends BaseAdapter {
     private final Context mContext;
     private List<MediaFileBean> musicInfoList;
 
@@ -30,7 +30,7 @@ public class MusicAdapter extends BaseAdapter {
     private int bg_selected_color;
     private ColorStateList colors;
 
-    public MusicAdapter(Context mContext, List<MediaFileBean> musicInfoList) {
+    public FavoriteMusicAdapter(Context mContext, List<MediaFileBean> musicInfoList) {
         this.mContext = mContext;
         this.musicInfoList = musicInfoList;
         Resources resources = mContext.getResources();
@@ -43,7 +43,7 @@ public class MusicAdapter extends BaseAdapter {
         resources = null;
     }
 
-    public MusicAdapter(Context mContext) {
+    public FavoriteMusicAdapter(Context mContext) {
         this.mContext = mContext;
     }
 
@@ -68,44 +68,35 @@ public class MusicAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             //获取LayoutInflater实例
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.music_item,null);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.favorite_music_item, null);
             holder = new ViewHolder();
-            holder.tvName = convertView.findViewById(R.id.tv_music_name);
-            holder.ivLike = convertView.findViewById(R.id.iv_like_music);
+            holder.tvFavoriteName = convertView.findViewById(R.id.tv_favorite_music_name);
+            holder.ivClose = convertView.findViewById(R.id.iv_delete_music);
             //将Holder存储到convertView中
             convertView.setTag(holder);
         } else {
             //convertView不为空时，从convertView中取出Holder
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.tvName.setText(musicInfoList.get(position).getTitle());
-        holder.ivLike.setImageResource(musicInfoList.get(position).isLike() ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
-        if (position == defaultSelection){
+        holder.tvFavoriteName.setText(musicInfoList.get(position).getTitle());
+        holder.ivClose.setImageResource(R.mipmap.close);
+        if (position == defaultSelection) {
             //设置已选择选项的颜色
-            holder.tvName.setTextColor(text_selected_color);
+            holder.tvFavoriteName.setTextColor(text_selected_color);
             //可以设置背景颜色，这里不设置
             //convertView.setBackgroundColor(bg_selected_color);
         } else {
             //设置按压效果
-            holder.tvName.setTextColor(colors);
+            holder.tvFavoriteName.setTextColor(colors);
         }
         //监听item里面的收藏按钮事件，需要在自定义Adapter的getView方法首个参数前添加final关键字(final int position...)
-        convertView.findViewById(R.id.iv_like_music).setOnClickListener(new View.OnClickListener() {
+        convertView.findViewById(R.id.iv_delete_music).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //获取点击前的状态
-                boolean isLike = musicInfoList.get(position).isLike();
-                musicInfoList.get(position).setLike(!isLike);
-                holder.ivLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
-                DebugLog.debug("position " + position + "isLike " + isLike);
-                if (!isLike){
-                    //加入收藏
-                    BasicApplication.getApplication().addMusicToFavoriteList(musicInfoList.get(position));
-                } else {
-                    //取消收藏
-                    BasicApplication.getApplication().deleteMusicFromFavoriteList(musicInfoList.get(position));
-                }
-                notifyItemChanged(position);
+                //取消收藏，这里调用deleteMusicFromFavoriteList删除收藏歌曲后，当前的收藏列表无需再删除，因为是同一对象
+                BasicApplication.getApplication().deleteMusicFromFavoriteList(musicInfoList.get(position));
+                DebugLog.debug("delete position " + position);
+                notifyDataSetChanged();
             }
         });
         return convertView;
@@ -116,12 +107,12 @@ public class MusicAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView tvName;
-        ImageView ivLike;
+        TextView tvFavoriteName;
+        ImageView ivClose;
 
     }
 
-    public void setSelectPosition(int position){
+    public void setSelectPosition(int position) {
         if (!(position < 0 || position > musicInfoList.size())) {
             defaultSelection = position;
             notifyDataSetChanged();
