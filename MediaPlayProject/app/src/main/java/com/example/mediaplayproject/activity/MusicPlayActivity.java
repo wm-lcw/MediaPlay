@@ -157,6 +157,9 @@ public class MusicPlayActivity extends BasicActivity {
             if (musicService != null) {
                 //service创建成功的时候立即初始化
                 initServicePlayHelper();
+                //获取到Service对象之后创建Adapter，避免后面打开列表时多次创建
+                musicAdapter = new MusicAdapter(mContext, defaultList);
+                favoriteListAdapter = new FavoriteMusicAdapter(mContext, favoriteList);
             }
         }
 
@@ -205,7 +208,6 @@ public class MusicPlayActivity extends BasicActivity {
      */
     private void initVolume() {
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        DebugLog.debug("getCurrentVolume " + currentVolume);
         //当前设备的
         if (currentVolume >= 0 && currentVolume <= 150) {
             int afterVolume = (int) (currentVolume / 1.5);
@@ -274,12 +276,10 @@ public class MusicPlayActivity extends BasicActivity {
      * @description 初始化PlayHelper
      */
     private void initServicePlayHelper() {
-        DebugLog.debug("");
         if (musicService != null) {
             //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
-            //初始化的时候需要先调用setPosition方法更新一下，避免数组越界
-            musicService.setPosition(mPosition);
-            musicService.setMusicInfo(musicInfo);
+            //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
+            musicService.initPlayData(musicInfo, mPosition, musicListMode);
             if (!isInitPlayHelper) {
                 isInitPlayHelper = true;
                 musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, handler);
@@ -341,7 +341,6 @@ public class MusicPlayActivity extends BasicActivity {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == sbVolume) {
-                DebugLog.debug("volume progress is " + progress);
                 int afterVolume = (int) (progress * 1.5);
                 if (fromUser) {
                     //手动拖动seekbar时才设置音量（排除外部改变音量的影响）
@@ -374,7 +373,6 @@ public class MusicPlayActivity extends BasicActivity {
         wmParams = new WindowManager.LayoutParams();
         //获取的是WindowManagerImpl.CompatModeWrapper
         mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
-        DebugLog.debug("mWindowManager--->" + mWindowManager);
         //设置window type
         wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         //设置背景为透明，否则滑动ListView会出现残影
@@ -428,8 +426,6 @@ public class MusicPlayActivity extends BasicActivity {
         tvDefaultList.setOnClickListener(mListener);
 
         mMusicListView = mFloatLayout.findViewById(R.id.lv_musicList);
-
-        musicAdapter = new MusicAdapter(mContext, defaultList);
         mMusicListView.setAdapter(musicAdapter);
         mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -449,7 +445,6 @@ public class MusicPlayActivity extends BasicActivity {
 
         //喜欢的列表
         mFavoriteListView = mFloatLayout.findViewById(R.id.lv_favoriteList);
-        favoriteListAdapter = new FavoriteMusicAdapter(mContext, favoriteList);
         mFavoriteListView.setAdapter(favoriteListAdapter);
         mFavoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -485,7 +480,6 @@ public class MusicPlayActivity extends BasicActivity {
                 if (!rect.contains(x, y) && isShowList) {
                     mWindowManager.removeView(mFloatLayout);
                 }
-                DebugLog.debug("onTouch : " + x + ", " + y + ", rect: " + rect);
                 return false;
             }
         });
@@ -509,6 +503,7 @@ public class MusicPlayActivity extends BasicActivity {
             //取消另一个列表的当前播放高亮效果
             favoriteListAdapter.setSelectPosition(-1);
         } else if (musicListMode == 1) {
+            //若移除了收藏歌曲（下标在当前播放之前），列表整体前移，当前的下标应该改变了，这里必须拿到最新的position值
             //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
             favoriteListAdapter.setSelectPosition(mPosition);
             //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
@@ -529,7 +524,6 @@ public class MusicPlayActivity extends BasicActivity {
      * @description 处理音乐的播放和暂停等
      */
     private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
-        DebugLog.debug("play isResetPlay " + isRestPlayer);
         initServicePlayHelper();
         musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
     }
@@ -575,6 +569,7 @@ public class MusicPlayActivity extends BasicActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(VOLUME_CHANGE_ACTION);
         filter.addAction(VOLUME_MUTE);
+        filter.addAction(MusicPlayService.DELETE_MUSIC_ACTION);
         mContext.registerReceiver(mMusicBroadcastReceiver, filter);
         mRegistered = true;
     }
@@ -596,18 +591,28 @@ public class MusicPlayActivity extends BasicActivity {
     private class MusicBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            DebugLog.debug("receiver action " + intent.getAction());
             //媒体音量改变才通知
             if (VOLUME_CHANGE_ACTION.equals(intent.getAction())
                     && (intent.getIntExtra(EXTRA_VOLUME_STREAM_TYPE, -1) == AudioManager.STREAM_MUSIC)) {
                 int changedVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                DebugLog.debug("get change volume " + changedVolume);
                 Message msg = new Message();
                 msg.what = HANDLER_MESSAGE_REFRESH_VOLUME;
                 Bundle bundle = new Bundle();
                 bundle.putInt("volume", changedVolume);
                 msg.setData(bundle);
                 handler.sendMessage(msg);
+            } else if (MusicPlayService.DELETE_MUSIC_ACTION.equals(intent.getAction())){
+                //删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
+                //若是在收藏列表界面，需要实时更新；
+                //在默认界面切换过去的时候，会重新设定高亮的位置为position，所以需要拿到收藏列表里最新的position
+                int deletePosition = intent.getExtras().getInt("musicPosition");
+                if (musicListMode == 1){
+                    boolean isRefresh = favoriteListAdapter.checkRefreshPosition(deletePosition);
+                    if (isRefresh){
+                        favoriteListAdapter.refreshSelectionPosition();
+                        mPosition--;
+                    }
+                }
             }
         }
     }

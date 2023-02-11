@@ -63,15 +63,20 @@ public class MusicPlayService extends Service {
     public static final String PREV = "prev";
     public static final String NEXT = "next";
     public static final String CLOSE = "close";
+    public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     /**
      * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
      * 主要是控制播放上下曲的position
      */
     private int playMode = 0;
 
+    /**
+     * musicListMode:播放的来源 0->默认列表; 1->收藏列表; 后面可以扩展其他的列表
+     */
+    private int musicListMode = 0;
+
     @Override
     public void onCreate() {
-        DebugLog.debug("");
         super.onCreate();
         //创建通知栏通道
         createNotificationChannel();
@@ -81,7 +86,6 @@ public class MusicPlayService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        DebugLog.debug("");
         return myBinder;
     }
 
@@ -94,13 +98,11 @@ public class MusicPlayService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        DebugLog.debug("");
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        DebugLog.debug("");
         super.onDestroy();
         helper.destroy();
         if (musicReceiver != null) {
@@ -116,17 +118,18 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param musicInfo 音乐列表
+     * @param
      * @return
      * @version V1.0
-     * @Title setMusicInfo
+     * @Title initPlayData
      * @author wm
-     * @createTime 2023/2/11 9:22
-     * @description 更新音乐播放列表
+     * @createTime 2023/2/11 15:44
+     * @description 将Activity中的一些属性和状态同步到Service中
      */
-    public void setMusicInfo(List<MediaFileBean> musicInfo) {
-        //保存歌曲列表
+    public void initPlayData(List<MediaFileBean> musicInfo, int position, int musicListMode) {
         this.musicInfo = musicInfo;
+        this.mPosition = position;
+        this.musicListMode = musicListMode;
     }
 
     /**
@@ -135,7 +138,6 @@ public class MusicPlayService extends Service {
      * @param currentTime      当前歌曲播放的时间
      * @param mediaTime        当前歌曲的总时长
      * @param handler          用于给Activity发送消息的Handler
-     * @return
      * @version V1.0
      * @Title initPlayHelper
      * @author wm
@@ -150,7 +152,6 @@ public class MusicPlayService extends Service {
         helper.initData(seekBar, currentMusicInfo, currentTime, mediaTime);
         //实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
         helper.setOnCompletionListener(mp -> {
-            DebugLog.debug("setOnCompletionListener ");
             playNextEnd();
         });
         isInitPlayHelper = true;
@@ -208,7 +209,6 @@ public class MusicPlayService extends Service {
      * @description 暂停
      */
     public void pause() {
-        DebugLog.debug("pause");
         helper.pause();
     }
 
@@ -220,7 +220,6 @@ public class MusicPlayService extends Service {
      * @description 播放上一首
      */
     public void playPre() {
-        DebugLog.debug("playPre Mode " + playMode);
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
         if (playMode == 0 || playMode == 2) {
             //如果当前是第一首，则播放最后一首
@@ -243,7 +242,6 @@ public class MusicPlayService extends Service {
      * @description 播放下一首
      */
     public void playNext() {
-        DebugLog.debug("playNext Mode " + playMode);
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
         if (playMode == 0 || playMode == 2) {
             mPosition++;
@@ -266,7 +264,6 @@ public class MusicPlayService extends Service {
      * @description 播放完毕后自动播放下一曲，用于回调
      */
     private void playNextEnd() {
-        DebugLog.debug("playNextEnd Mode " + playMode);
         //循环播放
         if (playMode == 0) {
             mPosition++;
@@ -293,8 +290,8 @@ public class MusicPlayService extends Service {
      */
     private int getRandomPosition() {
         Random random = new Random();
-        int randomNum = Math.abs(random.nextInt() % musicInfo.size() - 1);
-        DebugLog.debug("--" + randomNum);
+        int randomNum = Math.abs(random.nextInt() % musicInfo.size());
+        DebugLog.debug(""+randomNum);
         return randomNum;
     }
 
@@ -321,7 +318,6 @@ public class MusicPlayService extends Service {
     }
 
     public void setPosition(int position) {
-        DebugLog.debug("---" + position);
         this.mPosition = position;
     }
 
@@ -376,7 +372,7 @@ public class MusicPlayService extends Service {
     }
 
     public int getMusicListMode() {
-        return 1;
+        return musicListMode;
     }
 
     /**
@@ -387,7 +383,6 @@ public class MusicPlayService extends Service {
      * @description 创建通知栏通道
      */
     private void createNotificationChannel() {
-        DebugLog.debug("");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "9527";
             CharSequence name = "PlayControl";
@@ -408,7 +403,6 @@ public class MusicPlayService extends Service {
      * @description 显示通知栏
      */
     private void showNotify() {
-        DebugLog.debug("");
         remoteViews = getContentView();
         //设置PendingIntent
         Intent it = new Intent(this, MusicPlayActivity.class);
@@ -495,6 +489,7 @@ public class MusicPlayService extends Service {
         intentFilter.addAction(PREV);
         intentFilter.addAction(NEXT);
         intentFilter.addAction(CLOSE);
+        intentFilter.addAction(DELETE_MUSIC_ACTION);
         registerReceiver(musicReceiver, intentFilter);
     }
 
@@ -512,20 +507,20 @@ public class MusicPlayService extends Service {
             String action = intent.getAction();
             switch (action) {
                 case PLAY:
-                    DebugLog.debug(PLAY + " or " + PAUSE);
                     play(musicInfo.get(mPosition), firstPlay, mHandler, mPosition);
                     break;
                 case PREV:
-                    DebugLog.debug(PREV);
                     playPre();
                     break;
                 case NEXT:
-                    DebugLog.debug(NEXT);
                     playNext();
                     break;
                 case CLOSE:
-                    DebugLog.debug(CLOSE);
                     closeApp();
+                    break;
+                case DELETE_MUSIC_ACTION:
+                    int deletePosition = intent.getExtras().getInt("musicPosition");
+                    disposeDeleteMusic(deletePosition);
                     break;
                 default:
                     break;
@@ -534,8 +529,11 @@ public class MusicPlayService extends Service {
     }
 
     private void closeApp() {
-        DebugLog.debug("close all Activity");
         BasicApplication.getActivityManager().finishAll();
+    }
+
+    private void disposeDeleteMusic(int deletePosition) {
+        DebugLog.debug("" + deletePosition);
     }
 
     /**
@@ -549,7 +547,6 @@ public class MusicPlayService extends Service {
      * @description 更改通知的信息和UI
      */
     public void updateNotificationShow(int position, boolean changeToPlay) {
-        DebugLog.debug(" changePlay " + changeToPlay);
         if (changeToPlay) {
             remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
         } else {

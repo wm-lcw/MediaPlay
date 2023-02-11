@@ -109,11 +109,19 @@ public class FavoriteMusicAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView tvFavoriteName;
         ImageView ivClose;
-
     }
 
+    /**
+     *  @version V1.0
+     *  @Title setSelectPosition
+     *  @author wm
+     *  @createTime 2023/2/11 15:37
+     *  @description 设置高亮的下标
+     *  @param position -1：取消高亮效果； 0 < position < size(): 设置高亮效果
+     *  @return
+     */
     public void setSelectPosition(int position) {
-        if (position == -1){
+        if (position == -1) {
             //若传进来的值是-1，则代表要取消播放歌曲高亮效果
             defaultSelection = position;
             notifyDataSetChanged();
@@ -124,4 +132,30 @@ public class FavoriteMusicAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * @version V1.0
+     * @Title refreshSelectionPosition
+     * @author wm
+     * @createTime 2023/2/11 14:56
+     * @description 删除收藏歌曲的时候，若删除的下标小于当前播放的下标，列表会上移，
+     * 但是高亮的位置不变，导致了正在播放的高亮位置不正确，所以需要刷新指向高亮的下标
+     */
+    public void refreshSelectionPosition() {
+        DebugLog.debug("defaultSelection " + defaultSelection);
+        defaultSelection--;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * @param deletePosition 要删除的歌曲下标
+     * @return
+     * @version V1.0
+     * @Title checkRefreshPosition
+     * @author wm
+     * @createTime 2023/2/11 15:35
+     * @description 检查要删除的歌曲下标是否小于当前播放歌曲的下标
+     */
+    public boolean checkRefreshPosition(int deletePosition) {
+        return deletePosition < defaultSelection;
+    }
 }

@@ -39,7 +39,6 @@ public class MainActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
-        DebugLog.debug("onCreate---");
         requestPermission();
     }
 
@@ -47,10 +46,8 @@ public class MainActivity extends BasicActivity {
         @Override
         public void onClick(View view) {
             if (view.getId() == R.id.bt_music) {
-                DebugLog.debug("start MusicActivity");
                 startActivity(new Intent(MainActivity.this, MusicPlayActivity.class));
             } else if (view.getId() == R.id.bt_video) {
-                DebugLog.debug("start VideoActivity");
                 startActivity(new Intent(MainActivity.this, VideoActivity.class));
             }
         }
@@ -132,7 +129,6 @@ public class MainActivity extends BasicActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_ALL_CODE) {
-            DebugLog.debug("onRequestPermissionsResult" + requestCode);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
                     ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
                     ContextCompat.checkSelfPermission(this, Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED) {
@@ -155,7 +151,6 @@ public class MainActivity extends BasicActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        DebugLog.debug("requestCode " + requestCode + "  resultCode " + resultCode);
         if (requestCode == REQUEST_STORE_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
                 DebugLog.debug("request alert permission");
@@ -185,7 +180,6 @@ public class MainActivity extends BasicActivity {
      */
     private void initData() {
         Toast.makeText(mContext, "已获取存储权限", Toast.LENGTH_SHORT).show();
-        DebugLog.debug("");
         findViewById(R.id.bt_music).setOnClickListener(mListener);
         findViewById(R.id.bt_video).setOnClickListener(mListener);
 
