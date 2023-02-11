@@ -93,7 +93,8 @@ public class BasicApplication extends Application {
             favoriteList.remove(mediaFileBean);
         }
         if (defaultList.contains(mediaFileBean)){
-            DebugLog.debug("----Object is same");
+            //需要删除默认列表中的收藏状态,直接操作对象
+            mediaFileBean.setLike(false);
         }
     }
 

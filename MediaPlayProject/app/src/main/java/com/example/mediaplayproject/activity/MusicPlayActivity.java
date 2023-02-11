@@ -111,7 +111,7 @@ public class MusicPlayActivity extends BasicActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        initPlayHelper();
+        initServicePlayHelper();
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
@@ -156,7 +156,7 @@ public class MusicPlayActivity extends BasicActivity {
             musicService = ((MusicPlayService.MyBinder) service).getService(mContext);
             if (musicService != null) {
                 //service创建成功的时候立即初始化
-                initPlayHelper();
+                initServicePlayHelper();
             }
         }
 
@@ -175,10 +175,8 @@ public class MusicPlayActivity extends BasicActivity {
      * @description 获取音频文件
      */
     private void updateMusicList() {
-        //需要注意数据更新问题：例如某首音乐是否标注为收藏
         defaultList = BasicApplication.getApplication().getDefaultList();
         favoriteList = BasicApplication.getApplication().getFavoriteList();
-
     }
 
     /**
@@ -195,12 +193,7 @@ public class MusicPlayActivity extends BasicActivity {
             musicInfo = favoriteList;
         }
         //改变播放列表的时候，刷新播放器中的音乐列表来源
-        if (musicService != null) {
-            //初始化的时候没有传最新的position过去，需要先调用setPosition方法更新一下，避免数组越界
-            musicService.setPosition(mPosition);
-            musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, musicInfo, handler);
-
-        }
+        initServicePlayHelper();
     }
 
     /**
@@ -275,16 +268,22 @@ public class MusicPlayActivity extends BasicActivity {
      * @param
      * @return
      * @version V1.0
-     * @Title initPlayHelper
+     * @Title initServicePlayHelper
      * @author wm
      * @createTime 2023/2/8 16:48
      * @description 初始化PlayHelper
      */
-    private void initPlayHelper() {
+    private void initServicePlayHelper() {
         DebugLog.debug("");
-        if (musicService != null && !isInitPlayHelper) {
-            isInitPlayHelper = true;
-            musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, musicInfo, handler);
+        if (musicService != null) {
+            //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
+            //初始化的时候需要先调用setPosition方法更新一下，避免数组越界
+            musicService.setPosition(mPosition);
+            musicService.setMusicInfo(musicInfo);
+            if (!isInitPlayHelper) {
+                isInitPlayHelper = true;
+                musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, handler);
+            }
         }
     }
 
@@ -296,7 +295,7 @@ public class MusicPlayActivity extends BasicActivity {
             if (view == ivMediaLoop) {
                 changePlayMode();
             } else if (view == ivMediaPre) {
-                initPlayHelper();
+                initServicePlayHelper();
                 musicService.playPre();
             } else if (view == ivMediaPlay) {
                 DebugLog.debug("current position " + mPosition);
@@ -304,7 +303,7 @@ public class MusicPlayActivity extends BasicActivity {
                 toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
-                initPlayHelper();
+                initServicePlayHelper();
                 musicService.playNext();
             } else if (view == ivMediaList) {
                 isShowList = true;
@@ -312,23 +311,18 @@ public class MusicPlayActivity extends BasicActivity {
             } else if (view == ivCloseListView) {
                 mWindowManager.removeView(mFloatLayout);
             } else if (view == ivLocalList) {
-                //这里的mPosition待定，应该是需要做区分
-                if (musicListMode == 0) {
-                    mMusicListView.setSelection(mPosition);
-                } else if (musicListMode == 1) {
-                    mFavoriteListView.setSelection(mPosition);
-                }
+                initListSelectView();
             } else if (view == tvDefaultList) {
+                initListSelectView();
                 //这里的两个列表都是从BaseApplication中拿到，是同一对象，不需要再重复赋值
-                musicAdapter.notifyDataSetChanged();
-                mMusicListView.setVisibility(View.GONE);
-                mFavoriteListView.setVisibility(View.VISIBLE);
-
-            } else if (view == tvFavoriteList) {
-//                updateMusicList();
                 musicAdapter.notifyDataSetChanged();
                 mMusicListView.setVisibility(View.VISIBLE);
                 mFavoriteListView.setVisibility(View.GONE);
+            } else if (view == tvFavoriteList) {
+                initListSelectView();
+                favoriteListAdapter.notifyDataSetChanged();
+                mMusicListView.setVisibility(View.GONE);
+                mFavoriteListView.setVisibility(View.VISIBLE);
 
             }
         }
@@ -426,12 +420,12 @@ public class MusicPlayActivity extends BasicActivity {
         ivLocalList.setOnClickListener(mListener);
 
         //显示收藏列表
-        tvDefaultList = mFloatLayout.findViewById(R.id.tv_favorite_list);
-        tvDefaultList.setOnClickListener(mListener);
+        tvFavoriteList = mFloatLayout.findViewById(R.id.tv_favorite_list);
+        tvFavoriteList.setOnClickListener(mListener);
 
         //显示默认列表
-        tvFavoriteList = mFloatLayout.findViewById(R.id.tv_default_list);
-        tvFavoriteList.setOnClickListener(mListener);
+        tvDefaultList = mFloatLayout.findViewById(R.id.tv_default_list);
+        tvDefaultList.setOnClickListener(mListener);
 
         mMusicListView = mFloatLayout.findViewById(R.id.lv_musicList);
 
@@ -472,17 +466,8 @@ public class MusicPlayActivity extends BasicActivity {
             }
         });
 
-        if (musicListMode == 0){
-            //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
-            musicAdapter.setSelectPosition(mPosition);
-            //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
-            mMusicListView.setSelection(mPosition);
-        } else if (musicListMode == 1){
-            //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
-            favoriteListAdapter.setSelectPosition(mPosition);
-            //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
-            mFavoriteListView.setSelection(mPosition);
-        }
+        //更新listView的当前播放高亮效果
+        initListSelectView();
 
         /* 点击窗口外部区域可消除
          将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域,
@@ -504,8 +489,35 @@ public class MusicPlayActivity extends BasicActivity {
                 return false;
             }
         });
-
     }
+
+    /**
+     * @param
+     * @return
+     * @version V1.0
+     * @Title initListSelectView
+     * @author wm
+     * @createTime 2023/2/11 11:03
+     * @description 刷新ListView的当前高亮效果
+     */
+    private void initListSelectView() {
+        if (musicListMode == 0) {
+            //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
+            musicAdapter.setSelectPosition(mPosition);
+            //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
+            mMusicListView.setSelection(mPosition);
+            //取消另一个列表的当前播放高亮效果
+            favoriteListAdapter.setSelectPosition(-1);
+        } else if (musicListMode == 1) {
+            //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
+            favoriteListAdapter.setSelectPosition(mPosition);
+            //在列表中将当前播放的歌曲显示在列表顶部（整体显示在顶部，顺序未改变）
+            mFavoriteListView.setSelection(mPosition);
+            //取消另一个列表的当前播放高亮效果
+            musicAdapter.setSelectPosition(-1);
+        }
+    }
+
 
     /**
      * @param
@@ -518,7 +530,7 @@ public class MusicPlayActivity extends BasicActivity {
      */
     private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
         DebugLog.debug("play isResetPlay " + isRestPlayer);
-        initPlayHelper();
+        initServicePlayHelper();
         musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
     }
 

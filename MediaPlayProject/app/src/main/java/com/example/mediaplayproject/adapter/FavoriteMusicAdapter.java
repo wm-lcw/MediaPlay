@@ -113,6 +113,11 @@ public class FavoriteMusicAdapter extends BaseAdapter {
     }
 
     public void setSelectPosition(int position) {
+        if (position == -1){
+            //若传进来的值是-1，则代表要取消播放歌曲高亮效果
+            defaultSelection = position;
+            notifyDataSetChanged();
+        }
         if (!(position < 0 || position > musicInfoList.size())) {
             defaultSelection = position;
             notifyDataSetChanged();

@@ -69,9 +69,6 @@ public class MusicPlayService extends Service {
      */
     private int playMode = 0;
 
-
-
-
     @Override
     public void onCreate() {
         DebugLog.debug("");
@@ -119,11 +116,24 @@ public class MusicPlayService extends Service {
     }
 
     /**
+     * @param musicInfo 音乐列表
+     * @return
+     * @version V1.0
+     * @Title setMusicInfo
+     * @author wm
+     * @createTime 2023/2/11 9:22
+     * @description 更新音乐播放列表
+     */
+    public void setMusicInfo(List<MediaFileBean> musicInfo) {
+        //保存歌曲列表
+        this.musicInfo = musicInfo;
+    }
+
+    /**
      * @param seekBar          歌曲播放进度条
      * @param currentMusicInfo 当前歌曲信息
      * @param currentTime      当前歌曲播放的时间
      * @param mediaTime        当前歌曲的总时长
-     * @param musicInfo        音乐列表
      * @param handler          用于给Activity发送消息的Handler
      * @return
      * @version V1.0
@@ -132,9 +142,7 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/8 15:58
      * @description 初始化音乐播放器辅助类
      */
-    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, List<MediaFileBean> musicInfo, Handler handler) {
-        //保存歌曲列表
-        this.musicInfo = musicInfo;
+    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, Handler handler) {
         //保存handler对象
         mHandler = handler;
         //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
@@ -312,7 +320,7 @@ public class MusicPlayService extends Service {
         return mPosition;
     }
 
-    public void setPosition(int position){
+    public void setPosition(int position) {
         DebugLog.debug("---" + position);
         this.mPosition = position;
     }
@@ -367,7 +375,7 @@ public class MusicPlayService extends Service {
         playMode = mode;
     }
 
-    public int getMusicListMode(){
+    public int getMusicListMode() {
         return 1;
     }
 
