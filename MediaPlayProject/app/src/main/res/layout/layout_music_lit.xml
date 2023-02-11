@@ -34,7 +34,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_width="2dp"
                 android:layout_height="@dimen/dp_30"
-                android:background="@color/cardview_light_background"/>
+                android:background="@color/white"/>
             <TextView
                 android:id="@+id/tv_favorite_list"
                 android:gravity="center"

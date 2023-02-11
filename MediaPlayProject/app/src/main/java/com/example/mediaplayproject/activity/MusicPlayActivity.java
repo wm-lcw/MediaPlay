@@ -103,6 +103,7 @@ public class MusicPlayActivity extends BasicActivity {
         updateMusicList();
         initData();
         registerReceiver();
+        createFloatView();
         //启动MusicPlayService服务
         Intent bindIntent = new Intent(MusicPlayActivity.this, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
@@ -289,7 +290,7 @@ public class MusicPlayActivity extends BasicActivity {
 
 
     private View.OnClickListener mListener = new View.OnClickListener() {
-        @SuppressLint("ResourceType")
+        @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists"})
         @Override
         public void onClick(View view) {
             if (view == ivMediaLoop) {
@@ -307,7 +308,7 @@ public class MusicPlayActivity extends BasicActivity {
                 musicService.playNext();
             } else if (view == ivMediaList) {
                 isShowList = true;
-                createFloatView();
+                showFloatView();
             } else if (view == ivCloseListView) {
                 mWindowManager.removeView(mFloatLayout);
             } else if (view == ivLocalList) {
@@ -318,11 +319,16 @@ public class MusicPlayActivity extends BasicActivity {
                 musicAdapter.notifyDataSetChanged();
                 mMusicListView.setVisibility(View.VISIBLE);
                 mFavoriteListView.setVisibility(View.GONE);
+                //这里直接使用setTextColor(R.color.white)是不会起作用的
+                tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
+                tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
             } else if (view == tvFavoriteList) {
                 initListHighLight();
                 favoriteListAdapter.notifyDataSetChanged();
                 mMusicListView.setVisibility(View.GONE);
                 mFavoriteListView.setVisibility(View.VISIBLE);
+                tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
+                tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
             }
         }
     };
@@ -389,12 +395,14 @@ public class MusicPlayActivity extends BasicActivity {
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
 
+    }
+
+    private void showFloatView(){
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_music_lit, null);
         //添加mFloatLayout
         mWindowManager.addView(mFloatLayout, wmParams);
-
         //初始化视窗
         initFloatView();
     }
@@ -406,7 +414,7 @@ public class MusicPlayActivity extends BasicActivity {
      * @createTime 2023/2/9 23:27
      * @description 初始化视窗、对视窗中的控件进行监听
      */
-    @SuppressLint("ResourceAsColor")
+    @SuppressLint({"ResourceAsColor", "UseCompatLoadingForColorStateLists"})
     private void initFloatView() {
 
         //浮动窗口关闭按钮
@@ -465,14 +473,14 @@ public class MusicPlayActivity extends BasicActivity {
         initListHighLight();
 
         //根据当前播放的来源，打开列表时显示相应的列表页面
-        if (musicListMode == 0){
+        if (musicListMode == 0) {
             mMusicListView.setVisibility(View.VISIBLE);
             mFavoriteListView.setVisibility(View.GONE);
-            tvDefaultList.setTextColor(R.color.purple_200);
-        } else if (musicListMode == 1){
+            tvDefaultList.setTextColor(this.getResources().getColorStateList(R.color.text_pressed));
+        } else if (musicListMode == 1) {
             mFavoriteListView.setVisibility(View.VISIBLE);
             mMusicListView.setVisibility(View.GONE);
-            tvFavoriteList.setTextColor(R.color.purple_200);
+            tvFavoriteList.setTextColor(this.getResources().getColorStateList(R.color.text_pressed));
         }
 
         /* 点击窗口外部区域可消除
@@ -612,14 +620,14 @@ public class MusicPlayActivity extends BasicActivity {
                 bundle.putInt("volume", changedVolume);
                 msg.setData(bundle);
                 handler.sendMessage(msg);
-            } else if (MusicPlayService.DELETE_MUSIC_ACTION.equals(intent.getAction())){
+            } else if (MusicPlayService.DELETE_MUSIC_ACTION.equals(intent.getAction())) {
                 //删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
                 //若是在收藏列表界面，需要实时更新；
                 //在默认界面切换过去的时候，会重新设定高亮的位置为position，所以需要拿到收藏列表里最新的position
                 int deletePosition = intent.getExtras().getInt("musicPosition");
-                if (musicListMode == 1){
+                if (musicListMode == 1) {
                     boolean isRefresh = favoriteListAdapter.checkRefreshPosition(deletePosition);
-                    if (isRefresh){
+                    if (isRefresh) {
                         favoriteListAdapter.refreshSelectionPosition();
                         mPosition--;
                     }
