@@ -311,19 +311,18 @@ public class MusicPlayActivity extends BasicActivity {
             } else if (view == ivCloseListView) {
                 mWindowManager.removeView(mFloatLayout);
             } else if (view == ivLocalList) {
-                initListSelectView();
+                initListHighLight();
             } else if (view == tvDefaultList) {
-                initListSelectView();
+                initListHighLight();
                 //这里的两个列表都是从BaseApplication中拿到，是同一对象，不需要再重复赋值
                 musicAdapter.notifyDataSetChanged();
                 mMusicListView.setVisibility(View.VISIBLE);
                 mFavoriteListView.setVisibility(View.GONE);
             } else if (view == tvFavoriteList) {
-                initListSelectView();
+                initListHighLight();
                 favoriteListAdapter.notifyDataSetChanged();
                 mMusicListView.setVisibility(View.GONE);
                 mFavoriteListView.setVisibility(View.VISIBLE);
-
             }
         }
     };
@@ -407,6 +406,7 @@ public class MusicPlayActivity extends BasicActivity {
      * @createTime 2023/2/9 23:27
      * @description 初始化视窗、对视窗中的控件进行监听
      */
+    @SuppressLint("ResourceAsColor")
     private void initFloatView() {
 
         //浮动窗口关闭按钮
@@ -462,7 +462,18 @@ public class MusicPlayActivity extends BasicActivity {
         });
 
         //更新listView的当前播放高亮效果
-        initListSelectView();
+        initListHighLight();
+
+        //根据当前播放的来源，打开列表时显示相应的列表页面
+        if (musicListMode == 0){
+            mMusicListView.setVisibility(View.VISIBLE);
+            mFavoriteListView.setVisibility(View.GONE);
+            tvDefaultList.setTextColor(R.color.purple_200);
+        } else if (musicListMode == 1){
+            mFavoriteListView.setVisibility(View.VISIBLE);
+            mMusicListView.setVisibility(View.GONE);
+            tvFavoriteList.setTextColor(R.color.purple_200);
+        }
 
         /* 点击窗口外部区域可消除
          将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域,
@@ -489,12 +500,12 @@ public class MusicPlayActivity extends BasicActivity {
      * @param
      * @return
      * @version V1.0
-     * @Title initListSelectView
+     * @Title initListHighLight
      * @author wm
      * @createTime 2023/2/11 11:03
      * @description 刷新ListView的当前高亮效果
      */
-    private void initListSelectView() {
+    private void initListHighLight() {
         if (musicListMode == 0) {
             //为音乐列表添加高亮处理（当前播放和选中的选项都会高亮）
             musicAdapter.setSelectPosition(mPosition);
@@ -652,6 +663,7 @@ public class MusicPlayActivity extends BasicActivity {
      * @return
      */
     final Handler handler = new Handler(Looper.myLooper()) {
+        @SuppressLint("ResourceAsColor")
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
