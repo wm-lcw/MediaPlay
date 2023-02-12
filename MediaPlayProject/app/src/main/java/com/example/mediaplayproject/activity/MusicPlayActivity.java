@@ -83,6 +83,7 @@ public class MusicPlayActivity extends BasicActivity {
     private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
+    public static final int HANDLER_MESSAGE_AFTER_DELETE_POSITION = 2;
     private int mPosition = 0;
     private MusicPlayService musicService;
     /**
@@ -125,7 +126,7 @@ public class MusicPlayActivity extends BasicActivity {
         }
         //重新进入界面之后都获取一下音量信息和当前音乐列表
         initVolume();
-        DebugLog.debug("isInitPlayHelper " + isInitPlayHelper + "; firstPlay " + firstPlay + "; position " + mPosition);
+//        DebugLog.debug("isInitPlayHelper " + isInitPlayHelper + "; firstPlay " + firstPlay + "; position " + mPosition);
     }
 
     @Override
@@ -299,7 +300,7 @@ public class MusicPlayActivity extends BasicActivity {
                 initServicePlayHelper();
                 musicService.playPre();
             } else if (view == ivMediaPlay) {
-                DebugLog.debug("current position " + mPosition);
+//                DebugLog.debug("current position " + mPosition);
                 // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
                 toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
                 firstPlay = false;
@@ -628,9 +629,16 @@ public class MusicPlayActivity extends BasicActivity {
                 if (musicListMode == 1) {
                     boolean isRefresh = favoriteListAdapter.checkRefreshPosition(deletePosition);
                     if (isRefresh) {
+                        DebugLog.debug("refreshSelectionPosition");
                         favoriteListAdapter.refreshSelectionPosition();
                         mPosition--;
                     }
+
+                    //这里需要判断删除的是当前歌曲的情况--若自动播放下一曲时高亮的位置需要根据最新播放的mPosition来确定
+                    //可以由Service播放下一曲之后回传mPosition的值
+
+                    //同步更新Service中的mPosition值
+                    musicService.setPosition(mPosition);
                 }
             }
         }
@@ -685,12 +693,18 @@ public class MusicPlayActivity extends BasicActivity {
             } else if (msg.what == HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
                 //service发送的信息，用于更新播放状态的图标
                 boolean isPlaying = msg.getData().getBoolean("iconType");
-                DebugLog.debug("refresh play icon , change playing icon " + isPlaying);
+//                DebugLog.debug("refresh play icon , change playing icon " + isPlaying);
                 ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
                 //接收到service发送的播放状态改变之后，刷新Activity的值（针对未刷新页面的情况）
                 firstPlay = false;
                 isInitPlayHelper = true;
                 mPosition = musicService.getPosition();
+            } else if (msg.what == HANDLER_MESSAGE_AFTER_DELETE_POSITION) {
+                //service发送的信息，用于删除歌曲后自动播放下一曲的mPosition
+                int newPosition = msg.getData().getInt("newPosition");
+                DebugLog.debug("after delete new position " + newPosition);
+                favoriteListAdapter.setSelectPosition(newPosition);
+                favoriteListAdapter.notifyDataSetChanged();
             }
         }
     };

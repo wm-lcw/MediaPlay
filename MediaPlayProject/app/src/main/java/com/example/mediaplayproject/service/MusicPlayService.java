@@ -175,7 +175,7 @@ public class MusicPlayService extends Service {
     public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
         if (!TextUtils.isEmpty(mediaFileBean.getData())) {
             this.mPosition = mPosition;
-            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
+//            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
             //记录当前的播放状态,用于给Activity发送Message
             boolean isPlayingStatus = false;
             // 当前若是播放，则进行暂停
@@ -533,7 +533,40 @@ public class MusicPlayService extends Service {
     }
 
     private void disposeDeleteMusic(int deletePosition) {
-        DebugLog.debug("" + deletePosition);
+//        DebugLog.debug("delete " + deletePosition);
+//        DebugLog.debug("favoriteList Size : " + musicInfo.size());
+//        DebugLog.debug("current " + mPosition);
+
+        //这里拿到的musicListSize是删除后的值，mPosition是删除的位置
+        if (musicInfo.size() <= 0) {
+            //如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
+            toStop();
+        } else{
+            if (deletePosition == mPosition){
+                mPosition--;
+                playNext();
+
+                //发送Message给MusicPlayActivity，更新删除后的新position
+                Message msg = new Message();
+                msg.what = MusicPlayActivity.HANDLER_MESSAGE_AFTER_DELETE_POSITION;
+                Bundle bundle = new Bundle();
+                bundle.putInt("newPosition", mPosition);
+                msg.setData(bundle);
+                mHandler.sendMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * @param
+     * @return
+     * @version V1.0
+     * @Title toStop
+     * @author wm
+     * @createTime 2023/2/12 22:08
+     * @description 若当前播放的是收藏列表且删除了所有歌曲，则停止播放
+     */
+    private void toStop() {
     }
 
     /**

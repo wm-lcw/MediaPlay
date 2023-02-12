@@ -104,7 +104,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (mOnCompletionListener != null) {
-            DebugLog.debug("onCompletion");
             mOnCompletionListener.onCompletion(mp);
         }
     }
@@ -121,7 +120,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      */
     @Override
     public void onPrepared(MediaPlayer mp) {
-        DebugLog.debug("onPrepared");
         mp.start();
     }
 
@@ -136,7 +134,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      */
     public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull Boolean isRestPlayer) {
         this.mediaFileBean = mediaFileBean;
-        DebugLog.debug("mediaFile " + mediaFileBean.getData());
+//        DebugLog.debug("mediaFile " + mediaFileBean.getData());
         if (isRestPlayer) {
             //重置多媒体
             player.reset();
