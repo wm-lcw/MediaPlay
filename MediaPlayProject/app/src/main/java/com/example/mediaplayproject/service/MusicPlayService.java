@@ -511,9 +511,13 @@ public class MusicPlayService extends Service {
                     break;
                 case PREV:
                     playPre();
+                    //播放列表显示的时候，下拉通知栏播放上下曲之后，需要刷新播放列表
+                    sendMessageRefreshPosition();
                     break;
                 case NEXT:
                     playNext();
+                    //播放列表显示的时候，下拉通知栏播放上下曲之后，需要刷新播放列表
+                    sendMessageRefreshPosition();
                     break;
                 case CLOSE:
                     closeApp();
@@ -545,16 +549,20 @@ public class MusicPlayService extends Service {
             if (deletePosition == mPosition){
                 mPosition--;
                 playNext();
+                sendMessageRefreshPosition();
 
-                //发送Message给MusicPlayActivity，更新删除后的新position
-                Message msg = new Message();
-                msg.what = MusicPlayActivity.HANDLER_MESSAGE_AFTER_DELETE_POSITION;
-                Bundle bundle = new Bundle();
-                bundle.putInt("newPosition", mPosition);
-                msg.setData(bundle);
-                mHandler.sendMessage(msg);
             }
         }
+    }
+
+    private void sendMessageRefreshPosition(){
+        //发送Message给MusicPlayActivity，更新删除后的新position
+        Message msg = new Message();
+        msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_POSITION;
+        Bundle bundle = new Bundle();
+        bundle.putInt("newPosition", mPosition);
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
     }
 
     /**

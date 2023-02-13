@@ -83,7 +83,7 @@ public class MusicPlayActivity extends BasicActivity {
     private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
-    public static final int HANDLER_MESSAGE_AFTER_DELETE_POSITION = 2;
+    public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
     private int mPosition = 0;
     private MusicPlayService musicService;
     /**
@@ -700,12 +700,18 @@ public class MusicPlayActivity extends BasicActivity {
                 firstPlay = false;
                 isInitPlayHelper = true;
                 mPosition = musicService.getPosition();
-            } else if (msg.what == HANDLER_MESSAGE_AFTER_DELETE_POSITION) {
-                //service发送的信息，用于删除歌曲后自动播放下一曲的mPosition
+            } else if (msg.what == HANDLER_MESSAGE_REFRESH_POSITION) {
+                //service发送的信息，用于删除歌曲后自动播放下一曲或者在通知栏切歌后的mPosition
                 int newPosition = msg.getData().getInt("newPosition");
                 DebugLog.debug("after delete new position " + newPosition);
-                favoriteListAdapter.setSelectPosition(newPosition);
-                favoriteListAdapter.notifyDataSetChanged();
+                if (musicListMode == 0){
+                    musicAdapter.setSelectPosition(newPosition);
+                    musicAdapter.notifyDataSetChanged();
+                } else if (musicListMode == 1){
+                    favoriteListAdapter.setSelectPosition(newPosition);
+                    favoriteListAdapter.notifyDataSetChanged();
+                }
+
             }
         }
     };
