@@ -291,7 +291,7 @@ public class MusicPlayService extends Service {
     private int getRandomPosition() {
         Random random = new Random();
         int randomNum = Math.abs(random.nextInt() % musicInfo.size());
-        DebugLog.debug(""+randomNum);
+        DebugLog.debug("" + randomNum);
         return randomNum;
     }
 
@@ -411,7 +411,7 @@ public class MusicPlayService extends Service {
         //创建通知栏信息
         notification = new NotificationCompat.Builder(this, "9527")
                 //设置图标
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_notify_icon)
                 .setWhen(System.currentTimeMillis())
                 //标题
                 //.setContentTitle("微信")
@@ -523,6 +523,7 @@ public class MusicPlayService extends Service {
                     closeApp();
                     break;
                 case DELETE_MUSIC_ACTION:
+                    //删除歌曲的广播
                     int deletePosition = intent.getExtras().getInt("musicPosition");
                     disposeDeleteMusic(deletePosition);
                     break;
@@ -532,30 +533,50 @@ public class MusicPlayService extends Service {
         }
     }
 
+    /**
+     * @version V1.0
+     * @Title closeApp
+     * @author wm
+     * @createTime 2023/2/13 15:07
+     * @description 点击通知栏按钮关闭整个应用
+     */
     private void closeApp() {
         BasicApplication.getActivityManager().finishAll();
     }
 
+    /**
+     * @version V1.0
+     * @Title disposeDeleteMusic
+     * @author wm
+     * @createTime 2023/2/13 15:08
+     * @description 删除音乐的判断和处理
+     */
     private void disposeDeleteMusic(int deletePosition) {
-//        DebugLog.debug("delete " + deletePosition);
-//        DebugLog.debug("favoriteList Size : " + musicInfo.size());
-//        DebugLog.debug("current " + mPosition);
-
         //这里拿到的musicListSize是删除后的值，mPosition是删除的位置
         if (musicInfo.size() <= 0) {
             //如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
             toStop();
-        } else{
-            if (deletePosition == mPosition){
+        } else {
+            //若删除的是其他位置的歌曲，不影响当前播放，只需要在Activity上改UI，再更新list和position即可
+            if (deletePosition == mPosition) {
+                //若列表不为空，且删除的是当前播放歌曲，才需要做播放逻辑上的处理
+                //删除歌曲后，列表整体上移，position指向的是下首歌了，所以需要减一再播放下一曲（直接播放可能会出现越界问题）
                 mPosition--;
                 playNext();
+                //发送信息给Activity更新position
                 sendMessageRefreshPosition();
-
             }
         }
     }
 
-    private void sendMessageRefreshPosition(){
+    /**
+     * @version V1.0
+     * @Title sendMessageRefreshPosition
+     * @author wm
+     * @createTime 2023/2/13 15:16
+     * @description 发送信息给Activity更新position
+     */
+    private void sendMessageRefreshPosition() {
         //发送Message给MusicPlayActivity，更新删除后的新position
         Message msg = new Message();
         msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_POSITION;
@@ -566,8 +587,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param
-     * @return
      * @version V1.0
      * @Title toStop
      * @author wm
@@ -575,6 +594,15 @@ public class MusicPlayService extends Service {
      * @description 若当前播放的是收藏列表且删除了所有歌曲，则停止播放
      */
     private void toStop() {
+        helper.stop();
+        //若收藏列表为空之后，播放的列表转为默认列表；需要刷新Activity和通知栏的内容
+        //先通知Activity修改播放列表及mPosition，再调用Service中的initPlayHelper来重新显示通知栏
+        firstPlay = true;
+
+        //发送Message给MusicPlayActivity，删除收藏列表之后自动切换至默认列表
+        Message msg = new Message();
+        msg.what = MusicPlayActivity.HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST;
+        mHandler.sendMessage(msg);
     }
 
     /**

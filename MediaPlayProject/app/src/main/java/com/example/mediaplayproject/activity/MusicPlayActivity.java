@@ -53,6 +53,7 @@ import java.util.List;
  * @Version: 1.0
  */
 public class MusicPlayActivity extends BasicActivity {
+
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivCloseListView, ivLocalList;
     private SeekBar sbVolume, sbProgress;
     private ListView mMusicListView, mFavoriteListView;
@@ -84,6 +85,7 @@ public class MusicPlayActivity extends BasicActivity {
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
     public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
+    public static final int HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST = 3;
     private int mPosition = 0;
     private MusicPlayService musicService;
     /**
@@ -249,6 +251,18 @@ public class MusicPlayActivity extends BasicActivity {
         //首次进入app时先获取一次音乐列表信息的来源
         switchMusicList();
 
+        //初始化播放主页的状态
+        initPlayStateAndInfo();
+    }
+
+    /**
+     * @version V1.0
+     * @Title initPlayStateAndInfo
+     * @author wm
+     * @createTime 2023/2/13 14:56
+     * @description 初始化播放主页各按钮的状态
+     */
+    private void initPlayStateAndInfo() {
         //获取音乐列表之后，若是列表为不空，则将当前下标的歌曲信息显示出来
         if (musicInfo.size() > 0) {
             tvCurrentMusicInfo.setText(musicInfo.get(mPosition).getTitle());
@@ -315,24 +329,46 @@ public class MusicPlayActivity extends BasicActivity {
             } else if (view == ivLocalList) {
                 initListHighLight();
             } else if (view == tvDefaultList) {
-                initListHighLight();
-                //这里的两个列表都是从BaseApplication中拿到，是同一对象，不需要再重复赋值
-                musicAdapter.notifyDataSetChanged();
-                mMusicListView.setVisibility(View.VISIBLE);
-                mFavoriteListView.setVisibility(View.GONE);
-                //这里直接使用setTextColor(R.color.white)是不会起作用的
-                tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
-                tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+                clickTvDefaultList();
             } else if (view == tvFavoriteList) {
-                initListHighLight();
-                favoriteListAdapter.notifyDataSetChanged();
-                mMusicListView.setVisibility(View.GONE);
-                mFavoriteListView.setVisibility(View.VISIBLE);
-                tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
-                tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+                clickFavoriteList();
             }
         }
     };
+
+    /**
+     * @version V1.0
+     * @Title clickTvDefaultList
+     * @author wm
+     * @createTime 2023/2/13 15:01
+     * @description 点击默认列表的操作
+     */
+    private void clickTvDefaultList() {
+        initListHighLight();
+        //这里的两个列表都是从BaseApplication中拿到，是同一对象，不需要再重复赋值
+        musicAdapter.notifyDataSetChanged();
+        mMusicListView.setVisibility(View.VISIBLE);
+        mFavoriteListView.setVisibility(View.GONE);
+        //这里直接使用setTextColor(R.color.white)是不会起作用的
+        tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
+        tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+    }
+
+    /**
+     * @version V1.0
+     * @Title clickFavoriteList
+     * @author wm
+     * @createTime 2023/2/13 15:01
+     * @description 点击收藏列表的操作
+     */
+    private void clickFavoriteList() {
+        initListHighLight();
+        favoriteListAdapter.notifyDataSetChanged();
+        mMusicListView.setVisibility(View.GONE);
+        mFavoriteListView.setVisibility(View.VISIBLE);
+        tvFavoriteList.setTextColor(mContext.getResources().getColorStateList(R.color.text_pressed));
+        tvDefaultList.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+    }
 
     /**
      * @version V1.0
@@ -398,7 +434,7 @@ public class MusicPlayActivity extends BasicActivity {
 
     }
 
-    private void showFloatView(){
+    private void showFloatView() {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_music_lit, null);
@@ -628,11 +664,12 @@ public class MusicPlayActivity extends BasicActivity {
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 if (musicListMode == 1) {
                     int isRefreshResult = favoriteListAdapter.checkRefreshPosition(deletePosition);
+                    DebugLog.debug("isRefreshResult " + isRefreshResult);
                     if (isRefreshResult == 1) {
                         //删除的是小于当前播放下标的歌曲
                         favoriteListAdapter.refreshSelectionPosition();
                         mPosition--;
-                    } else if (isRefreshResult == 0){
+                    } else if (isRefreshResult == 0) {
                         //删除的是当前的歌曲，需要先隐藏高亮坐标,等收到service的消息后再打开
                         favoriteListAdapter.setSelectPosition(-1);
                         favoriteListAdapter.notifyDataSetChanged();
@@ -704,14 +741,29 @@ public class MusicPlayActivity extends BasicActivity {
                 //service发送的信息，用于删除歌曲后自动播放下一曲或者在通知栏切歌后的mPosition
                 int newPosition = msg.getData().getInt("newPosition");
                 DebugLog.debug("after delete new position " + newPosition);
-                if (musicListMode == 0){
+                if (musicListMode == 0) {
                     musicAdapter.setSelectPosition(newPosition);
                     musicAdapter.notifyDataSetChanged();
-                } else if (musicListMode == 1){
+                } else if (musicListMode == 1) {
                     favoriteListAdapter.setSelectPosition(newPosition);
                     favoriteListAdapter.notifyDataSetChanged();
                 }
-
+            } else if (msg.what == HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST) {
+                DebugLog.debug("HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST");
+                //service发送的信息，收藏列表清空之后，直接切换为默认列表
+                musicListMode = 0;
+                mPosition = 0;
+                firstPlay = true;
+                isInitPlayHelper = false;
+                switchMusicList();
+                //UI上跳转到默认列表，直接调用点击事件的处理逻辑
+                clickTvDefaultList();
+                //UI上刷新播放信息和播放状态
+                initPlayStateAndInfo();
+                //刷新播放按钮
+                ivMediaPlay.setImageResource(R.mipmap.media_play);
+                //刷新通知栏的播放按钮状态
+                musicService.updateNotificationShow(0, false);
             }
         }
     };

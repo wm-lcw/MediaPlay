@@ -156,7 +156,7 @@ public class FavoriteMusicAdapter extends BaseAdapter {
      * @description 检查要删除的歌曲下标与当前播放歌曲下标的比较情况
      */
     public int checkRefreshPosition(int deletePosition) {
-        if (deletePosition == deletePosition){
+        if (deletePosition == defaultSelection){
             //删除的是当前播放的歌曲，先隐藏下标，等下一曲播放了再开启高亮下标
             return 0;
         } else if (deletePosition < defaultSelection){
