@@ -627,15 +627,16 @@ public class MusicPlayActivity extends BasicActivity {
                 //在默认界面切换过去的时候，会重新设定高亮的位置为position，所以需要拿到收藏列表里最新的position
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 if (musicListMode == 1) {
-                    boolean isRefresh = favoriteListAdapter.checkRefreshPosition(deletePosition);
-                    if (isRefresh) {
-                        DebugLog.debug("refreshSelectionPosition");
+                    int isRefreshResult = favoriteListAdapter.checkRefreshPosition(deletePosition);
+                    if (isRefreshResult == 1) {
+                        //删除的是小于当前播放下标的歌曲
                         favoriteListAdapter.refreshSelectionPosition();
                         mPosition--;
+                    } else if (isRefreshResult == 0){
+                        //删除的是当前的歌曲，需要先隐藏高亮坐标,等收到service的消息后再打开
+                        favoriteListAdapter.setSelectPosition(-1);
+                        favoriteListAdapter.notifyDataSetChanged();
                     }
-
-                    //这里需要判断删除的是当前歌曲的情况--若自动播放下一曲时高亮的位置需要根据最新播放的mPosition来确定
-                    //可以由Service播放下一曲之后回传mPosition的值
 
                     //同步更新Service中的mPosition值
                     musicService.setPosition(mPosition);

@@ -153,9 +153,18 @@ public class FavoriteMusicAdapter extends BaseAdapter {
      * @Title checkRefreshPosition
      * @author wm
      * @createTime 2023/2/11 15:35
-     * @description 检查要删除的歌曲下标是否小于当前播放歌曲的下标
+     * @description 检查要删除的歌曲下标与当前播放歌曲下标的比较情况
      */
-    public boolean checkRefreshPosition(int deletePosition) {
-        return deletePosition < defaultSelection;
+    public int checkRefreshPosition(int deletePosition) {
+        if (deletePosition == deletePosition){
+            //删除的是当前播放的歌曲，先隐藏下标，等下一曲播放了再开启高亮下标
+            return 0;
+        } else if (deletePosition < defaultSelection){
+            //删除的是下标小于当前的歌曲，需要刷新下标
+            return 1;
+        } else{
+            return 2;
+        }
+
     }
 }
