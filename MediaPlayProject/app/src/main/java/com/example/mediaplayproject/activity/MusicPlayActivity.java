@@ -285,6 +285,15 @@ public class MusicPlayActivity extends BasicActivity {
             ivMediaPlay.setEnabled(false);
             ivMediaNext.setEnabled(false);
         }
+
+        //初始化播放模式的图标
+        if (playMode == 0){
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+        } else if (playMode == 1){
+            ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
+        } else if (playMode == 2){
+            ivMediaLoop.setImageResource(R.mipmap.media_single);
+        }
     }
 
     /**
