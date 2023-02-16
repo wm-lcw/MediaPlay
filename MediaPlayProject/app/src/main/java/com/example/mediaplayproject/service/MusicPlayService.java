@@ -185,6 +185,8 @@ public class MusicPlayService extends Service {
                 //首次播放歌曲、切换歌曲播放、继续播放
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
+                //播放的时候保存播放的歌曲Id
+                BasicApplication.getApplication().setLastMusicId(mediaFileBean.getId());
             }
             //发送Meeage给MusicPlayActivity，用于更新播放图标
             Message msg = new Message();
@@ -552,6 +554,7 @@ public class MusicPlayService extends Service {
      * @description 删除音乐的判断和处理
      */
     private void disposeDeleteMusic(int deletePosition) {
+        DebugLog.debug("" + deletePosition);
         //这里拿到的musicListSize是删除后的值，mPosition是删除的位置
         if (musicInfo.size() <= 0) {
             //如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放

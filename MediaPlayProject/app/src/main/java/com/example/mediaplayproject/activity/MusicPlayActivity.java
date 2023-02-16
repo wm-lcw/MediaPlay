@@ -179,11 +179,14 @@ public class MusicPlayActivity extends BasicActivity {
      * @Title updateMusicList
      * @author wm
      * @createTime 2023/2/2 10:54
-     * @description 获取音频文件
+     * @description 从BasicApplication中获取音乐列表，上次播放的信息等
      */
     private void updateMusicList() {
         defaultList = BasicApplication.getApplication().getDefaultList();
         favoriteList = BasicApplication.getApplication().getFavoriteList();
+        playMode = BasicApplication.getApplication().getLastPlayMode();
+        musicListMode = BasicApplication.getApplication().getLastPlayListMode();
+        mPosition = BasicApplication.getApplication().getLastPosition();
     }
 
     /**
@@ -199,6 +202,8 @@ public class MusicPlayActivity extends BasicActivity {
         } else if (musicListMode == 1) {
             musicInfo = favoriteList;
         }
+        //保存上次播放的列表来源
+        BasicApplication.getApplication().setLastPlayListMode(musicListMode);
         //改变播放列表的时候，刷新播放器中的音乐列表来源
         initServicePlayHelper();
     }
@@ -606,6 +611,8 @@ public class MusicPlayActivity extends BasicActivity {
             ivMediaLoop.setImageResource(R.mipmap.media_loop);
             playMode = 0;
         }
+        //保存上次播放的播放模式
+        BasicApplication.getApplication().setLastPlayMode(playMode);
         if (musicService != null) {
             musicService.setPlayMode(playMode);
         }
@@ -764,6 +771,8 @@ public class MusicPlayActivity extends BasicActivity {
                 ivMediaPlay.setImageResource(R.mipmap.media_play);
                 //刷新通知栏的播放按钮状态
                 musicService.updateNotificationShow(0, false);
+                //保存最后播放歌曲的id--直接保存
+                BasicApplication.getApplication().setLastMusicId(defaultList.get(mPosition).getId());
             }
         }
     };
