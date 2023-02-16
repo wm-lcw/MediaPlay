@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference;
  */
 public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
-        SeekBar.OnSeekBarChangeListener {
+        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener {
     private static int MSG_CODE = 0x01;
     private static long MSG_TIME = 1_000L;
 
@@ -188,7 +188,11 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      *  @return
      */
     public void stop() {
-        player.stop();
+        //音乐正在播放时才调用stop，未初始化的状态调用stop会报-38的错误；
+        if (player != null && player.isPlaying()) {
+            player.stop();
+            player.reset();
+        }
         seekBar.setProgress(0);
         text.setText("");
         //移除更新命令
@@ -287,6 +291,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      */
     public void setOnCompletionListener(@NonNull OnCompletionListener listener) {
         this.mOnCompletionListener = listener;
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        DebugLog.debug("");
+        return true;
     }
 
     /**
