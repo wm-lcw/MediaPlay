@@ -126,10 +126,11 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/11 15:44
      * @description 将Activity中的一些属性和状态同步到Service中
      */
-    public void initPlayData(List<MediaFileBean> musicInfo, int position, int musicListMode) {
+    public void initPlayData(List<MediaFileBean> musicInfo, int position, int musicListMode, int playMode) {
         this.musicInfo = musicInfo;
         this.mPosition = position;
         this.musicListMode = musicListMode;
+        this.playMode = playMode;
     }
 
     /**

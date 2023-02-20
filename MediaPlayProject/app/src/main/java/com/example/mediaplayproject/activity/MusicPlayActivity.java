@@ -309,7 +309,7 @@ public class MusicPlayActivity extends BasicActivity {
         if (musicService != null) {
             //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
             //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
-            musicService.initPlayData(musicInfo, mPosition, musicListMode);
+            musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
             if (!isInitPlayHelper) {
                 isInitPlayHelper = true;
                 musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, handler);
