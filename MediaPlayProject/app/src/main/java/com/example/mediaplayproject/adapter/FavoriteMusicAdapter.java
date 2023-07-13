@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
@@ -94,7 +94,7 @@ public class FavoriteMusicAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 //取消收藏，这里调用deleteMusicFromFavoriteList删除收藏歌曲后，当前的收藏列表无需再删除，因为是同一对象
-                BasicApplication.getApplication().deleteMusicFromFavoriteList(musicInfoList.get(position));
+                DataRefreshService.deleteMusicFromFavoriteList(musicInfoList.get(position));
                 DebugLog.debug("delete position " + position);
                 notifyDataSetChanged();
             }

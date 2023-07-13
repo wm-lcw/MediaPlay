@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
@@ -100,10 +100,10 @@ public class MusicAdapter extends BaseAdapter {
                 DebugLog.debug("position " + position + "isLike " + isLike);
                 if (!isLike){
                     //加入收藏
-                    BasicApplication.getApplication().addMusicToFavoriteList(musicInfoList.get(position));
+                    DataRefreshService.addMusicToFavoriteList(musicInfoList.get(position));
                 } else {
                     //取消收藏
-                    BasicApplication.getApplication().deleteMusicFromFavoriteList(musicInfoList.get(position));
+                    DataRefreshService.deleteMusicFromFavoriteList(musicInfoList.get(position));
                 }
                 notifyItemChanged(position);
             }

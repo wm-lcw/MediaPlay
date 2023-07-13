@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.base.BasicActivity;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
 
 
@@ -184,7 +185,8 @@ public class MainActivity extends BasicActivity {
         Toast.makeText(mContext, "已获取存储权限", Toast.LENGTH_SHORT).show();
         findViewById(R.id.bt_music).setOnClickListener(mListener);
         findViewById(R.id.bt_video).setOnClickListener(mListener);
-
+        //再次初始化列表
+        DataRefreshService.initResource();
     }
 
     @Override

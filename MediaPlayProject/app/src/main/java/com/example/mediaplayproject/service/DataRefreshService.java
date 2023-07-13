@@ -64,9 +64,7 @@ public class DataRefreshService extends Service {
         MusicDataBaseHelper musicDataBaseHelper = new MusicDataBaseHelper(context, "musicplay.db", null, 1);
         db = musicDataBaseHelper.getReadableDatabase();
         DebugLog.debug("db : " + db);
-        searchMusic();
-        //初始化上次播放的相关信息
-        initLastPlayInfo();
+//        initResource();
     }
 
     @Override
@@ -84,6 +82,25 @@ public class DataRefreshService extends Service {
     public void onDestroy() {
         super.onDestroy();
         DebugLog.debug("---");
+    }
+
+    /**
+     *  @author wm
+     *  @createTime 2023/7/13 14:46
+     *  @description 初始化音乐资源
+     */
+    public static void initResource(){
+        clearResource();
+        searchMusic();
+        //初始化上次播放的相关信息
+        initLastPlayInfo();
+    }
+
+    public static void clearResource(){
+        musicListFromData.clear();
+        defaultList.clear();
+        favoriteList.clear();
+        musicListUtils.clear();
     }
 
     /**
@@ -118,7 +135,6 @@ public class DataRefreshService extends Service {
         cursor.close();
 
         //获取的列表与数据库中的数据对比，找出存在且收藏的歌，将其添加到收藏列表中
-        favoriteList.clear();
         long id = 0;
         for (int i = 0; i < defaultList.size(); i++) {
             id = defaultList.get(i).getId();
