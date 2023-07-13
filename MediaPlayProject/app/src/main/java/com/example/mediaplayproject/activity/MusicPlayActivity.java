@@ -33,7 +33,6 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.FavoriteMusicAdapter;
 import com.example.mediaplayproject.adapter.MusicAdapter;
 import com.example.mediaplayproject.base.BasicActivity;
-import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
@@ -47,9 +46,6 @@ import java.util.List;
  * @ClassName: MusicPlayActivity
  * @Description: 音乐播放主界面
  * @Author: wm
- * @CreateDate: 2023/2/2
- * @UpdateUser: updater
- * @UpdateDate: 2023/2/2
  * @UpdateRemark: 更新内容
  * @Version: 1.0
  */
@@ -148,8 +144,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title
      * @author wm
      * @createTime 2023/2/4 15:02
      * @description 创建ServiceConnection
@@ -176,8 +170,6 @@ public class MusicPlayActivity extends BasicActivity {
     };
 
     /**
-     * @version V1.0
-     * @Title updateMusicList
      * @author wm
      * @createTime 2023/2/2 10:54
      * @description 从BasicApplication中获取音乐列表，上次播放的信息等
@@ -191,8 +183,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title switchMusicList
      * @author wm
      * @createTime 2023/2/9 17:59
      * @description 改变当前的列表
@@ -210,8 +200,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title initVolume
      * @author wm
      * @createTime 2023/2/2 10:59
      * @description 初始化音量
@@ -226,10 +214,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title initData
      * @author wm
      * @createTime 2023/2/3 17:58
      * @description 获取组件、初始化数据
@@ -262,8 +246,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title initPlayStateAndInfo
      * @author wm
      * @createTime 2023/2/13 14:56
      * @description 初始化播放主页各按钮的状态
@@ -288,20 +270,16 @@ public class MusicPlayActivity extends BasicActivity {
         }
 
         //初始化播放模式的图标
-        if (playMode == 0){
+        if (playMode == 0) {
             ivMediaLoop.setImageResource(R.mipmap.media_loop);
-        } else if (playMode == 1){
+        } else if (playMode == 1) {
             ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
-        } else if (playMode == 2){
+        } else if (playMode == 2) {
             ivMediaLoop.setImageResource(R.mipmap.media_single);
         }
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title initServicePlayHelper
      * @author wm
      * @createTime 2023/2/8 16:48
      * @description 初始化PlayHelper
@@ -352,8 +330,6 @@ public class MusicPlayActivity extends BasicActivity {
     };
 
     /**
-     * @version V1.0
-     * @Title clickTvDefaultList
      * @author wm
      * @createTime 2023/2/13 15:01
      * @description 点击默认列表的操作
@@ -370,8 +346,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title clickFavoriteList
      * @author wm
      * @createTime 2023/2/13 15:01
      * @description 点击收藏列表的操作
@@ -386,13 +360,9 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title
      * @author wm
      * @createTime 2023/2/4 15:09
      * @description 音量拖动条的监听处理
-     * @param
-     * @return
      */
     private SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -418,10 +388,6 @@ public class MusicPlayActivity extends BasicActivity {
     };
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title createFloatView
      * @author wm
      * @createTime 2023/2/3 18:19
      * @description 创建悬浮窗
@@ -460,8 +426,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title initFloatView
      * @author wm
      * @createTime 2023/2/9 23:27
      * @description 初始化视窗、对视窗中的控件进行监听
@@ -557,10 +521,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title initListHighLight
      * @author wm
      * @createTime 2023/2/11 11:03
      * @description 刷新ListView的当前高亮效果
@@ -586,10 +546,6 @@ public class MusicPlayActivity extends BasicActivity {
 
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title toPlayMusic
      * @author wm
      * @createTime 2023/2/8 16:55
      * @description 处理音乐的播放和暂停等
@@ -600,8 +556,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @version V1.0
-     * @Title changePlayMode
      * @author wm
      * @createTime 2023/2/8 18:12
      * @description 更改播放模式；0->循环播放; 1->随机播放; 2->单曲播放;
@@ -630,9 +584,6 @@ public class MusicPlayActivity extends BasicActivity {
 
     /**
      * @param
-     * @return
-     * @version V1.0
-     * @Title registerReceiver
      * @author wm
      * @createTime 2023/2/8 16:55
      * @description 注册音量广播接收器
@@ -653,13 +604,9 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     * @param
      * @author wm
-     * @version V1.0
-     * @Title
      * @createTime 2023/2/3 18:21
      * @description 创建广播接收器，接收音量(媒体音量)改变的广播
-     * @return
      */
     private class MusicBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -700,13 +647,6 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     *
-     */
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title unregisterReceiver
      * @author wm
      * @createTime 2023/2/8 16:55
      * @description 注销音量广播监听器，需要与 registerReceiver 成对使用
