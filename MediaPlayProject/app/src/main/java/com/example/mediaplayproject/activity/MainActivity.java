@@ -158,13 +158,15 @@ public class MainActivity extends BasicActivity {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 startActivityForResult(intent, REQUEST_ALERT_CODE);
             } else {
-                Toast.makeText(mContext, "store权限获取失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "store权限获取失败,程序即将退出", Toast.LENGTH_SHORT).show();
+                finish();
             }
         } else if (requestCode == REQUEST_ALERT_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (hasAlertPermission()) {
                 initData();
             } else {
-                Toast.makeText(mContext, "alert权限获取失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "alert权限获取失败,程序即将退出", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }

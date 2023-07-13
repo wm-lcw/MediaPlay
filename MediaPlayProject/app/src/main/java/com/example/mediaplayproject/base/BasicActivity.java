@@ -1,6 +1,7 @@
 package com.example.mediaplayproject.base;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -8,6 +9,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.DebugLog;
 
 /**
  * @author wm
@@ -37,7 +41,8 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
         //Activity布局加载前的处理
         initBeforeView(savedInstanceState);
         this.context = this;
-
+        Intent dataRefreshService = new Intent(context, DataRefreshService.class);
+        startService(dataRefreshService);
         //添加继承这个BaseActivity的Activity
         BasicApplication.getActivityManager().addActivity(this);
         //绑定布局id
@@ -92,6 +97,13 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
      */
     protected void show(CharSequence charSequence) {
         Toast.makeText(context, charSequence, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        DebugLog.debug("---");
+        stopService(new Intent(context, DataRefreshService.class));
     }
 }
 

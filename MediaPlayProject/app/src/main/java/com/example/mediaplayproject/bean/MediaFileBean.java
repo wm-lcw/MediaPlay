@@ -1,5 +1,7 @@
 package com.example.mediaplayproject.bean;
 
+import java.util.Objects;
+
 /**
  * @author wm
  */
@@ -14,6 +16,23 @@ public class MediaFileBean {
     private long size;//音乐文件大小
     private boolean isPlaying;
     private boolean isLike;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
+        MediaFileBean that = (MediaFileBean) o;
+        return id == that.id && duration == that.duration && size == that.size && isPlaying == that.isPlaying && isLike == that.isLike && Objects.equals(title, that.title) && Objects.equals(data, that.data) && Objects.equals(album, that.album) && Objects.equals(artist, that.artist);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, data, album, artist, duration, size, isPlaying, isLike);
+    }
 
     public boolean isLike() {
         return isLike;

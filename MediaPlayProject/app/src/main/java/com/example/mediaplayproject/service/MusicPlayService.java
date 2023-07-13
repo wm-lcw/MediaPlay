@@ -187,7 +187,7 @@ public class MusicPlayService extends Service {
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
                 //播放的时候保存播放的歌曲Id
-                BasicApplication.getApplication().setLastMusicId(mediaFileBean.getId());
+                DataRefreshService.setLastMusicId(mediaFileBean.getId());
             }
             //发送Meeage给MusicPlayActivity，用于更新播放图标
             Message msg = new Message();

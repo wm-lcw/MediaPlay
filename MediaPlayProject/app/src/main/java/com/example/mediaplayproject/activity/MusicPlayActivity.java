@@ -35,6 +35,7 @@ import com.example.mediaplayproject.adapter.MusicAdapter;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
@@ -182,11 +183,11 @@ public class MusicPlayActivity extends BasicActivity {
      * @description 从BasicApplication中获取音乐列表，上次播放的信息等
      */
     private void updateMusicList() {
-        defaultList = BasicApplication.getApplication().getDefaultList();
-        favoriteList = BasicApplication.getApplication().getFavoriteList();
-        playMode = BasicApplication.getApplication().getLastPlayMode();
-        musicListMode = BasicApplication.getApplication().getLastPlayListMode();
-        mPosition = BasicApplication.getApplication().getLastPosition();
+        defaultList = DataRefreshService.getDefaultList();
+        favoriteList = DataRefreshService.getFavoriteList();
+        playMode = DataRefreshService.getLastPlayMode();
+        musicListMode = DataRefreshService.getLastPlayListMode();
+        mPosition = DataRefreshService.getLastPosition();
     }
 
     /**
@@ -203,7 +204,7 @@ public class MusicPlayActivity extends BasicActivity {
             musicInfo = favoriteList;
         }
         //保存上次播放的列表来源
-        BasicApplication.getApplication().setLastPlayListMode(musicListMode);
+        DataRefreshService.setLastPlayListMode(musicListMode);
         //改变播放列表的时候，刷新播放器中的音乐列表来源
         initServicePlayHelper();
     }
@@ -621,7 +622,7 @@ public class MusicPlayActivity extends BasicActivity {
             playMode = 0;
         }
         //保存上次播放的播放模式
-        BasicApplication.getApplication().setLastPlayMode(playMode);
+        DataRefreshService.setLastPlayMode(playMode);
         if (musicService != null) {
             musicService.setPlayMode(playMode);
         }
@@ -724,13 +725,9 @@ public class MusicPlayActivity extends BasicActivity {
 
 
     /**
-     * @version V1.0
-     * @Title
      * @author wm
      * @createTime 2023/2/3 18:22
      * @description 创建handler，用于更新UI
-     * @param
-     * @return
      */
     final Handler handler = new Handler(Looper.myLooper()) {
         @SuppressLint("ResourceAsColor")
@@ -781,7 +778,7 @@ public class MusicPlayActivity extends BasicActivity {
                 //刷新通知栏的播放按钮状态
                 musicService.updateNotificationShow(0, false);
                 //保存最后播放歌曲的id--直接保存
-                BasicApplication.getApplication().setLastMusicId(defaultList.get(mPosition).getId());
+                DataRefreshService.setLastMusicId(defaultList.get(mPosition).getId());
             }
         }
     };
