@@ -36,12 +36,12 @@ import java.util.Random;
 
 /**
  * @ClassName: MusicPlayService
- * @Description: ÒôÀÖ²¥·ÅÆ÷service£¬ÓÃÓÚÖ§³ÖºóÌ¨²¥·Å
+ * @Description: éŸ³ä¹æ’­æ”¾å™¨serviceï¼Œç”¨äºæ”¯æŒåå°æ’­æ”¾
  * @Author: wm
  * @CreateDate: 2023/2/4
  * @UpdateUser: updater
  * @UpdateDate: 2023/2/4
- * @UpdateRemark: ¸üĞÂÄÚÈİ
+ * @UpdateRemark: æ›´æ–°å†…å®¹
  * @Version: 1.0
  */
 public class MusicPlayService extends Service {
@@ -65,22 +65,22 @@ public class MusicPlayService extends Service {
     public static final String CLOSE = "close";
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     /**
-     * playMode:²¥·ÅÄ£Ê½ 0->Ñ­»·²¥·Å; 1->Ëæ»ú²¥·Å; 2->µ¥Çú²¥·Å;
-     * Ö÷ÒªÊÇ¿ØÖÆ²¥·ÅÉÏÏÂÇúµÄposition
+     * playMode:æ’­æ”¾æ¨¡å¼ 0->å¾ªç¯æ’­æ”¾; 1->éšæœºæ’­æ”¾; 2->å•æ›²æ’­æ”¾;
+     * ä¸»è¦æ˜¯æ§åˆ¶æ’­æ”¾ä¸Šä¸‹æ›²çš„position
      */
     private int playMode = 0;
 
     /**
-     * musicListMode:²¥·ÅµÄÀ´Ô´ 0->Ä¬ÈÏÁĞ±í; 1->ÊÕ²ØÁĞ±í; ºóÃæ¿ÉÒÔÀ©Õ¹ÆäËûµÄÁĞ±í
+     * musicListMode:æ’­æ”¾çš„æ¥æº 0->é»˜è®¤åˆ—è¡¨; 1->æ”¶è—åˆ—è¡¨; åé¢å¯ä»¥æ‰©å±•å…¶ä»–çš„åˆ—è¡¨
      */
     private int musicListMode = 0;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        //´´½¨Í¨ÖªÀ¸Í¨µÀ
+        //åˆ›å»ºé€šçŸ¥æ é€šé“
         createNotificationChannel();
-        //×¢²á¹ã²¥½ÓÊÕÆ÷
+        //æ³¨å†Œå¹¿æ’­æ¥æ”¶å™¨
         registerMusicReceiver();
     }
 
@@ -106,7 +106,7 @@ public class MusicPlayService extends Service {
         super.onDestroy();
         helper.destroy();
         if (musicReceiver != null) {
-            //½â³ı¶¯Ì¬×¢²áµÄ¹ã²¥
+            //è§£é™¤åŠ¨æ€æ³¨å†Œçš„å¹¿æ’­
             unregisterReceiver(musicReceiver);
         }
         notificationManager.cancel(NOTIFICATION_ID);
@@ -124,7 +124,7 @@ public class MusicPlayService extends Service {
      * @Title initPlayData
      * @author wm
      * @createTime 2023/2/11 15:44
-     * @description ½«ActivityÖĞµÄÒ»Ğ©ÊôĞÔºÍ×´Ì¬Í¬²½µ½ServiceÖĞ
+     * @description å°†Activityä¸­çš„ä¸€äº›å±æ€§å’ŒçŠ¶æ€åŒæ­¥åˆ°Serviceä¸­
      */
     public void initPlayData(List<MediaFileBean> musicInfo, int position, int musicListMode, int playMode) {
         this.musicInfo = musicInfo;
@@ -134,62 +134,62 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param seekBar          ¸èÇú²¥·Å½ø¶ÈÌõ
-     * @param currentMusicInfo µ±Ç°¸èÇúĞÅÏ¢
-     * @param currentTime      µ±Ç°¸èÇú²¥·ÅµÄÊ±¼ä
-     * @param mediaTime        µ±Ç°¸èÇúµÄ×ÜÊ±³¤
-     * @param handler          ÓÃÓÚ¸øActivity·¢ËÍÏûÏ¢µÄHandler
+     * @param seekBar          æ­Œæ›²æ’­æ”¾è¿›åº¦æ¡
+     * @param currentMusicInfo å½“å‰æ­Œæ›²ä¿¡æ¯
+     * @param currentTime      å½“å‰æ­Œæ›²æ’­æ”¾çš„æ—¶é—´
+     * @param mediaTime        å½“å‰æ­Œæ›²çš„æ€»æ—¶é•¿
+     * @param handler          ç”¨äºç»™Activityå‘é€æ¶ˆæ¯çš„Handler
      * @version V1.0
      * @Title initPlayHelper
      * @author wm
      * @createTime 2023/2/8 15:58
-     * @description ³õÊ¼»¯ÒôÀÖ²¥·ÅÆ÷¸¨ÖúÀà
+     * @description åˆå§‹åŒ–éŸ³ä¹æ’­æ”¾å™¨è¾…åŠ©ç±»
      */
     public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, Handler handler) {
-        //±£´æhandler¶ÔÏó
+        //ä¿å­˜handlerå¯¹è±¡
         mHandler = handler;
-        //seekBarÎªÒôÀÖ²¥·Å½ø¶ÈÌõ£¬tvCurrentMusicInfoÎªµ±Ç°²¥·Å¸èÇúµÄĞÅÏ¢
+        //seekBarä¸ºéŸ³ä¹æ’­æ”¾è¿›åº¦æ¡ï¼ŒtvCurrentMusicInfoä¸ºå½“å‰æ’­æ”¾æ­Œæ›²çš„ä¿¡æ¯
         helper = MusicPlayerHelper.getInstance();
         helper.initData(seekBar, currentMusicInfo, currentTime, mediaTime);
-        //ÊµÏÖÒôÀÖ²¥·ÅÍê±ÏµÄ»Øµ÷º¯Êı£¬²¥·ÅÍê±Ïºó¸ù¾İ²¥·ÅÄ£Ê½×Ô¶¯²¥·ÅÏÂÒ»Ê×
+        //å®ç°éŸ³ä¹æ’­æ”¾å®Œæ¯•çš„å›è°ƒå‡½æ•°ï¼Œæ’­æ”¾å®Œæ¯•åæ ¹æ®æ’­æ”¾æ¨¡å¼è‡ªåŠ¨æ’­æ”¾ä¸‹ä¸€é¦–
         helper.setOnCompletionListener(mp -> {
             playNextEnd();
         });
         isInitPlayHelper = true;
-        //³õÊ¼»¯Ö®ºóÔÙÏÔÊ¾Í¨ÖªÀ¸
+        //åˆå§‹åŒ–ä¹‹åå†æ˜¾ç¤ºé€šçŸ¥æ 
         showNotify();
     }
 
 
     /**
-     * @param mediaFileBean µ±Ç°²¥·ÅµÄÒôÀÖ¶ÔÏó
-     * @param isRestPlayer  ÊÇ·ñÖØĞÂ¿ªÊ¼²¥·Å
-     * @param handler       handler¶ÔÏó£¬ÓÃÓÚ¸øActivity·¢ËÍÏûÏ¢
-     * @param mPosition     µ±Ç°²¥·Å¸èÇúµÄÏÂ±ê
+     * @param mediaFileBean å½“å‰æ’­æ”¾çš„éŸ³ä¹å¯¹è±¡
+     * @param isRestPlayer  æ˜¯å¦é‡æ–°å¼€å§‹æ’­æ”¾
+     * @param handler       handlerå¯¹è±¡ï¼Œç”¨äºç»™Activityå‘é€æ¶ˆæ¯
+     * @param mPosition     å½“å‰æ’­æ”¾æ­Œæ›²çš„ä¸‹æ ‡
      * @return
      * @version V1.0
      * @Title play
      * @author wm
      * @createTime 2023/2/8 16:02
-     * @description ²¥·ÅÒôÀÖ
+     * @description æ’­æ”¾éŸ³ä¹
      */
     public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
         if (!TextUtils.isEmpty(mediaFileBean.getData())) {
             this.mPosition = mPosition;
-//            DebugLog.debug(String.format("µ±Ç°×´Ì¬£º%s  ÊÇ·ñÇĞ»»¸èÇú£º%s", helper.isPlaying(), isRestPlayer));
-            //¼ÇÂ¼µ±Ç°µÄ²¥·Å×´Ì¬,ÓÃÓÚ¸øActivity·¢ËÍMessage
+//            DebugLog.debug(String.format("å½“å‰çŠ¶æ€ï¼š%s  æ˜¯å¦åˆ‡æ¢æ­Œæ›²ï¼š%s", helper.isPlaying(), isRestPlayer));
+            //è®°å½•å½“å‰çš„æ’­æ”¾çŠ¶æ€,ç”¨äºç»™Activityå‘é€Message
             boolean isPlayingStatus = false;
-            // µ±Ç°ÈôÊÇ²¥·Å£¬Ôò½øĞĞÔİÍ£
+            // å½“å‰è‹¥æ˜¯æ’­æ”¾ï¼Œåˆ™è¿›è¡Œæš‚åœ
             if (!isRestPlayer && helper.isPlaying()) {
                 pause();
             } else {
-                //Ê×´Î²¥·Å¸èÇú¡¢ÇĞ»»¸èÇú²¥·Å¡¢¼ÌĞø²¥·Å
+                //é¦–æ¬¡æ’­æ”¾æ­Œæ›²ã€åˆ‡æ¢æ­Œæ›²æ’­æ”¾ã€ç»§ç»­æ’­æ”¾
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
-                //²¥·ÅµÄÊ±ºò±£´æ²¥·ÅµÄ¸èÇúId
+                //æ’­æ”¾çš„æ—¶å€™ä¿å­˜æ’­æ”¾çš„æ­Œæ›²Id
                 DataRefreshService.setLastMusicId(mediaFileBean.getId());
             }
-            //·¢ËÍMeeage¸øMusicPlayActivity£¬ÓÃÓÚ¸üĞÂ²¥·ÅÍ¼±ê
+            //å‘é€Meeageç»™MusicPlayActivityï¼Œç”¨äºæ›´æ–°æ’­æ”¾å›¾æ ‡
             Message msg = new Message();
             msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
             Bundle bundle = new Bundle();
@@ -199,8 +199,8 @@ public class MusicPlayService extends Service {
             updateNotificationShow(mPosition, isPlayingStatus);
             firstPlay = false;
         } else {
-            DebugLog.debug("µ±Ç°²¥·ÅµØÖ·ÎŞĞ§");
-            Toast.makeText(mContext, "µ±Ç°²¥·ÅµØÖ·ÎŞĞ§", Toast.LENGTH_SHORT).show();
+            DebugLog.debug("å½“å‰æ’­æ”¾åœ°å€æ— æ•ˆ");
+            Toast.makeText(mContext, "å½“å‰æ’­æ”¾åœ°å€æ— æ•ˆ", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -209,7 +209,7 @@ public class MusicPlayService extends Service {
      * @Title pause
      * @author wm
      * @createTime 2023/2/8 14:34
-     * @description ÔİÍ£
+     * @description æš‚åœ
      */
     public void pause() {
         helper.pause();
@@ -220,18 +220,18 @@ public class MusicPlayService extends Service {
      * @Title playPre
      * @author wm
      * @createTime 2023/2/8 14:34
-     * @description ²¥·ÅÉÏÒ»Ê×
+     * @description æ’­æ”¾ä¸Šä¸€é¦–
      */
     public void playPre() {
-        //µ¥Çú²¥·ÅºÍÑ­»·²¥·Å£¬¶¼ÊÇ°´ÕÕÒôÀÖÁĞ±íµÄË³Ğò²¥·Å
+        //å•æ›²æ’­æ”¾å’Œå¾ªç¯æ’­æ”¾ï¼Œéƒ½æ˜¯æŒ‰ç…§éŸ³ä¹åˆ—è¡¨çš„é¡ºåºæ’­æ”¾
         if (playMode == 0 || playMode == 2) {
-            //Èç¹ûµ±Ç°ÊÇµÚÒ»Ê×£¬Ôò²¥·Å×îºóÒ»Ê×
+            //å¦‚æœå½“å‰æ˜¯ç¬¬ä¸€é¦–ï¼Œåˆ™æ’­æ”¾æœ€åä¸€é¦–
             if (mPosition <= 0) {
                 mPosition = musicInfo.size();
             }
             mPosition--;
         } else if (playMode == 1) {
-            //Ëæ»ú²¥·Å
+            //éšæœºæ’­æ”¾
             mPosition = getRandomPosition();
         }
         play(musicInfo.get(mPosition), true, mHandler, mPosition);
@@ -242,18 +242,18 @@ public class MusicPlayService extends Service {
      * @Title playNext
      * @author wm
      * @createTime 2023/2/8 16:11
-     * @description ²¥·ÅÏÂÒ»Ê×
+     * @description æ’­æ”¾ä¸‹ä¸€é¦–
      */
     public void playNext() {
-        //µ¥Çú²¥·ÅºÍÑ­»·²¥·Å£¬¶¼ÊÇ°´ÕÕÒôÀÖÁĞ±íµÄË³Ğò²¥·Å
+        //å•æ›²æ’­æ”¾å’Œå¾ªç¯æ’­æ”¾ï¼Œéƒ½æ˜¯æŒ‰ç…§éŸ³ä¹åˆ—è¡¨çš„é¡ºåºæ’­æ”¾
         if (playMode == 0 || playMode == 2) {
             mPosition++;
-            //Èç¹ûÏÂÒ»Çú´óÓÚ¸èÇúÊıÁ¿ÔòÈ¡µÚÒ»Ê×
+            //å¦‚æœä¸‹ä¸€æ›²å¤§äºæ­Œæ›²æ•°é‡åˆ™å–ç¬¬ä¸€é¦–
             if (mPosition >= musicInfo.size()) {
                 mPosition = 0;
             }
         } else if (playMode == 1) {
-            //Ëæ»ú²¥·Å
+            //éšæœºæ’­æ”¾
             mPosition = getRandomPosition();
         }
         play(musicInfo.get(mPosition), true, mHandler, mPosition);
@@ -264,21 +264,21 @@ public class MusicPlayService extends Service {
      * @Title playNextEnd
      * @author wm
      * @createTime 2023/2/8 18:26
-     * @description ²¥·ÅÍê±Ïºó×Ô¶¯²¥·ÅÏÂÒ»Çú£¬ÓÃÓÚ»Øµ÷
+     * @description æ’­æ”¾å®Œæ¯•åè‡ªåŠ¨æ’­æ”¾ä¸‹ä¸€æ›²ï¼Œç”¨äºå›è°ƒ
      */
     private void playNextEnd() {
-        //Ñ­»·²¥·Å
+        //å¾ªç¯æ’­æ”¾
         if (playMode == 0) {
             mPosition++;
-            //Èç¹ûÏÂÒ»Çú´óÓÚ¸èÇúÊıÁ¿ÔòÈ¡µÚÒ»Ê×
+            //å¦‚æœä¸‹ä¸€æ›²å¤§äºæ­Œæ›²æ•°é‡åˆ™å–ç¬¬ä¸€é¦–
             if (mPosition >= musicInfo.size()) {
                 mPosition = 0;
             }
         } else if (playMode == 1) {
-            //Ëæ»ú²¥·Å
+            //éšæœºæ’­æ”¾
             mPosition = getRandomPosition();
         }
-        //µ¥Çú²¥·Å£¬mPositionÃ»ÓĞ¸Ä±ä£¬Ö±½ÓÖØĞÂ¿ªÊ¼²¥·Å
+        //å•æ›²æ’­æ”¾ï¼ŒmPositionæ²¡æœ‰æ”¹å˜ï¼Œç›´æ¥é‡æ–°å¼€å§‹æ’­æ”¾
         play(musicInfo.get(mPosition), true, mHandler, mPosition);
     }
 
@@ -289,7 +289,7 @@ public class MusicPlayService extends Service {
      * @Title getRandomPosition
      * @author wm
      * @createTime 2023/2/8 18:11
-     * @description ´Ó¸èÇúÁĞ±íÖĞ»ñÈ¡Ëæ»úÊı£¨0~musicInfo.size()£©
+     * @description ä»æ­Œæ›²åˆ—è¡¨ä¸­è·å–éšæœºæ•°ï¼ˆ0~musicInfo.size()ï¼‰
      */
     private int getRandomPosition() {
         Random random = new Random();
@@ -303,7 +303,7 @@ public class MusicPlayService extends Service {
      * @Title isPlaying
      * @author wm
      * @createTime 2023/2/8 16:12
-     * @description ·µ»Øµ±Ç°ÊÇ·ñÕıÔÚ²¥·Å
+     * @description è¿”å›å½“å‰æ˜¯å¦æ­£åœ¨æ’­æ”¾
      */
     public boolean isPlaying() {
         return helper.isPlaying();
@@ -314,7 +314,7 @@ public class MusicPlayService extends Service {
      * @Title getPosition
      * @author wm
      * @createTime 2023/2/8 16:12
-     * @description ÃèÊö¸Ã·½·¨µÄ¹¦ÄÜ
+     * @description æè¿°è¯¥æ–¹æ³•çš„åŠŸèƒ½
      */
     public int getPosition() {
         return mPosition;
@@ -329,7 +329,7 @@ public class MusicPlayService extends Service {
      * @Title getInitResult
      * @author wm
      * @createTime 2023/2/8 16:12
-     * @description ÃèÊö¸Ã·½·¨µÄ¹¦ÄÜ
+     * @description æè¿°è¯¥æ–¹æ³•çš„åŠŸèƒ½
      */
     public boolean getInitResult() {
         return isInitPlayHelper;
@@ -342,7 +342,7 @@ public class MusicPlayService extends Service {
      * @Title getFirstPlay
      * @author wm
      * @createTime 2023/2/8 16:12
-     * @description ÃèÊö¸Ã·½·¨µÄ¹¦ÄÜ
+     * @description æè¿°è¯¥æ–¹æ³•çš„åŠŸèƒ½
      */
     public boolean getFirstPlay() {
         return firstPlay;
@@ -355,20 +355,20 @@ public class MusicPlayService extends Service {
      * @Title getPlayMode
      * @author wm
      * @createTime 2023/2/8 17:30
-     * @description »ñÈ¡²¥·ÅÄ£Ê½
+     * @description è·å–æ’­æ”¾æ¨¡å¼
      */
     public int getPlayMode() {
         return playMode;
     }
 
     /**
-     * @param mode ²¥·ÅÄ£Ê½
+     * @param mode æ’­æ”¾æ¨¡å¼
      * @return
      * @version V1.0
      * @Title setPlayMode
      * @author wm
      * @createTime 2023/2/8 17:52
-     * @description ÉèÖÃ²¥·ÅÄ£Ê½
+     * @description è®¾ç½®æ’­æ”¾æ¨¡å¼
      */
     public void setPlayMode(int mode) {
         playMode = mode;
@@ -383,13 +383,13 @@ public class MusicPlayService extends Service {
      * @Title createNotificationChannel
      * @author wm
      * @createTime 2023/2/8 14:33
-     * @description ´´½¨Í¨ÖªÀ¸Í¨µÀ
+     * @description åˆ›å»ºé€šçŸ¥æ é€šé“
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "9527";
             CharSequence name = "PlayControl";
-            String description = "Í¨ÖªÀ¸";
+            String description = "é€šçŸ¥æ ";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(channelId, name, importance);
             channel.setDescription(description);
@@ -403,33 +403,33 @@ public class MusicPlayService extends Service {
      * @Title showNotify
      * @author wm
      * @createTime 2023/2/8 14:32
-     * @description ÏÔÊ¾Í¨ÖªÀ¸
+     * @description æ˜¾ç¤ºé€šçŸ¥æ 
      */
     private void showNotify() {
         remoteViews = getContentView();
-        //ÉèÖÃPendingIntent
+        //è®¾ç½®PendingIntent
         Intent it = new Intent(this, MusicPlayActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 
-        //´´½¨Í¨ÖªÀ¸ĞÅÏ¢
+        //åˆ›å»ºé€šçŸ¥æ ä¿¡æ¯
         notification = new NotificationCompat.Builder(this, "9527")
-                //ÉèÖÃÍ¼±ê
+                //è®¾ç½®å›¾æ ‡
                 .setSmallIcon(R.mipmap.ic_notify_icon)
                 .setWhen(System.currentTimeMillis())
-                //±êÌâ
-                //.setContentTitle("Î¢ĞÅ")
-                //ÕıÎÄÏûÏ¢
-                //.setContentText("ÄãÓĞÒ»ÌõĞÂÏûÏ¢")
+                //æ ‡é¢˜
+                //.setContentTitle("å¾®ä¿¡")
+                //æ­£æ–‡æ¶ˆæ¯
+                //.setContentText("ä½ æœ‰ä¸€æ¡æ–°æ¶ˆæ¯")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                //ÉèÖÃµã»÷Æô¶¯µÄIntent
+                //è®¾ç½®ç‚¹å‡»å¯åŠ¨çš„Intent
                 .setContentIntent(pi)
-                //ÉèÖÃlayout
+                //è®¾ç½®layout
                 .setCustomContentView(remoteViews)
-                //µã»÷ºóÍ¨ÖªÀ¸È¡ÏûÍ¨Öª
+                //ç‚¹å‡»åé€šçŸ¥æ å–æ¶ˆé€šçŸ¥
                 //.setAutoCancel(true)
-                .setTicker("ÕıÔÚ²¥·Å")
+                .setTicker("æ­£åœ¨æ’­æ”¾")
                 .setOngoing(true)
-                //ÓÅÏÈ¼¶
+                //ä¼˜å…ˆçº§
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
 
@@ -442,35 +442,35 @@ public class MusicPlayService extends Service {
      * @Title getContentView
      * @author wm
      * @createTime 2023/2/8 14:32
-     * @description »ñÈ¡Í¨ÖªÀ¸²¼¾Ö¶ÔÏó
+     * @description è·å–é€šçŸ¥æ å¸ƒå±€å¯¹è±¡
      */
     private RemoteViews getContentView() {
         RemoteViews mRemoteViews = new RemoteViews(this.getPackageName(), R.layout.layout_notify_view);
-        //Í¨ÖªÀ¸¿ØÖÆÆ÷ÉÏÒ»Ê×°´Å¥¹ã²¥²Ù×÷
+        //é€šçŸ¥æ æ§åˆ¶å™¨ä¸Šä¸€é¦–æŒ‰é’®å¹¿æ’­æ“ä½œ
         Intent intentPrev = new Intent(PREV);
         PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this, 0, intentPrev, 0);
-        //Îªprev¿Ø¼ş×¢²áÊÂ¼ş
+        //ä¸ºprevæ§ä»¶æ³¨å†Œäº‹ä»¶
         mRemoteViews.setOnClickPendingIntent(R.id.btn_play_prev, prevPendingIntent);
 
-        //Í¨ÖªÀ¸¿ØÖÆÆ÷²¥·ÅÔİÍ£°´Å¥¹ã²¥²Ù×÷  //ÓÃÓÚ½ÓÊÕ¹ã²¥Ê±¹ıÂËÒâÍ¼ĞÅÏ¢
+        //é€šçŸ¥æ æ§åˆ¶å™¨æ’­æ”¾æš‚åœæŒ‰é’®å¹¿æ’­æ“ä½œ  //ç”¨äºæ¥æ”¶å¹¿æ’­æ—¶è¿‡æ»¤æ„å›¾ä¿¡æ¯
         Intent intentPlay = new Intent(PLAY);
         PendingIntent playPendingIntent = PendingIntent.getBroadcast(this, 0, intentPlay, 0);
-        //Îªplay¿Ø¼ş×¢²áÊÂ¼ş
+        //ä¸ºplayæ§ä»¶æ³¨å†Œäº‹ä»¶
         mRemoteViews.setOnClickPendingIntent(R.id.btn_play, playPendingIntent);
 
-        //Í¨ÖªÀ¸¿ØÖÆÆ÷ÏÂÒ»Ê×°´Å¥¹ã²¥²Ù×÷
+        //é€šçŸ¥æ æ§åˆ¶å™¨ä¸‹ä¸€é¦–æŒ‰é’®å¹¿æ’­æ“ä½œ
         Intent intentNext = new Intent(NEXT);
         PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this, 0, intentNext, 0);
-        //Îªnext¿Ø¼ş×¢²áÊÂ¼ş
+        //ä¸ºnextæ§ä»¶æ³¨å†Œäº‹ä»¶
         mRemoteViews.setOnClickPendingIntent(R.id.btn_play_next, nextPendingIntent);
 
-        //Í¨ÖªÀ¸¿ØÖÆÆ÷¹Ø±Õ°´Å¥¹ã²¥²Ù×÷
+        //é€šçŸ¥æ æ§åˆ¶å™¨å…³é—­æŒ‰é’®å¹¿æ’­æ“ä½œ
         Intent intentClose = new Intent(CLOSE);
         PendingIntent closePendingIntent = PendingIntent.getBroadcast(this, 0, intentClose, 0);
-        //Îªclose¿Ø¼ş×¢²áÊÂ¼ş
+        //ä¸ºcloseæ§ä»¶æ³¨å†Œäº‹ä»¶
         mRemoteViews.setOnClickPendingIntent(R.id.iv_notify_close, closePendingIntent);
 
-        //ÈôÒôÀÖÁĞ±í²»Îª¿Õ£¬³õÊ¼»¯Í¨ÖªÀ¸µÄ¸èÇúĞÅÏ¢
+        //è‹¥éŸ³ä¹åˆ—è¡¨ä¸ä¸ºç©ºï¼Œåˆå§‹åŒ–é€šçŸ¥æ çš„æ­Œæ›²ä¿¡æ¯
         if (musicInfo.size() > 0) {
             mRemoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(mPosition).getTitle());
             mRemoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(mPosition).getArtist());
@@ -483,7 +483,7 @@ public class MusicPlayService extends Service {
      * @Title registerMusicReceiver
      * @author wm
      * @createTime 2023/2/8 16:15
-     * @description ×¢²á¶¯Ì¬¹ã²¥
+     * @description æ³¨å†ŒåŠ¨æ€å¹¿æ’­
      */
     private void registerMusicReceiver() {
         musicReceiver = new MusicReceiver();
@@ -501,7 +501,7 @@ public class MusicPlayService extends Service {
      * @version V1.0
      * @Title
      * @createTime 2023/2/8 16:15
-     * @description ¹ã²¥½ÓÊÕÆ÷ , ½ÓÊÕÀ´×ÔÍ¨ÖªÀ¸µÄ¹ã²¥
+     * @description å¹¿æ’­æ¥æ”¶å™¨ , æ¥æ”¶æ¥è‡ªé€šçŸ¥æ çš„å¹¿æ’­
      * @return
      */
     public class MusicReceiver extends BroadcastReceiver {
@@ -514,19 +514,19 @@ public class MusicPlayService extends Service {
                     break;
                 case PREV:
                     playPre();
-                    //²¥·ÅÁĞ±íÏÔÊ¾µÄÊ±ºò£¬ÏÂÀ­Í¨ÖªÀ¸²¥·ÅÉÏÏÂÇúÖ®ºó£¬ĞèÒªË¢ĞÂ²¥·ÅÁĞ±í
+                    //æ’­æ”¾åˆ—è¡¨æ˜¾ç¤ºçš„æ—¶å€™ï¼Œä¸‹æ‹‰é€šçŸ¥æ æ’­æ”¾ä¸Šä¸‹æ›²ä¹‹åï¼Œéœ€è¦åˆ·æ–°æ’­æ”¾åˆ—è¡¨
                     sendMessageRefreshPosition();
                     break;
                 case NEXT:
                     playNext();
-                    //²¥·ÅÁĞ±íÏÔÊ¾µÄÊ±ºò£¬ÏÂÀ­Í¨ÖªÀ¸²¥·ÅÉÏÏÂÇúÖ®ºó£¬ĞèÒªË¢ĞÂ²¥·ÅÁĞ±í
+                    //æ’­æ”¾åˆ—è¡¨æ˜¾ç¤ºçš„æ—¶å€™ï¼Œä¸‹æ‹‰é€šçŸ¥æ æ’­æ”¾ä¸Šä¸‹æ›²ä¹‹åï¼Œéœ€è¦åˆ·æ–°æ’­æ”¾åˆ—è¡¨
                     sendMessageRefreshPosition();
                     break;
                 case CLOSE:
                     closeApp();
                     break;
                 case DELETE_MUSIC_ACTION:
-                    //É¾³ı¸èÇúµÄ¹ã²¥
+                    //åˆ é™¤æ­Œæ›²çš„å¹¿æ’­
                     int deletePosition = intent.getExtras().getInt("musicPosition");
                     disposeDeleteMusic(deletePosition);
                     break;
@@ -541,7 +541,7 @@ public class MusicPlayService extends Service {
      * @Title closeApp
      * @author wm
      * @createTime 2023/2/13 15:07
-     * @description µã»÷Í¨ÖªÀ¸°´Å¥¹Ø±ÕÕû¸öÓ¦ÓÃ
+     * @description ç‚¹å‡»é€šçŸ¥æ æŒ‰é’®å…³é—­æ•´ä¸ªåº”ç”¨
      */
     private void closeApp() {
         BasicApplication.getActivityManager().finishAll();
@@ -552,22 +552,22 @@ public class MusicPlayService extends Service {
      * @Title disposeDeleteMusic
      * @author wm
      * @createTime 2023/2/13 15:08
-     * @description É¾³ıÒôÀÖµÄÅĞ¶ÏºÍ´¦Àí
+     * @description åˆ é™¤éŸ³ä¹çš„åˆ¤æ–­å’Œå¤„ç†
      */
     private void disposeDeleteMusic(int deletePosition) {
         DebugLog.debug("" + deletePosition);
-        //ÕâÀïÄÃµ½µÄmusicListSizeÊÇÉ¾³ıºóµÄÖµ£¬mPositionÊÇÉ¾³ıµÄÎ»ÖÃ
+        //è¿™é‡Œæ‹¿åˆ°çš„musicListSizeæ˜¯åˆ é™¤åçš„å€¼ï¼ŒmPositionæ˜¯åˆ é™¤çš„ä½ç½®
         if (musicInfo.size() <= 0) {
-            //Èç¹ûÁĞ±íÎª¿Õ£¬Ö¤Ã÷É¾³ıµÄÊÇ×îºóÒ»Ê×¸è£¬ÁĞ±íÎª¿Õ£¬ĞèÒªÍ£Ö¹²¥·Å
+            //å¦‚æœåˆ—è¡¨ä¸ºç©ºï¼Œè¯æ˜åˆ é™¤çš„æ˜¯æœ€åä¸€é¦–æ­Œï¼Œåˆ—è¡¨ä¸ºç©ºï¼Œéœ€è¦åœæ­¢æ’­æ”¾
             toStop();
         } else {
-            //ÈôÉ¾³ıµÄÊÇÆäËûÎ»ÖÃµÄ¸èÇú£¬²»Ó°Ïìµ±Ç°²¥·Å£¬Ö»ĞèÒªÔÚActivityÉÏ¸ÄUI£¬ÔÙ¸üĞÂlistºÍposition¼´¿É
+            //è‹¥åˆ é™¤çš„æ˜¯å…¶ä»–ä½ç½®çš„æ­Œæ›²ï¼Œä¸å½±å“å½“å‰æ’­æ”¾ï¼Œåªéœ€è¦åœ¨Activityä¸Šæ”¹UIï¼Œå†æ›´æ–°listå’Œpositionå³å¯
             if (deletePosition == mPosition) {
-                //ÈôÁĞ±í²»Îª¿Õ£¬ÇÒÉ¾³ıµÄÊÇµ±Ç°²¥·Å¸èÇú£¬²ÅĞèÒª×ö²¥·ÅÂß¼­ÉÏµÄ´¦Àí
-                //É¾³ı¸èÇúºó£¬ÁĞ±íÕûÌåÉÏÒÆ£¬positionÖ¸ÏòµÄÊÇÏÂÊ×¸èÁË£¬ËùÒÔĞèÒª¼õÒ»ÔÙ²¥·ÅÏÂÒ»Çú£¨Ö±½Ó²¥·Å¿ÉÄÜ»á³öÏÖÔ½½çÎÊÌâ£©
+                //è‹¥åˆ—è¡¨ä¸ä¸ºç©ºï¼Œä¸”åˆ é™¤çš„æ˜¯å½“å‰æ’­æ”¾æ­Œæ›²ï¼Œæ‰éœ€è¦åšæ’­æ”¾é€»è¾‘ä¸Šçš„å¤„ç†
+                //åˆ é™¤æ­Œæ›²åï¼Œåˆ—è¡¨æ•´ä½“ä¸Šç§»ï¼ŒpositionæŒ‡å‘çš„æ˜¯ä¸‹é¦–æ­Œäº†ï¼Œæ‰€ä»¥éœ€è¦å‡ä¸€å†æ’­æ”¾ä¸‹ä¸€æ›²ï¼ˆç›´æ¥æ’­æ”¾å¯èƒ½ä¼šå‡ºç°è¶Šç•Œé—®é¢˜ï¼‰
                 mPosition--;
                 playNext();
-                //·¢ËÍĞÅÏ¢¸øActivity¸üĞÂposition
+                //å‘é€ä¿¡æ¯ç»™Activityæ›´æ–°position
                 sendMessageRefreshPosition();
             }
         }
@@ -578,10 +578,10 @@ public class MusicPlayService extends Service {
      * @Title sendMessageRefreshPosition
      * @author wm
      * @createTime 2023/2/13 15:16
-     * @description ·¢ËÍĞÅÏ¢¸øActivity¸üĞÂposition
+     * @description å‘é€ä¿¡æ¯ç»™Activityæ›´æ–°position
      */
     private void sendMessageRefreshPosition() {
-        //·¢ËÍMessage¸øMusicPlayActivity£¬¸üĞÂÉ¾³ıºóµÄĞÂposition
+        //å‘é€Messageç»™MusicPlayActivityï¼Œæ›´æ–°åˆ é™¤åçš„æ–°position
         Message msg = new Message();
         msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_POSITION;
         Bundle bundle = new Bundle();
@@ -595,29 +595,29 @@ public class MusicPlayService extends Service {
      * @Title toStop
      * @author wm
      * @createTime 2023/2/12 22:08
-     * @description Èôµ±Ç°²¥·ÅµÄÊÇÊÕ²ØÁĞ±íÇÒÉ¾³ıÁËËùÓĞ¸èÇú£¬ÔòÍ£Ö¹²¥·Å
+     * @description è‹¥å½“å‰æ’­æ”¾çš„æ˜¯æ”¶è—åˆ—è¡¨ä¸”åˆ é™¤äº†æ‰€æœ‰æ­Œæ›²ï¼Œåˆ™åœæ­¢æ’­æ”¾
      */
     private void toStop() {
         helper.stop();
-        //ÈôÊÕ²ØÁĞ±íÎª¿ÕÖ®ºó£¬²¥·ÅµÄÁĞ±í×ªÎªÄ¬ÈÏÁĞ±í£»ĞèÒªË¢ĞÂActivityºÍÍ¨ÖªÀ¸µÄÄÚÈİ
-        //ÏÈÍ¨ÖªActivityĞŞ¸Ä²¥·ÅÁĞ±í¼°mPosition£¬ÔÙµ÷ÓÃServiceÖĞµÄinitPlayHelperÀ´ÖØĞÂÏÔÊ¾Í¨ÖªÀ¸
+        //è‹¥æ”¶è—åˆ—è¡¨ä¸ºç©ºä¹‹åï¼Œæ’­æ”¾çš„åˆ—è¡¨è½¬ä¸ºé»˜è®¤åˆ—è¡¨ï¼›éœ€è¦åˆ·æ–°Activityå’Œé€šçŸ¥æ çš„å†…å®¹
+        //å…ˆé€šçŸ¥Activityä¿®æ”¹æ’­æ”¾åˆ—è¡¨åŠmPositionï¼Œå†è°ƒç”¨Serviceä¸­çš„initPlayHelperæ¥é‡æ–°æ˜¾ç¤ºé€šçŸ¥æ 
         firstPlay = true;
 
-        //·¢ËÍMessage¸øMusicPlayActivity£¬É¾³ıÊÕ²ØÁĞ±íÖ®ºó×Ô¶¯ÇĞ»»ÖÁÄ¬ÈÏÁĞ±í
+        //å‘é€Messageç»™MusicPlayActivityï¼Œåˆ é™¤æ”¶è—åˆ—è¡¨ä¹‹åè‡ªåŠ¨åˆ‡æ¢è‡³é»˜è®¤åˆ—è¡¨
         Message msg = new Message();
         msg.what = MusicPlayActivity.HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST;
         mHandler.sendMessage(msg);
     }
 
     /**
-     * @param position     ¸èÇúÎ»ÖÃ, changeToPlay ¸èÇúÎ»ÖÃ
-     * @param changeToPlay true±íÊ¾½ÓÏÂÀ´µÄ×´Ì¬ÊÇ²¥·Å£¬false½ÓÏÂÀ´µÄ×´Ì¬ÊÇÔİÍ£
+     * @param position     æ­Œæ›²ä½ç½®, changeToPlay æ­Œæ›²ä½ç½®
+     * @param changeToPlay trueè¡¨ç¤ºæ¥ä¸‹æ¥çš„çŠ¶æ€æ˜¯æ’­æ”¾ï¼Œfalseæ¥ä¸‹æ¥çš„çŠ¶æ€æ˜¯æš‚åœ
      * @return
      * @version V1.0
      * @Title updateNotificationShow
      * @author wm
      * @createTime 2023/2/8 16:16
-     * @description ¸ü¸ÄÍ¨ÖªµÄĞÅÏ¢ºÍUI
+     * @description æ›´æ”¹é€šçŸ¥çš„ä¿¡æ¯å’ŒUI
      */
     public void updateNotificationShow(int position, boolean changeToPlay) {
         if (changeToPlay) {
@@ -625,14 +625,14 @@ public class MusicPlayService extends Service {
         } else {
             remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
         }
-        //·âÃæ×¨¼­
+        //å°é¢ä¸“è¾‘
 //        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
-        //¸èÇúÃû
+        //æ­Œæ›²å
         remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
-        //¸èÊÖÃû
+        //æ­Œæ‰‹å
         remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
 
-        //·¢ËÍÍ¨Öª
+        //å‘é€é€šçŸ¥
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 

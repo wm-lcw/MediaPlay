@@ -45,7 +45,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     /**
      * 显示播放信息
      */
-    private TextView text,currentTime,mediaTime;
+    private TextView text, currentTime, mediaTime;
 
     /**
      * 当前的播放歌曲信息
@@ -54,7 +54,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
     private static MusicPlayerHelper instance = new MusicPlayerHelper();
 
-    private MusicPlayerHelper(){
+    private MusicPlayerHelper() {
         mHandler = new MusicPlayerHelperHandler(this);
         player = new MediaPlayer();
         // 设置媒体流类型
@@ -64,11 +64,11 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         player.setOnCompletionListener(this);
     }
 
-    public static MusicPlayerHelper getInstance(){
+    public static MusicPlayerHelper getInstance() {
         return instance;
     }
 
-    public void initData(SeekBar seekBar, TextView text,TextView currentTime,TextView mediaTime){
+    public void initData(SeekBar seekBar, TextView text, TextView currentTime, TextView mediaTime) {
         this.seekBar = seekBar;
         this.seekBar.setOnSeekBarChangeListener(this);
         this.text = text;
@@ -77,13 +77,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title onBufferingUpdate
-     *  @author wm
-     *  @createTime 2023/2/3 18:30
-     *  @description 缓存百分比
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onBufferingUpdate
+     * @author wm
+     * @createTime 2023/2/3 18:30
+     * @description 缓存百分比
      */
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
@@ -93,13 +93,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title onCompletion
-     *  @author wm
-     *  @createTime 2023/2/3 18:31
-     *  @description 当前歌曲播放完毕会调用该方法
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onCompletion
+     * @author wm
+     * @createTime 2023/2/3 18:31
+     * @description 当前歌曲播放完毕会调用该方法
      */
     @Override
     public void onCompletion(MediaPlayer mp) {
@@ -110,13 +110,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
 
     /**
-     *  @version V1.0
-     *  @Title onPrepared
-     *  @author wm
-     *  @createTime 2023/2/3 18:33
-     *  @description 歌曲准备播放
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onPrepared
+     * @author wm
+     * @createTime 2023/2/3 18:33
+     * @description 歌曲准备播放
      */
     @Override
     public void onPrepared(MediaPlayer mp) {
@@ -124,13 +124,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title playByMediaFileBean
-     *  @author wm
-     *  @createTime 2023/2/3 18:33
-     *  @description 播放歌曲：mediaFileBean 播放源；isRestPlayer  true 切换歌曲 false 不切换
-     *  @param mediaFileBean,isRestPlayer
-     *  @return
+     * @param mediaFileBean,isRestPlayer
+     * @return
+     * @version V1.0
+     * @Title playByMediaFileBean
+     * @author wm
+     * @createTime 2023/2/3 18:33
+     * @description 播放歌曲：mediaFileBean 播放源；isRestPlayer  true 切换歌曲 false 不切换
      */
     public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull Boolean isRestPlayer) {
         this.mediaFileBean = mediaFileBean;
@@ -162,13 +162,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title pause
-     *  @author wm
-     *  @createTime 2023/2/3 18:35
-     *  @description 暂停
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title pause
+     * @author wm
+     * @createTime 2023/2/3 18:35
+     * @description 暂停
      */
     public void pause() {
         if (player.isPlaying()) {
@@ -179,13 +179,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title stop
-     *  @author wm
-     *  @createTime 2023/2/3 18:35
-     *  @description 停止
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title stop
+     * @author wm
+     * @createTime 2023/2/3 18:35
+     * @description 停止
      */
     public void stop() {
         //音乐正在播放时才调用stop，未初始化的状态调用stop会报-38的错误；
@@ -200,26 +200,18 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title isPlaying
-     *  @author wm
-     *  @createTime 2023/2/3 18:35
-     *  @description 是否正在播放
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/2/3 18:35
+     * @description 是否正在播放
      */
     public Boolean isPlaying() {
         return player.isPlaying();
     }
 
     /**
-     *  @version V1.0
-     *  @Title destroy
-     *  @author wm
-     *  @createTime 2023/2/3 18:38
-     *  @description 消亡 必须在 Activity或Fragment的onDestroy()调用 以防止内存泄露
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/2/3 18:38
+     * @description 消亡 必须在 Activity或Fragment的onDestroy()调用 以防止内存泄露
      */
     public void destroy() {
         // 释放掉播放器
@@ -228,13 +220,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title onProgressChanged
-     *  @author wm
-     *  @createTime 2023/2/3 18:41
-     *  @description 用于监听SeekBar进度值的改变
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onProgressChanged
+     * @author wm
+     * @createTime 2023/2/3 18:41
+     * @description 用于监听SeekBar进度值的改变
      */
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -242,13 +234,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title onStartTrackingTouch
-     *  @author wm
-     *  @createTime 2023/2/3 18:41
-     *  @description 监听SeekBar开始拖动
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onStartTrackingTouch
+     * @author wm
+     * @createTime 2023/2/3 18:41
+     * @description 监听SeekBar开始拖动
      */
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -256,13 +248,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title onStopTrackingTouch
-     *  @author wm
-     *  @createTime 2023/2/3 18:41
-     *  @description 监听SeekBar停止拖动 ,停止拖动后计算seekbar和歌曲的对应位置
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title onStopTrackingTouch
+     * @author wm
+     * @createTime 2023/2/3 18:41
+     * @description 监听SeekBar停止拖动 ,停止拖动后计算seekbar和歌曲的对应位置
      */
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
@@ -281,13 +273,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private OnCompletionListener mOnCompletionListener;
 
     /**
-     *  @version V1.0
-     *  @Title setOnCompletionListener
-     *  @author wm
-     *  @createTime 2023/2/3 18:46
-     *  @description 注册在播放过程中到达媒体源末尾时要调用的回调
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title setOnCompletionListener
+     * @author wm
+     * @createTime 2023/2/3 18:46
+     * @description 注册在播放过程中到达媒体源末尾时要调用的回调
      */
     public void setOnCompletionListener(@NonNull OnCompletionListener listener) {
         this.mOnCompletionListener = listener;
@@ -300,13 +292,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title
-     *  @author wm
-     *  @createTime 2023/2/3 18:32
-     *  @description 媒体源播放完成后要调用的回调的接口定义
-     *  @param
-     *  @return
+     * @param
+     * @author wm
+     * @version V1.0
+     * @Title
+     * @createTime 2023/2/3 18:32
+     * @description 媒体源播放完成后要调用的回调的接口定义
+     * @return
      */
     public interface OnCompletionListener {
         /**
@@ -316,13 +308,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title
-     *  @author wm
-     *  @createTime 2023/2/3 18:49
-     *  @description 创建handler，用于更新音乐播放器进度条
-     *  @param
-     *  @return
+     * @param
+     * @author wm
+     * @version V1.0
+     * @Title
+     * @createTime 2023/2/3 18:49
+     * @description 创建handler，用于更新音乐播放器进度条
+     * @return
      */
     static class MusicPlayerHelperHandler extends Handler {
         WeakReference<MusicPlayerHelper> weakReference;
@@ -356,30 +348,30 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     *  @version V1.0
-     *  @Title getCurrentPlayingInfo
-     *  @author wm
-     *  @createTime 2023/2/3 18:43
-     *  @description 格式化当前正在播放歌曲的信息
-     *  @param
-     *  @return 
+     * @param
+     * @return
+     * @version V1.0
+     * @Title getCurrentPlayingInfo
+     * @author wm
+     * @createTime 2023/2/3 18:43
+     * @description 格式化当前正在播放歌曲的信息
      */
     private String getCurrentPlayingInfo() {
         return String.format("%s", mediaFileBean.getTitle());
     }
 
-    private String getFormatTime(int time){
+    private String getFormatTime(int time) {
         return String.format("%s", formatTime(time));
     }
 
     /**
-     *  @version V1.0
-     *  @Title formatTime
-     *  @author wm
-     *  @createTime 2023/2/3 18:40
-     *  @description 格式化获取到的时间
-     *  @param
-     *  @return
+     * @param
+     * @return
+     * @version V1.0
+     * @Title formatTime
+     * @author wm
+     * @createTime 2023/2/3 18:40
+     * @description 格式化获取到的时间
      */
     public static String formatTime(int time) {
         if (time / 1000 % 60 < 10) {

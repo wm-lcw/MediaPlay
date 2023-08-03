@@ -148,7 +148,7 @@ public class MusicPlayActivity extends BasicActivity {
      * @createTime 2023/2/4 15:02
      * @description 创建ServiceConnection
      */
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             DebugLog.debug("onServiceConnected");
@@ -506,6 +506,7 @@ public class MusicPlayActivity extends BasicActivity {
         final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
         final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
         popupWindowView.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int x = (int) event.getX();

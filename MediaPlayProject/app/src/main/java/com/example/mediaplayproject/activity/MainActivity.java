@@ -1,8 +1,8 @@
 package com.example.mediaplayproject.activity;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -21,9 +21,9 @@ import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.base.BasicActivity;
+import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
-
 
 /**
  * @author wm
@@ -33,13 +33,47 @@ public class MainActivity extends BasicActivity {
     private static final int REQUEST_STORE_CODE = 1024;
     private static final int REQUEST_ALERT_CODE = 1025;
     private static final int REQUEST_ALL_CODE = 1026;
-    private static final String TAG = "MainActivity";
+    private static final String REQUEST_CODE_KEY = "requestCode";
+    private static boolean isStorePermissionRequested = false;
+    private static boolean isFloatWindowPermissionRequested = false;
     private Context mContext;
+    private ActivityResultLauncher<Intent> intentActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
+        findViewById(R.id.bt_music).setOnClickListener(mListener);
+        findViewById(R.id.bt_video).setOnClickListener(mListener);
+
+        intentActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    DebugLog.debug("resultCode" + result.getResultCode());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        if (hasStorePermission()) {
+                            if (hasAlertPermission()) {
+                                initData();
+                            } else {
+                                if (isFloatWindowPermissionRequested) {
+                                    Toast.makeText(mContext, "缺少必要权限,程序即将退出", Toast.LENGTH_SHORT).show();
+                                    BasicApplication.getActivityManager().finishAll();
+                                }
+                                DebugLog.debug("store permission ok,request alert permission");
+                                Toast.makeText(MainActivity.this, "请打开悬浮窗权限!", Toast.LENGTH_LONG).show();
+                                isFloatWindowPermissionRequested = true;
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                                intentActivityResultLauncher.launch(intent);
+                            }
+                        } else {
+                            Toast.makeText(mContext, "缺少必要权限,程序即将退出", Toast.LENGTH_SHORT).show();
+                            BasicApplication.getActivityManager().finishAll();
+                        }
+
+                    }
+                }
+        );
+
         requestPermission();
     }
 
@@ -47,7 +81,12 @@ public class MainActivity extends BasicActivity {
         @Override
         public void onClick(View view) {
             if (view.getId() == R.id.bt_music) {
-                startActivity(new Intent(MainActivity.this, MusicPlayActivity.class));
+                if (hasStorePermission() && hasAlertPermission()){
+                    startActivity(new Intent(MainActivity.this, MusicPlayActivity.class));
+                } else {
+                    Toast.makeText(MainActivity.this, "缺少必要权限，请重新启动应用并赋予权限!", Toast.LENGTH_LONG).show();
+                }
+
             } else if (view.getId() == R.id.bt_video) {
                 startActivity(new Intent(MainActivity.this, VideoActivity.class));
             }
@@ -55,33 +94,30 @@ public class MainActivity extends BasicActivity {
     };
 
     /**
-     *  @version V1.0
-     *  @Title requestPermission
-     *  @author wm
-     *  @createTime 2023/2/3 17:47
-     *  @description 申请权限
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/2/3 17:47
+     * @description 申请权限
      */
     private void requestPermission() {
         //主要是判断安卓11
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // 先判断有没有权限
-            if (Environment.isExternalStorageManager()) {
+            if (hasStorePermission()) {
                 DebugLog.debug("store permission ok");
                 if (hasAlertPermission()) {
                     DebugLog.debug("alert permission ok");
                     initData();
                 } else {
+                    Toast.makeText(MainActivity.this, "请打开文件存储权限!", Toast.LENGTH_LONG).show();
                     DebugLog.debug("request alert permission");
                     Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                    startActivityForResult(intent, REQUEST_ALERT_CODE);
+                    intentActivityResultLauncher.launch(intent);
                 }
             } else {
                 Toast.makeText(MainActivity.this, "请打开存储权限!", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-                startActivityForResult(intent, REQUEST_STORE_CODE);
+                intentActivityResultLauncher.launch(intent);
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // 先判断有没有权限
@@ -99,32 +135,39 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
-     *  @version V1.0
-     *  @Title hasAlertPermission
-     *  @author wm
-     *  @createTime 2023/2/3 17:44
-     *  @description 判断是否有悬浮窗权限
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/2/3 17:44
+     * @description 判断是否有悬浮窗权限
      */
     private boolean hasAlertPermission() {
         AppOpsManager appOpsMgr = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         if (appOpsMgr == null) {
             return false;
         }
-        int mode = appOpsMgr.checkOpNoThrow("android:system_alert_window", android.os.Process.myUid(), mContext.getPackageName());
+        int mode = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            mode = appOpsMgr.unsafeCheckOpNoThrow("android:system_alert_window", android.os.Process.myUid(), mContext.getPackageName());
+        }
         //这里只能为MODE_ALLOWED，若加上AppOpsManager.MODE_IGNORED会判断为真
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
     /**
-     *  @version V1.0
-     *  @Title onRequestPermissionsResult
-     *  @author wm
-     *  @createTime 2023/2/3 17:49
-     *  @description 这个方法主要针对SDK<=23的情况
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/8/3 18:19
+     * @description 判断是否有文件存储权限
+     */
+    private boolean hasStorePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        }
+        return false;
+    }
+
+    /**
+     * @author wm
+     * @createTime 2023/2/3 17:49
+     * @description 这个方法主要针对SDK<= 2 3 的情况
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -141,51 +184,14 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
-     *  @version V1.0
-     *  @Title onActivityResult
-     *  @author wm
-     *  @createTime 2023/2/3 17:50
-     *  @description 这个方法主要针对安卓11以上
-     *  @param
-     *  @return
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_STORE_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (Environment.isExternalStorageManager()) {
-                DebugLog.debug("request alert permission");
-                Toast.makeText(MainActivity.this, "请打开悬浮窗权限!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                startActivityForResult(intent, REQUEST_ALERT_CODE);
-            } else {
-                Toast.makeText(mContext, "store权限获取失败,程序即将退出", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        } else if (requestCode == REQUEST_ALERT_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (hasAlertPermission()) {
-                initData();
-            } else {
-                Toast.makeText(mContext, "alert权限获取失败,程序即将退出", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
-    }
-
-    /**
-     *  @version V1.0
-     *  @Title initData
-     *  @author wm
-     *  @createTime 2023/2/3 17:50
-     *  @description 初始化按钮
-     *  @param
-     *  @return
+     * @author wm
+     * @createTime 2023/2/3 17:50
+     * @description 初始化按钮
      */
     private void initData() {
         Toast.makeText(mContext, "已获取存储权限", Toast.LENGTH_SHORT).show();
-        findViewById(R.id.bt_music).setOnClickListener(mListener);
-        findViewById(R.id.bt_video).setOnClickListener(mListener);
-        //再次初始化列表
+
+        //初始化音乐列表资源
         DataRefreshService.initResource();
     }
 
