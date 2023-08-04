@@ -40,10 +40,6 @@ public class DataRefreshService extends Service {
      * 收藏的列表
      */
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
-    /**
-     * 用于帮助过滤收藏列表里的重复歌曲
-     */
-    private static HashSet<MediaFileBean> musicListUtils = new HashSet<>();
 
     private static int lastPlayListMode = 0;
     private static int lastPlayMode = 0;
@@ -85,22 +81,21 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     *  @author wm
-     *  @createTime 2023/7/13 14:46
-     *  @description 初始化音乐资源
+     * @author wm
+     * @createTime 2023/7/13 14:46
+     * @description 初始化音乐资源
      */
-    public static void initResource(){
+    public static void initResource() {
         clearResource();
         searchMusic();
         //初始化上次播放的相关信息
         initLastPlayInfo();
     }
 
-    public static void clearResource(){
+    public static void clearResource() {
         musicListFromData.clear();
         defaultList.clear();
         favoriteList.clear();
-        musicListUtils.clear();
     }
 
     /**
@@ -138,10 +133,9 @@ public class DataRefreshService extends Service {
         long id = 0;
         for (int i = 0; i < defaultList.size(); i++) {
             id = defaultList.get(i).getId();
-            if (musicListFromData.containsKey(id)) {
+            if (musicListFromData.containsKey(id) && musicListFromData.get(id) != null) {
                 defaultList.get(i).setLike(1 == musicListFromData.get(id));
-                //使用musicListUtils来筛选出重复的歌曲
-                if (musicListUtils.add(defaultList.get(i))) {
+                if (!favoriteList.contains(defaultList.get(i))) {
                     favoriteList.add(defaultList.get(i));
                 }
             }
@@ -246,9 +240,10 @@ public class DataRefreshService extends Service {
      * @description 将歌曲加入收藏列表
      */
     public static void addMusicToFavoriteList(MediaFileBean mediaFileBean) {
-        DebugLog.debug("");
-        //插入set集合中，过滤掉重复添加的歌曲
-        if (musicListUtils.add(mediaFileBean)) {
+        DebugLog.debug("mediaFileBean " + mediaFileBean);
+        if (favoriteList.contains(mediaFileBean)) {
+            return;
+        } else {
             favoriteList.add(mediaFileBean);
             //添加信息到数据库中
             ContentValues values = new ContentValues();
@@ -265,11 +260,10 @@ public class DataRefreshService extends Service {
      * @description 从收藏列表移除歌曲
      */
     public static void deleteMusicFromFavoriteList(MediaFileBean mediaFileBean) {
-        DebugLog.debug("");
-        if (musicListUtils.contains(mediaFileBean)) {
-            musicListUtils.remove(mediaFileBean);
-            //获取要删除歌曲在收藏列表的下标是多少，然后发送广播给Service处理（当前列表是否是收藏列表）
+        DebugLog.debug("mediaFileBean " + mediaFileBean);
+        if (favoriteList.contains(mediaFileBean)) {
             int removePosition = favoriteList.indexOf(mediaFileBean);
+            DebugLog.debug("removePosition " + removePosition);
             Intent intent = new Intent("com.example.media.play.delete.music.action");
             Bundle bundle = new Bundle();
             bundle.putInt("musicPosition", removePosition);
@@ -279,10 +273,11 @@ public class DataRefreshService extends Service {
             //从数据库中删除信息
             db.execSQL("DELETE FROM musiclistrecord WHERE musicId = ?",
                     new Long[]{mediaFileBean.getId()});
-        }
-        if (defaultList.contains(mediaFileBean)) {
-            //需要删除默认列表中的收藏状态,直接操作对象
-            mediaFileBean.setLike(false);
+            if (defaultList.contains(mediaFileBean)) {
+                //需要删除默认列表中的收藏状态,直接操作对象
+                mediaFileBean.setLike(false);
+                DebugLog.debug("mediaFileBean1 " + mediaFileBean);
+            }
         }
     }
 

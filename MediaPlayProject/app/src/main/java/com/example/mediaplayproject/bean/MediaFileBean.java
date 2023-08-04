@@ -8,12 +8,18 @@ import java.util.Objects;
 public class MediaFileBean {
 
     private long id;
-    private String title;//音乐名称
-    private String data;//音乐文件
-    private String album;//专辑
-    private String artist;//艺人
-    private int duration;//音乐时长
-    private long size;//音乐文件大小
+    /**音乐名称*/
+    private String title;
+    /**音乐文件*/
+    private String data;
+    /**专辑*/
+    private String album;
+    /**艺人*/
+    private String artist;
+    /**音乐时长*/
+    private int duration;
+    /**音乐文件大小*/
+    private long size;
     private boolean isPlaying;
     private boolean isLike;
 

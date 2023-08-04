@@ -97,7 +97,8 @@ public class MusicAdapter extends BaseAdapter {
                 boolean isLike = musicInfoList.get(position).isLike();
                 musicInfoList.get(position).setLike(!isLike);
                 holder.ivLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
-                DebugLog.debug("position " + position + "isLike " + isLike);
+                DebugLog.debug("position:" + position + "; isLike:" + isLike);
+                DebugLog.debug("mediaFileBean " + musicInfoList.get(position));
                 if (!isLike){
                     //加入收藏
                     DataRefreshService.addMusicToFavoriteList(musicInfoList.get(position));
