@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class FavoriteMusicAdapter extends BaseAdapter {
     private int text_selected_color;
     private int bg_selected_color;
     private ColorStateList colors;
+
 
     public FavoriteMusicAdapter(Context mContext, List<MediaFileBean> musicInfoList) {
         this.mContext = mContext;
@@ -112,13 +114,13 @@ public class FavoriteMusicAdapter extends BaseAdapter {
     }
 
     /**
-     *  @version V1.0
-     *  @Title setSelectPosition
-     *  @author wm
-     *  @createTime 2023/2/11 15:37
-     *  @description 设置高亮的下标
-     *  @param position -1：取消高亮效果； 0 < position < size(): 设置高亮效果
-     *  @return
+     * @param position -1：取消高亮效果； 0 < position < size(): 设置高亮效果
+     * @return
+     * @version V1.0
+     * @Title setSelectPosition
+     * @author wm
+     * @createTime 2023/2/11 15:37
+     * @description 设置高亮的下标
      */
     public void setSelectPosition(int position) {
         if (position == -1) {
@@ -133,37 +135,34 @@ public class FavoriteMusicAdapter extends BaseAdapter {
     }
 
     /**
-     * @version V1.0
-     * @Title refreshSelectionPosition
-     * @author wm
      * @createTime 2023/2/11 14:56
-     * @description 删除收藏歌曲的时候，若删除的下标小于当前播放的下标，列表会上移，
+     * @description 专门用于--删除收藏歌曲的时候，若删除的下标小于当前播放的下标，列表会上移，
      * 但是高亮的位置不变，导致了正在播放的高亮位置不正确，所以需要刷新指向高亮的下标
      */
-    public void refreshSelectionPosition() {
+    public void refreshSelectedPosition() {
         DebugLog.debug("defaultSelection " + defaultSelection);
         defaultSelection--;
         notifyDataSetChanged();
     }
 
+
     /**
-     * @param deletePosition 要删除的歌曲下标
-     * @return
-     * @version V1.0
-     * @Title checkRefreshPosition
-     * @author wm
-     * @createTime 2023/2/11 15:35
-     * @description 检查要删除的歌曲下标与当前播放歌曲下标的比较情况
+     *  检查要删除的歌曲下标与当前播放歌曲下标的比较情况
+     *  @author wm
+     *  @createTime 2023/8/17 16:30
+     * @param deletePosition: 要删除的歌曲下标
+     * @return : int
      */
     public int checkRefreshPosition(int deletePosition) {
-        if (deletePosition == defaultSelection){
-            //删除的是当前播放的歌曲，先隐藏下标，等下一曲播放了再开启高亮下标
-            return 0;
-        } else if (deletePosition < defaultSelection){
-            //删除的是下标小于当前的歌曲，需要刷新下标
-            return 1;
-        } else{
-            return 2;
+        if (deletePosition == defaultSelection) {
+            // 删除的是当前播放的歌曲，先隐藏下标，等下一曲播放了再开启高亮下标
+            return Constant.RESULT_IS_CURRENT_POSITION;
+        } else if (deletePosition < defaultSelection) {
+            // 删除的是下标小于当前的歌曲，需要刷新下标
+            return Constant.RESULT_BEFORE_CURRENT_POSITION;
+        } else {
+            // 删除的是当前播放歌曲后面的，不受影响
+            return Constant.RESULT_AFTER_CURRENT_POSITION;
         }
 
     }

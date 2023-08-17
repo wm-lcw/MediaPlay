@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicDataBaseHelper;
 import com.example.mediaplayproject.utils.SearchFiles;
@@ -264,9 +265,10 @@ public class DataRefreshService extends Service {
         if (favoriteList.contains(mediaFileBean)) {
             int removePosition = favoriteList.indexOf(mediaFileBean);
             DebugLog.debug("removePosition " + removePosition);
-            Intent intent = new Intent("com.example.media.play.delete.music.action");
+            Intent intent = new Intent(Constant.DELETE_MUSIC_ACTION);
             Bundle bundle = new Bundle();
             bundle.putInt("musicPosition", removePosition);
+            bundle.putInt("musicListSource", Constant.LIST_MODE_FAVORITE);
             intent.putExtras(bundle);
             context.sendBroadcast(intent);
             favoriteList.remove(mediaFileBean);

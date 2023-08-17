@@ -63,7 +63,6 @@ public class MusicPlayService extends Service {
     public static final String PREV = "prev";
     public static final String NEXT = "next";
     public static final String CLOSE = "close";
-    public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     /**
      * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
      * 主要是控制播放上下曲的position
@@ -492,7 +491,6 @@ public class MusicPlayService extends Service {
         intentFilter.addAction(PREV);
         intentFilter.addAction(NEXT);
         intentFilter.addAction(CLOSE);
-        intentFilter.addAction(DELETE_MUSIC_ACTION);
         registerReceiver(musicReceiver, intentFilter);
     }
 
@@ -525,11 +523,6 @@ public class MusicPlayService extends Service {
                 case CLOSE:
                     closeApp();
                     break;
-                case DELETE_MUSIC_ACTION:
-                    //删除歌曲的广播
-                    int deletePosition = intent.getExtras().getInt("musicPosition");
-                    disposeDeleteMusic(deletePosition);
-                    break;
                 default:
                     break;
             }
@@ -547,31 +540,6 @@ public class MusicPlayService extends Service {
         BasicApplication.getActivityManager().finishAll();
     }
 
-    /**
-     * @version V1.0
-     * @Title disposeDeleteMusic
-     * @author wm
-     * @createTime 2023/2/13 15:08
-     * @description 删除音乐的判断和处理
-     */
-    private void disposeDeleteMusic(int deletePosition) {
-        DebugLog.debug("" + deletePosition);
-        //这里拿到的musicListSize是删除后的值，mPosition是删除的位置
-        if (musicInfo.size() <= 0) {
-            //如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
-            toStop();
-        } else {
-            //若删除的是其他位置的歌曲，不影响当前播放，只需要在Activity上改UI，再更新list和position即可
-            if (deletePosition == mPosition) {
-                //若列表不为空，且删除的是当前播放歌曲，才需要做播放逻辑上的处理
-                //删除歌曲后，列表整体上移，position指向的是下首歌了，所以需要减一再播放下一曲（直接播放可能会出现越界问题）
-                mPosition--;
-                playNext();
-                //发送信息给Activity更新position
-                sendMessageRefreshPosition();
-            }
-        }
-    }
 
     /**
      * @version V1.0
@@ -597,16 +565,11 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/12 22:08
      * @description 若当前播放的是收藏列表且删除了所有歌曲，则停止播放
      */
-    private void toStop() {
+    public void toStop() {
         helper.stop();
         //若收藏列表为空之后，播放的列表转为默认列表；需要刷新Activity和通知栏的内容
         //先通知Activity修改播放列表及mPosition，再调用Service中的initPlayHelper来重新显示通知栏
         firstPlay = true;
-
-        //发送Message给MusicPlayActivity，删除收藏列表之后自动切换至默认列表
-        Message msg = new Message();
-        msg.what = MusicPlayActivity.HANDLER_MESSAGE_TURN_TO_DEFAULT_LIST;
-        mHandler.sendMessage(msg);
     }
 
     /**

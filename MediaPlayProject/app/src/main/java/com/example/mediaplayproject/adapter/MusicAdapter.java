@@ -31,6 +31,7 @@ public class MusicAdapter extends BaseAdapter {
     private ColorStateList colors;
 
     public MusicAdapter(Context mContext, List<MediaFileBean> musicInfoList) {
+        DebugLog.debug("--" + musicInfoList.size());
         this.mContext = mContext;
         this.musicInfoList = musicInfoList;
         Resources resources = mContext.getResources();
