@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +32,12 @@ import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.google.android.material.navigation.NavigationView;
+
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -221,17 +228,46 @@ public class MainActivity extends BasicActivity implements NavigationView.OnNavi
         return false;
     }
 
+    /**
+     * 菜单、返回键响应
+     */
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //调用双击退出函数
+            exitBy2Click();
+        }
+        return false;
     }
+
+    private static Boolean isExit = false;
+    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("scheduled-pool-%d").daemon(true).build());
+
+    /**
+     * 双击退出函数
+     */
+    private void exitBy2Click() {
+        if (!isExit) {
+            // 准备退出
+            isExit = true;
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            // 第一个参数为执行体，第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间。
+            scheduledExecutorService.scheduleAtFixedRate(() -> {
+                // 取消退出
+                isExit = false;
+            }, 2, 10, TimeUnit.SECONDS);
+        } else {
+            BasicApplication.getActivityManager().finishAll();
+        }
+    }
+
 
 
     /**
      * activity实现OnTouchListener接口，用来检测手势滑动
      * 这里直接调用GestureDetector.SimpleOnGestureListener的onTouchEvent方法来处理
      */
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return mGestureDetector.onTouchEvent(event);
@@ -260,7 +296,6 @@ public class MainActivity extends BasicActivity implements NavigationView.OnNavi
             return false;
         }
     };
-
 
 
 }
