@@ -5,8 +5,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +19,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.view.GestureDetector;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -24,27 +30,41 @@ import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.google.android.material.navigation.NavigationView;
 
 /**
  * @author wm
  */
-public class MainActivity extends BasicActivity {
+public class MainActivity extends BasicActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnTouchListener {
 
-    private static final int REQUEST_STORE_CODE = 1024;
-    private static final int REQUEST_ALERT_CODE = 1025;
     private static final int REQUEST_ALL_CODE = 1026;
-    private static final String REQUEST_CODE_KEY = "requestCode";
-    private static boolean isStorePermissionRequested = false;
     private static boolean isFloatWindowPermissionRequested = false;
     private Context mContext;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
 
+    /**
+     * 手势滑动水平方向的最小距离
+     */
+    private static final int FLING_MIN_DISTANCE = 50;
+    /**
+     * 手势滑动垂直方向的最小距离
+     */
+    private static final int FLING_MIN_VELOCITY = 0;
+    private DrawerLayout drawerLayout;
+    private GestureDetector mGestureDetector;
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         findViewById(R.id.bt_music).setOnClickListener(mListener);
-        findViewById(R.id.bt_video).setOnClickListener(mListener);
+        findViewById(R.id.iv_setting).setOnClickListener(mListener);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        mGestureDetector = new GestureDetector(this, myGestureListener);
+        drawerLayout.setOnTouchListener(this);
+        // 必须设置setLongClickable为true 否则监听不到手势
+        drawerLayout.setLongClickable(true);
 
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -73,23 +93,19 @@ public class MainActivity extends BasicActivity {
                     }
                 }
         );
-
         requestPermission();
     }
 
-    private final View.OnClickListener mListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if (view.getId() == R.id.bt_music) {
-                if (hasStorePermission() && hasAlertPermission()){
-                    startActivity(new Intent(MainActivity.this, MusicPlayActivity.class));
-                } else {
-                    Toast.makeText(MainActivity.this, "缺少必要权限，请重新启动应用并赋予权限!", Toast.LENGTH_LONG).show();
-                }
-
-            } else if (view.getId() == R.id.bt_video) {
-                startActivity(new Intent(MainActivity.this, VideoActivity.class));
+    private final View.OnClickListener mListener = view -> {
+        if (view.getId() == R.id.bt_music) {
+            if (hasStorePermission() && hasAlertPermission()) {
+                startActivity(new Intent(MainActivity.this, MusicPlayActivity.class));
+            } else {
+                Toast.makeText(MainActivity.this, "缺少必要权限，请重新启动应用并赋予权限!", Toast.LENGTH_LONG).show();
             }
+
+        } else if (view.getId() == R.id.iv_setting) {
+            drawerLayout.openDrawer(GravityCompat.START);
         }
     };
 
@@ -199,4 +215,52 @@ public class MainActivity extends BasicActivity {
     public int getLayoutId() {
         return R.layout.activity_main;
     }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+    }
+
+
+    /**
+     * activity实现OnTouchListener接口，用来检测手势滑动
+     * 这里直接调用GestureDetector.SimpleOnGestureListener的onTouchEvent方法来处理
+     */
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return mGestureDetector.onTouchEvent(event);
+    }
+
+    /**
+     * 创建一个GestureDetector.SimpleOnGestureListener对象，用来识别各种手势动作
+     * 源码中SimpleOnGestureListener实现的是OnGestureListener, OnDoubleTapListener这两个接口，
+     * 如果只是做检测左右滑动可以去只实现OnGestureListener，
+     * 然后覆盖public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)方法即可
+     */
+    GestureDetector.SimpleOnGestureListener myGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            DebugLog.debug("开始滑动");
+            float x = e1.getX() - e2.getX();
+            float x2 = e2.getX() - e1.getX();
+            if (x > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                DebugLog.debug("show drawerLayout");
+
+            } else if (x2 > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                drawerLayout.openDrawer(GravityCompat.START);
+                DebugLog.debug("hide drawerLayout");
+            }
+            return false;
+        }
+    };
+
+
+
 }

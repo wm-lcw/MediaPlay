@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_call"
+            android:icon="@mipmap/ic_list_like"
+            android:title="Call" />
+        <item
+            android:id="@+id/nav_menu_friends"
+            android:icon="@mipmap/ic_list_like_choose"
+            android:title="Friends"/>
+        <item
+            android:id="@+id/nav_menu_loaction"
+            android:title="Loaction"/>
+        <item
+            android:id="@+id/nav_menu_mail"
+            android:title="Mail"/>
+        <item
+            android:id="@+id/nav_menu_cloud"
+            android:title="Cloud"/>
+    </group>
+
+</menu>

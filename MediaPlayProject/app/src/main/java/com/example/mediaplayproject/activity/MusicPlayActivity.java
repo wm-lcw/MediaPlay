@@ -116,7 +116,10 @@ public class MusicPlayActivity extends BasicActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // 这里应该不用每次都调用，启动app时只调用一次即可，需要处理
+        // 不然initServicePlayHelper刚设置service，下面又在service中获取，相当于是没更新
         initServicePlayHelper();
+        // 重新进入界面之后都获取一下音量信息和当前音乐列表
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
@@ -127,7 +130,7 @@ public class MusicPlayActivity extends BasicActivity {
             playMode = musicService.getPlayMode();
             musicListMode = musicService.getMusicListMode();
         }
-        //重新进入界面之后都获取一下音量信息和当前音乐列表
+
         initVolume();
 //        DebugLog.debug("isInitPlayHelper " + isInitPlayHelper + "; firstPlay " + firstPlay + "; position " + mPosition);
     }
@@ -676,5 +679,14 @@ public class MusicPlayActivity extends BasicActivity {
      *
      * 清空/删除或其它操作，切换默认列表 页面出现焦点丢失问题--已解决 --在Fragment生命周期中设定焦点的状态-onResume获取焦点
      * 默认列表的listView长度会跟随收藏列表，不可见部分失去焦点--已解决-viewPager的高度由warn设为match
+     *
+     * 重构首页--创建MediaMainActivity，绑定Service对象，Activity中包含Fragment
+     * 将MusicPlayActivity转变成Fragment，与其他Fragment共享Service对象
+     *
+     * 侧边栏功能（登录-设置-UI风格等）--预留空间
+     *
+     * 在主页返回时，会进入过场动画的SplashActivity，需要将其屏蔽
+     *
+     *
      * */
 }
