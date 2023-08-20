@@ -7,10 +7,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,14 +29,24 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
+import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
+import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.fragment.DefaultListFragment;
+import com.example.mediaplayproject.fragment.DiscoveryFragment;
+import com.example.mediaplayproject.fragment.FavoriteListFragment;
+import com.example.mediaplayproject.fragment.PersonalPageFragment;
+import com.example.mediaplayproject.fragment.ToolsFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.google.android.material.navigation.NavigationView;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +72,12 @@ public class MainActivity extends BasicActivity implements NavigationView.OnNavi
     private DrawerLayout drawerLayout;
     private GestureDetector mGestureDetector;
 
+    private MusicViewPagerAdapter mainViewPagerAdapter;
+    private ViewPager2 musicListViewPager;
+    private ArrayList<BaseFragment> mainViewPagerLists;
+    private DiscoveryFragment discoveryFragment;
+    private PersonalPageFragment personalPageFragment;
+    private ToolsFragment toolsFragment;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +85,17 @@ public class MainActivity extends BasicActivity implements NavigationView.OnNavi
         mContext = this;
         findViewById(R.id.bt_music).setOnClickListener(mListener);
         findViewById(R.id.iv_setting).setOnClickListener(mListener);
+        musicListViewPager = findViewById(R.id.main_view_pager);
+        discoveryFragment = new DiscoveryFragment();
+        personalPageFragment = new PersonalPageFragment();
+        toolsFragment = new ToolsFragment();
+        mainViewPagerLists = new ArrayList<>();
+        mainViewPagerLists.add(discoveryFragment);
+        mainViewPagerLists.add(personalPageFragment);
+        mainViewPagerLists.add(toolsFragment);
+        mainViewPagerAdapter = new MusicViewPagerAdapter(this,mainViewPagerLists);
+        musicListViewPager.setAdapter(mainViewPagerAdapter);
+
         drawerLayout = findViewById(R.id.drawer_layout);
         mGestureDetector = new GestureDetector(this, myGestureListener);
         drawerLayout.setOnTouchListener(this);
