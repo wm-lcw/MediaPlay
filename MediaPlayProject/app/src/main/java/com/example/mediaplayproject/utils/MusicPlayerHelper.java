@@ -2,6 +2,7 @@ package com.example.mediaplayproject.utils;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.example.mediaplayproject.activity.MusicPlayActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
 
 import java.io.IOException;
@@ -25,8 +27,7 @@ import java.lang.ref.WeakReference;
  * @Created by wm
  */
 public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
-        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener {
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
     private static int MSG_CODE = 0x01;
     private static long MSG_TIME = 1_000L;
 
@@ -38,19 +39,15 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private MediaPlayer player;
 
     /**
-     * 进度条
-     */
-    private SeekBar seekBar;
-
-    /**
-     * 显示播放信息
-     */
-    private TextView text, currentTime, mediaTime;
-
-    /**
      * 当前的播放歌曲信息
      */
     private MediaFileBean mediaFileBean;
+
+    private Handler mActivityHandle;
+    private int currentProgress;
+    private int maxProgress;
+    private String currentMusicInfo, currentPlayTime, mediaTime;
+    private boolean isPressed = false;
 
     private static MusicPlayerHelper instance = new MusicPlayerHelper();
 
@@ -68,36 +65,19 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         return instance;
     }
 
-    public void initData(SeekBar seekBar, TextView text, TextView currentTime, TextView mediaTime) {
-        this.seekBar = seekBar;
-        this.seekBar.setOnSeekBarChangeListener(this);
-        this.text = text;
-        this.currentTime = currentTime;
-        this.mediaTime = mediaTime;
+    public void initData(Handler handler) {
+        this.mActivityHandle = handler;
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onBufferingUpdate
-     * @author wm
      * @createTime 2023/2/3 18:30
      * @description 缓存百分比
      */
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        seekBar.setSecondaryProgress(percent);
-        int currentProgress =
-                seekBar.getMax() * player.getCurrentPosition() / player.getDuration();
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onCompletion
-     * @author wm
      * @createTime 2023/2/3 18:31
      * @description 当前歌曲播放完毕会调用该方法
      */
@@ -110,11 +90,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onPrepared
-     * @author wm
      * @createTime 2023/2/3 18:33
      * @description 歌曲准备播放
      */
@@ -124,17 +99,13 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     * @param mediaFileBean,isRestPlayer
-     * @return
-     * @version V1.0
-     * @Title playByMediaFileBean
-     * @author wm
+     * @param mediaFileBean 播放源
+     * @param isRestPlayer  true 切换歌曲 false 不切换
      * @createTime 2023/2/3 18:33
-     * @description 播放歌曲：mediaFileBean 播放源；isRestPlayer  true 切换歌曲 false 不切换
+     * @description 播放歌曲
      */
     public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull Boolean isRestPlayer) {
         this.mediaFileBean = mediaFileBean;
-//        DebugLog.debug("mediaFile " + mediaFileBean.getData());
         if (isRestPlayer) {
             //重置多媒体
             player.reset();
@@ -146,13 +117,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                     e.printStackTrace();
                 }
             }
-            // 准备自动播放 同步加载，阻塞 UI 线程
-//            try {
-//                player.prepare();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-            // 建议使用异步加载方式，不阻塞 UI 线程
+            // 使用异步加载方式，不阻塞 UI 线程
             player.prepareAsync();
         } else {
             player.start();
@@ -162,11 +127,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title pause
-     * @author wm
      * @createTime 2023/2/3 18:35
      * @description 暂停
      */
@@ -179,11 +139,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title stop
-     * @author wm
      * @createTime 2023/2/3 18:35
      * @description 停止
      */
@@ -193,8 +148,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
             player.stop();
             player.reset();
         }
-        seekBar.setProgress(0);
-        text.setText("");
+        currentProgress = 0;
+        currentPlayTime = "00:00";
+
         //移除更新命令
         mHandler.removeMessages(MSG_CODE);
     }
@@ -219,65 +175,10 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onProgressChanged
-     * @author wm
-     * @createTime 2023/2/3 18:41
-     * @description 用于监听SeekBar进度值的改变
-     */
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-    }
-
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onStartTrackingTouch
-     * @author wm
-     * @createTime 2023/2/3 18:41
-     * @description 监听SeekBar开始拖动
-     */
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        mHandler.removeMessages(MSG_CODE);
-    }
-
-    /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title onStopTrackingTouch
-     * @author wm
-     * @createTime 2023/2/3 18:41
-     * @description 监听SeekBar停止拖动 ,停止拖动后计算seekbar和歌曲的对应位置
-     */
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        int progress = seekBar.getProgress();
-        // 得到该首歌曲最长秒数
-        int musicMax = player.getDuration();
-        // SeekBar最大值
-        int seekBarMax = seekBar.getMax();
-        //计算相对当前播放器歌曲的应播放时间
-        float msec = progress / (seekBarMax * 1.0F) * musicMax;
-        // 跳到该曲该秒
-        player.seekTo((int) msec);
-        mHandler.sendEmptyMessageDelayed(MSG_CODE, MSG_TIME);
-    }
 
     private OnCompletionListener mOnCompletionListener;
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title setOnCompletionListener
-     * @author wm
      * @createTime 2023/2/3 18:46
      * @description 注册在播放过程中到达媒体源末尾时要调用的回调
      */
@@ -292,13 +193,39 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     * @param
+     * 拖动条正在按压，暂停更新拖动条和播放时间
+     *
      * @author wm
-     * @version V1.0
-     * @Title
+     * @createTime 2023/8/20 21:49
+     */
+    public void removeMessage() {
+        isPressed = true;
+        mHandler.removeMessages(MSG_CODE);
+    }
+
+    /**
+     * 根据拖动条变化，跳转歌曲的位置
+     *
+     * @param progress:    拖动条位置
+     * @param maxProgress: 拖动条最大数值，用来辅助计算播放器要跳转的秒数
+     * @author wm
+     * @createTime 2023/8/20 21:47
+     */
+    public void changeSeekbarProgress(int progress, int maxProgress) {
+        isPressed = false;
+        this.maxProgress = maxProgress;
+        // 得到该首歌曲最长秒数
+        int musicMax = player.getDuration();
+        //计算相对当前播放器歌曲的应播放时间
+        float second = progress / (maxProgress * 1.0F) * musicMax;
+        // 跳到该曲该秒
+        player.seekTo((int) second);
+        mHandler.sendEmptyMessageDelayed(MSG_CODE, MSG_TIME);
+    }
+
+    /**
      * @createTime 2023/2/3 18:32
      * @description 媒体源播放完成后要调用的回调的接口定义
-     * @return
      */
     public interface OnCompletionListener {
         /**
@@ -308,13 +235,8 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
-     * @param
-     * @author wm
-     * @version V1.0
-     * @Title
      * @createTime 2023/2/3 18:49
      * @description 创建handler，用于更新音乐播放器进度条
-     * @return
      */
     static class MusicPlayerHelperHandler extends Handler {
         WeakReference<MusicPlayerHelper> weakReference;
@@ -328,31 +250,36 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == MSG_CODE) {
-                int pos = 0;
+                int seekbarProgress = 0;
+                String currentPlayingInfo = weakReference.get().getCurrentPlayingInfo();
+                String currentTime = weakReference.get().currentPlayTime;
+                String mediaTime = weakReference.get().mediaTime;
                 //如果播放且进度条未被按压
-                if (weakReference.get().player.isPlaying() && !weakReference.get().seekBar.isPressed()) {
+                if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
                     int position = weakReference.get().player.getCurrentPosition();
                     int duration = weakReference.get().player.getDuration();
                     if (duration > 0) {
                         // 计算进度（获取进度条最大刻度*当前音乐播放位置 / 当前音乐时长）
-                        pos = (int) (weakReference.get().seekBar.getMax() * position / (duration * 1.0f));
+                        seekbarProgress = (int) (weakReference.get().maxProgress * position / (duration * 1.0f));
                     }
-                    weakReference.get().text.setText(weakReference.get().getCurrentPlayingInfo());
-                    weakReference.get().currentTime.setText(weakReference.get().getFormatTime(position));
-                    weakReference.get().mediaTime.setText(weakReference.get().getFormatTime(duration));
+                    currentTime = weakReference.get().getFormatTime(position);
+                    mediaTime = weakReference.get().getFormatTime(duration);
                 }
-                weakReference.get().seekBar.setProgress(pos);
+                Message message = new Message();
+                message.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER;
+                Bundle bundle = new Bundle();
+                bundle.putInt("seekbarProgress", seekbarProgress);
+                bundle.putString("currentPlayingInfo", currentPlayingInfo);
+                bundle.putString("currentTime", currentTime);
+                bundle.putString("mediaTime", mediaTime);
+                message.setData(bundle);
+                weakReference.get().getMActivityHandle().sendMessage(message);
                 sendEmptyMessageDelayed(MSG_CODE, MSG_TIME);
             }
         }
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title getCurrentPlayingInfo
-     * @author wm
      * @createTime 2023/2/3 18:43
      * @description 格式化当前正在播放歌曲的信息
      */
@@ -364,11 +291,11 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         return String.format("%s", formatTime(time));
     }
 
+    private Handler getMActivityHandle() {
+        return mActivityHandle;
+    }
+
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title formatTime
      * @author wm
      * @createTime 2023/2/3 18:40
      * @description 格式化获取到的时间

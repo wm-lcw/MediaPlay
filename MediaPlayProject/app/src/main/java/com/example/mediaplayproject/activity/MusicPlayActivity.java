@@ -30,8 +30,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.adapter.FavoriteMusicAdapter;
-import com.example.mediaplayproject.adapter.MusicListPagerAdapter;
+import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
 import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
@@ -50,7 +49,7 @@ import java.util.List;
  * @author wm
  * @Description: 音乐播放主界面
  */
-public class MusicPlayActivity extends BasicActivity {
+public class MusicPlayActivity extends BasicActivity{
 
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList;
     private SeekBar sbVolume, sbProgress;
@@ -80,6 +79,7 @@ public class MusicPlayActivity extends BasicActivity {
     private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
     public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
+    public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
     public static final int HANDLER_MESSAGE_FROM_LIST_FRAGMENT = 4;
     private int mPosition = 0;
     private MusicPlayService musicService;
@@ -96,7 +96,7 @@ public class MusicPlayActivity extends BasicActivity {
 
     private ViewPager2 musicListViewPager;
     private ArrayList<BaseFragment> viewPagerLists;
-    private MusicListPagerAdapter musicListPagerAdapter;
+    private MusicViewPagerAdapter musicViewPagerAdapter;
     private DefaultListFragment defaultListFragment;
     private FavoriteListFragment favoriteListFragment;
 
@@ -239,6 +239,7 @@ public class MusicPlayActivity extends BasicActivity {
         ivMediaNext.setOnClickListener(mListener);
         ivMediaList.setOnClickListener(mListener);
         sbVolume.setOnSeekBarChangeListener(mSeekBarListener);
+        sbProgress.setOnSeekBarChangeListener(mSeekBarListener);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         //首次进入app时先获取一次音乐列表信息的来源
@@ -295,7 +296,7 @@ public class MusicPlayActivity extends BasicActivity {
             musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
             if (!isInitPlayHelper) {
                 isInitPlayHelper = true;
-                musicService.initPlayHelper(sbProgress, tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime, handler);
+                musicService.initPlayHelper(handler);
             }
         }
     }
@@ -345,11 +346,19 @@ public class MusicPlayActivity extends BasicActivity {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
+            if (seekBar == sbProgress) {
+                musicService.removeMessage();
+            }
 
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            if (seekBar == sbProgress) {
+                int progress = seekBar.getProgress();
+                int maxProgress = seekBar.getMax();
+                musicService.changeSeekbarProgress(progress, maxProgress);
+            }
 
         }
     };
@@ -382,26 +391,26 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-    * 初始化悬浮窗中的视图、初始化Fragment等
-    * */
+     * 初始化悬浮窗中的视图、初始化Fragment等
+     */
     private void initFloatView() {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
-        mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_main_view_pager, null);
+        mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
-        musicListViewPager = mFloatLayout.findViewById(R.id.main_view_pager);
+        musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
         defaultListFragment = new DefaultListFragment(mContext, defaultList, handler);
         favoriteListFragment = new FavoriteListFragment(mContext, favoriteList, handler);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
-        musicListPagerAdapter = new MusicListPagerAdapter(this, viewPagerLists);
-        musicListViewPager.setAdapter(musicListPagerAdapter);
+        musicViewPagerAdapter = new MusicViewPagerAdapter(this, viewPagerLists);
+        musicListViewPager.setAdapter(musicViewPagerAdapter);
     }
 
     /**
-     *  @createTime 2023/8/14 10:19
-     *  @description 显示悬浮窗
+     * @createTime 2023/8/14 10:19
+     * @description 显示悬浮窗
      */
     private void showFloatView() {
         //添加mFloatLayout
@@ -512,18 +521,18 @@ public class MusicPlayActivity extends BasicActivity {
                 //删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 int listSource = intent.getExtras().getInt("musicListSource");
-                dealDeleteMusic(listSource,deletePosition);
+                dealDeleteMusic(listSource, deletePosition);
             }
         }
     }
 
     /**
-     *  @createTime 2023/8/16 22:54
-     *  @description 删除音乐的处理
-     *  @param listSource 音乐列表类型
-     *  @param deletePosition 删除音乐所在列表的下标
+     * @param listSource     音乐列表类型
+     * @param deletePosition 删除音乐所在列表的下标
+     * @createTime 2023/8/16 22:54
+     * @description 删除音乐的处理
      */
-    private void dealDeleteMusic(int listSource, int deletePosition){
+    private void dealDeleteMusic(int listSource, int deletePosition) {
         // 删除的音乐列表是当前正在播放的列表
         if (musicListMode == listSource) {
             if (musicInfo.size() <= 0) {
@@ -531,7 +540,7 @@ public class MusicPlayActivity extends BasicActivity {
                 stopPlayByDelete();
             } else {
                 // 刷新列表Ui高亮状态
-                int result  = viewPagerLists.get(listSource).checkRefreshPosition(deletePosition);
+                int result = viewPagerLists.get(listSource).checkRefreshPosition(deletePosition);
                 if (result == Constant.RESULT_BEFORE_CURRENT_POSITION) {
                     // 删除的是小于当前播放下标的歌曲，只刷新service中的position即可，UI操作在Fragment已完成
                     mPosition--;
@@ -548,9 +557,9 @@ public class MusicPlayActivity extends BasicActivity {
                 }
             }
         } else {
-            switch (listSource){
+            switch (listSource) {
                 case Constant.LIST_MODE_FAVORITE:
-                    if (favoriteList.size() <= 0 && viewPagerLists.size() > 0){
+                    if (favoriteList.size() <= 0 && viewPagerLists.size() > 0) {
                         DebugLog.debug("to DefaultList ");
                         toDefaultList();
                     }
@@ -563,10 +572,10 @@ public class MusicPlayActivity extends BasicActivity {
     }
 
     /**
-     *  @createTime 2023/8/14 16:07
-     *  @description 删除歌曲后-列表为空，需要切换播放列表并刷新通知栏等状态
+     * @createTime 2023/8/14 16:07
+     * @description 删除歌曲后-列表为空，需要切换播放列表并刷新通知栏等状态
      */
-    private void stopPlayByDelete(){
+    private void stopPlayByDelete() {
         DebugLog.debug("stopPlayByDeleteMusic");
         musicService.toStop();
         musicListMode = 0;
@@ -585,9 +594,9 @@ public class MusicPlayActivity extends BasicActivity {
         toDefaultList();
     }
 
-    private void toDefaultList(){
+    private void toDefaultList() {
         musicListViewPager.setCurrentItem(0);
-        musicListPagerAdapter.notifyItemChanged(0);
+        musicViewPagerAdapter.notifyItemChanged(0);
     }
 
     /**
@@ -650,14 +659,20 @@ public class MusicPlayActivity extends BasicActivity {
                 }
                 firstPlay = false;
                 refreshListStatus();
+            } else if (msg.what == HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
+//                DebugLog.debug("HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER");
+                sbProgress.setProgress(msg.getData().getInt("seekbarProgress"));
+                tvCurrentMusicInfo.setText(msg.getData().getString("currentPlayingInfo"));
+                tvCurrentPlayTime.setText(msg.getData().getString("currentTime"));
+                tvMediaTime.setText(msg.getData().getString("mediaTime"));
             }
         }
     };
 
     /**
-     *  @description 刷新列表状态
-     *  @author wm
-     *  @createTime 2023/8/17 16:28
+     * @description 刷新列表状态
+     * @author wm
+     * @createTime 2023/8/17 16:28
      */
     private void refreshListStatus() {
         DebugLog.debug("musicListMode " + musicListMode + "; position " + mPosition);
@@ -677,16 +692,8 @@ public class MusicPlayActivity extends BasicActivity {
 
     /*
      *
-     * 清空/删除或其它操作，切换默认列表 页面出现焦点丢失问题--已解决 --在Fragment生命周期中设定焦点的状态-onResume获取焦点
-     * 默认列表的listView长度会跟随收藏列表，不可见部分失去焦点--已解决-viewPager的高度由warn设为match
-     *
      * 重构首页--创建MediaMainActivity，绑定Service对象，Activity中包含Fragment
      * 将MusicPlayActivity转变成Fragment，与其他Fragment共享Service对象
-     *
-     * 侧边栏功能（登录-设置-UI风格等）--预留空间
-     *
-     * 在主页返回时，会进入过场动画的SplashActivity，需要将其屏蔽
-     *
      *
      * */
 }

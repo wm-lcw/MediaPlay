@@ -17,8 +17,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
-import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -39,10 +37,6 @@ import java.util.Random;
  * @Description: 音乐播放器service，用于支持后台播放
  * @Author: wm
  * @CreateDate: 2023/2/4
- * @UpdateUser: updater
- * @UpdateDate: 2023/2/4
- * @UpdateRemark: 更新内容
- * @Version: 1.0
  */
 public class MusicPlayService extends Service {
 
@@ -88,6 +82,14 @@ public class MusicPlayService extends Service {
         return myBinder;
     }
 
+    public void removeMessage() {
+        helper.removeMessage();
+    }
+
+    public void changeSeekbarProgress(int progress, int maxProgress) {
+        helper.changeSeekbarProgress(progress, maxProgress);
+    }
+
     public class MyBinder extends Binder {
         public MusicPlayService getService(Context context) {
             mContext = context;
@@ -117,11 +119,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title initPlayData
-     * @author wm
      * @createTime 2023/2/11 15:44
      * @description 将Activity中的一些属性和状态同步到Service中
      */
@@ -133,23 +130,15 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param seekBar          歌曲播放进度条
-     * @param currentMusicInfo 当前歌曲信息
-     * @param currentTime      当前歌曲播放的时间
-     * @param mediaTime        当前歌曲的总时长
-     * @param handler          用于给Activity发送消息的Handler
-     * @version V1.0
-     * @Title initPlayHelper
-     * @author wm
+     * @param handler   用于给Activity发送消息的Handler
      * @createTime 2023/2/8 15:58
      * @description 初始化音乐播放器辅助类
      */
-    public void initPlayHelper(SeekBar seekBar, TextView currentMusicInfo, TextView currentTime, TextView mediaTime, Handler handler) {
+    public void initPlayHelper(Handler handler) {
         //保存handler对象
         mHandler = handler;
-        //seekBar为音乐播放进度条，tvCurrentMusicInfo为当前播放歌曲的信息
         helper = MusicPlayerHelper.getInstance();
-        helper.initData(seekBar, currentMusicInfo, currentTime, mediaTime);
+        helper.initData(handler);
         //实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
         helper.setOnCompletionListener(mp -> {
             playNextEnd();
@@ -165,10 +154,6 @@ public class MusicPlayService extends Service {
      * @param isRestPlayer  是否重新开始播放
      * @param handler       handler对象，用于给Activity发送消息
      * @param mPosition     当前播放歌曲的下标
-     * @return
-     * @version V1.0
-     * @Title play
-     * @author wm
      * @createTime 2023/2/8 16:02
      * @description 播放音乐
      */

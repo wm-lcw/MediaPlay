@@ -282,16 +282,15 @@ public class MainActivity extends BasicActivity implements NavigationView.OnNavi
     GestureDetector.SimpleOnGestureListener myGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            DebugLog.debug("开始滑动");
             float x = e1.getX() - e2.getX();
             float x2 = e2.getX() - e1.getX();
             if (x > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                DebugLog.debug("show drawerLayout");
+//                DebugLog.debug("show drawerLayout");
 
             } else if (x2 > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
                 drawerLayout.openDrawer(GravityCompat.START);
-                DebugLog.debug("hide drawerLayout");
+//                DebugLog.debug("hide drawerLayout");
             }
             return false;
         }
