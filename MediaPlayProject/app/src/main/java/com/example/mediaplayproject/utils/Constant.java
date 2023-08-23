@@ -17,5 +17,11 @@ public class Constant {
     public final static int RESULT_BEFORE_CURRENT_POSITION = 1;
     public final static int RESULT_AFTER_CURRENT_POSITION = 2;
 
+    public static final int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
+    public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
+    public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
+    public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
+    public static final int HANDLER_MESSAGE_FROM_LIST_FRAGMENT = 4;
+
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
 }

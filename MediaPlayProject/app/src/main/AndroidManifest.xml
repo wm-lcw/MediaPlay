@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:versionCode="1"
-    android:versionName="1.4.4">
+    android:versionName="1.4.5">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -41,9 +41,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".activity.VideoActivity"
-            android:exported="false" />
         <activity
             android:name=".activity.MusicPlayActivity"
             android:exported="false"

@@ -17,9 +17,12 @@ import com.example.mediaplayproject.base.BaseFragment;
  */
 public class ToolsFragment extends BaseFragment {
 
-    public static ToolsFragment newInstance(String param1, String param2) {
-        ToolsFragment fragment = new ToolsFragment();
-        return fragment;
+    private static ToolsFragment instance;
+    public static ToolsFragment getInstance() {
+        if (instance == null) {
+            instance = new ToolsFragment();
+        }
+        return instance;
     }
 
     @Override

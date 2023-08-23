@@ -7,12 +7,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.example.mediaplayproject.activity.MusicPlayActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
 
 import java.io.IOException;
@@ -44,9 +41,8 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private MediaFileBean mediaFileBean;
 
     private Handler mActivityHandle;
-    private int currentProgress;
     private int maxProgress;
-    private String currentMusicInfo, currentPlayTime, mediaTime;
+    private String currentPlayTime;
     private boolean isPressed = false;
 
     private static MusicPlayerHelper instance = new MusicPlayerHelper();
@@ -67,6 +63,11 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
     public void initData(Handler handler) {
         this.mActivityHandle = handler;
+    }
+
+    public void initHandlerFromPlayFragment(Handler handler, int maxProgress) {
+        this.mActivityHandle = handler;
+        this.maxProgress = maxProgress;
     }
 
     /**
@@ -148,7 +149,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
             player.stop();
             player.reset();
         }
-        currentProgress = 0;
         currentPlayTime = "00:00";
 
         //移除更新命令
@@ -253,11 +253,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                 int seekbarProgress = 0;
                 String currentPlayingInfo = weakReference.get().getCurrentPlayingInfo();
                 String currentTime = weakReference.get().currentPlayTime;
-                String mediaTime = weakReference.get().mediaTime;
+                String mediaTime = "";
                 //如果播放且进度条未被按压
                 if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
                     int position = weakReference.get().player.getCurrentPosition();
                     int duration = weakReference.get().player.getDuration();
+                    DebugLog.debug("position " + position + "; duration " + duration);
                     if (duration > 0) {
                         // 计算进度（获取进度条最大刻度*当前音乐播放位置 / 当前音乐时长）
                         seekbarProgress = (int) (weakReference.get().maxProgress * position / (duration * 1.0f));
@@ -266,7 +267,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                     mediaTime = weakReference.get().getFormatTime(duration);
                 }
                 Message message = new Message();
-                message.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER;
+                message.what = Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER;
                 Bundle bundle = new Bundle();
                 bundle.putInt("seekbarProgress", seekbarProgress);
                 bundle.putString("currentPlayingInfo", currentPlayingInfo);

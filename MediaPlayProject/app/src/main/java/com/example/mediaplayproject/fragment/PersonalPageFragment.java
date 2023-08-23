@@ -17,9 +17,12 @@ import com.example.mediaplayproject.base.BaseFragment;
  */
 public class PersonalPageFragment extends BaseFragment {
 
-    public static PersonalPageFragment newInstance(String param1, String param2) {
-        PersonalPageFragment fragment = new PersonalPageFragment();
-        return fragment;
+    private static PersonalPageFragment instance;
+    public static PersonalPageFragment getInstance() {
+        if (instance == null) {
+            instance = new PersonalPageFragment();
+        }
+        return instance;
     }
 
     @Override

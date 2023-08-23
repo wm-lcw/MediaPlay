@@ -1,28 +1,32 @@
-package com.example.mediaplayproject.activity;
+package com.example.mediaplayproject.fragment;
 
-
-import androidx.annotation.NonNull;
-import androidx.viewpager2.widget.ViewPager2;
+import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,10 +36,7 @@ import android.widget.TextView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
 import com.example.mediaplayproject.base.BaseFragment;
-import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
-import com.example.mediaplayproject.fragment.DefaultListFragment;
-import com.example.mediaplayproject.fragment.FavoriteListFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
@@ -45,17 +46,26 @@ import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * @author wm
- * @Description: 音乐播放主界面
  */
-public class MusicPlayActivity extends BasicActivity{
+public class MusicPlayFragment extends Fragment {
 
+    private Context mContext;
+    private View playView;
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList;
     private SeekBar sbVolume, sbProgress;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
-    private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false;
-    private Context mContext;
+    private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false, isPlaying = false;
+    private LinearLayout mFloatLayout;
+    private WindowManager.LayoutParams wmParams;
+    private WindowManager mWindowManager;
+    private AudioManager mAudioManager;
+    private MusicBroadcastReceiver mMusicBroadcastReceiver;
+    private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
+    private final String VOLUME_CHANGE_ACTION = "android.media.VOLUME_CHANGED_ACTION";
+    private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
     /**
      * 正在播放的列表
      */
@@ -68,21 +78,10 @@ public class MusicPlayActivity extends BasicActivity{
      * 收藏的列表
      */
     private List<MediaFileBean> favoriteList = new ArrayList<>();
-    private LinearLayout mFloatLayout;
-    private WindowManager.LayoutParams wmParams;
-    private WindowManager mWindowManager;
-    private AudioManager mAudioManager;
-    private MusicBroadcastReceiver mMusicBroadcastReceiver;
-    private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
-    private final String VOLUME_CHANGE_ACTION = "android.media.VOLUME_CHANGED_ACTION";
-    private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
-    private final static int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
-    public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
-    public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
-    public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
-    public static final int HANDLER_MESSAGE_FROM_LIST_FRAGMENT = 4;
+    /**
+     * 当前播放歌曲的下标
+     */
     private int mPosition = 0;
-    private MusicPlayService musicService;
     /**
      * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
      * 主要是控制播放上下曲的position
@@ -100,83 +99,69 @@ public class MusicPlayActivity extends BasicActivity{
     private DefaultListFragment defaultListFragment;
     private FavoriteListFragment favoriteListFragment;
 
+
+    /**
+     * MusicPlayService对象，控制音乐播放service类
+     */
+    private MusicPlayService musicService;
+
+    public MusicPlayFragment(Context context) {
+        mContext = context;
+    }
+
+    private static MusicPlayFragment instance;
+
+    public static MusicPlayFragment getInstance(Context context) {
+        if (instance == null) {
+            instance = new MusicPlayFragment(context);
+        }
+        return instance;
+    }
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this;
-        updateMusicList();
-        initData();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        playView = inflater.inflate(R.layout.fragment_music_play, container, false);
+        return playView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initMusicSource();
         registerReceiver();
         createFloatView();
-        //启动MusicPlayService服务
-        Intent bindIntent = new Intent(MusicPlayActivity.this, MusicPlayService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+        DebugLog.debug("");
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        // 这里应该不用每次都调用，启动app时只调用一次即可，需要处理
-        // 不然initServicePlayHelper刚设置service，下面又在service中获取，相当于是没更新
-        initServicePlayHelper();
-        // 重新进入界面之后都获取一下音量信息和当前音乐列表
-        if (musicService != null) {
-            //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
-            ivMediaPlay.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
-            //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
-            isInitPlayHelper = musicService.getInitResult();
-            firstPlay = musicService.getFirstPlay();
-            mPosition = musicService.getPosition();
-            playMode = musicService.getPlayMode();
-            musicListMode = musicService.getMusicListMode();
-        }
-
-        initVolume();
+        DebugLog.debug("");
+        // 绑定控件
+        bindView();
+        // 从service获取相关信息
+        initData();
+        // 首次进入app时先刷新一次音乐列表的来源
+        switchMusicList();
+        //初始化播放主页的状态
+        initPlayStateAndInfo();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         unregisterReceiver();
-        // 解绑服务：注意bindService后 必须要解绑服务，否则会报-连接资源异常
-        if (null != connection) {
-            unbindService(connection);
-        }
     }
 
-    /**
-     * @createTime 2023/2/4 15:02
-     * @description 创建ServiceConnection
-     */
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            DebugLog.debug("onServiceConnected");
-            musicService = ((MusicPlayService.MyBinder) service).getService(mContext);
-            if (musicService != null) {
-                //service创建成功的时候立即初始化
-                initServicePlayHelper();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicService = null;
-            DebugLog.debug("onServiceDisconnected");
-        }
-    };
-
-    /**
-     * @author wm
-     * @createTime 2023/2/2 10:54
-     * @description 从BasicApplication中获取音乐列表，上次播放的信息等
-     */
-    private void updateMusicList() {
+    private void initMusicSource() {
+        // 从BasicApplication中获取音乐列表，上次播放的信息等
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         playMode = DataRefreshService.getLastPlayMode();
@@ -184,53 +169,17 @@ public class MusicPlayActivity extends BasicActivity{
         mPosition = DataRefreshService.getLastPosition();
     }
 
-    /**
-     * @author wm
-     * @createTime 2023/2/9 17:59
-     * @description 初始化/改变 当前的列表
-     */
-    private void switchMusicList() {
-        if (musicListMode == 0) {
-            musicInfo = defaultList;
-        } else if (musicListMode == 1) {
-            musicInfo = favoriteList;
-        }
-        //保存上次播放的列表来源
-        DataRefreshService.setLastPlayListMode(musicListMode);
-        // 改变播放列表的时候，刷新播放器中的音乐列表来源,onCreate阶段不会执行（此时service对象还没创建）
-        initServicePlayHelper();
-    }
-
-    /**
-     * @author wm
-     * @createTime 2023/2/2 10:59
-     * @description 初始化音量
-     */
-    private void initVolume() {
-        int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        //当前设备的
-        if (currentVolume >= 0 && currentVolume <= 150) {
-            int afterVolume = (int) (currentVolume / 1.5);
-            sbVolume.setProgress(afterVolume);
-        }
-    }
-
-    /**
-     * @author wm
-     * @createTime 2023/2/3 17:58
-     * @description 获取组件、初始化数据
-     */
-    private void initData() {
-        ivMediaLoop = findViewById(R.id.bt_loop);
-        ivMediaPre = findViewById(R.id.bt_pre);
-        ivMediaPlay = findViewById(R.id.bt_play);
-        ivMediaNext = findViewById(R.id.bt_next);
-        ivMediaList = findViewById(R.id.bt_list);
-        sbVolume = findViewById(R.id.sb_volume);
-        sbProgress = findViewById(R.id.sb_progress);
-        tvCurrentMusicInfo = findViewById(R.id.tv_music_info);
-        tvCurrentPlayTime = findViewById(R.id.tv_music_current_time);
-        tvMediaTime = findViewById(R.id.tv_music_time);
+    private void bindView() {
+        ivMediaLoop = playView.findViewById(R.id.bt_loop);
+        ivMediaPre = playView.findViewById(R.id.bt_pre);
+        ivMediaPlay = playView.findViewById(R.id.bt_play);
+        ivMediaNext = playView.findViewById(R.id.bt_next);
+        ivMediaList = playView.findViewById(R.id.bt_list);
+        sbVolume = playView.findViewById(R.id.sb_volume);
+        sbProgress = playView.findViewById(R.id.sb_progress);
+        tvCurrentMusicInfo = playView.findViewById(R.id.tv_music_info);
+        tvCurrentPlayTime = playView.findViewById(R.id.tv_music_current_time);
+        tvMediaTime = playView.findViewById(R.id.tv_music_time);
 
         ivMediaLoop.setOnClickListener(mListener);
         ivMediaPre.setOnClickListener(mListener);
@@ -241,18 +190,45 @@ public class MusicPlayActivity extends BasicActivity{
         sbProgress.setOnSeekBarChangeListener(mSeekBarListener);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
-        // 首次进入app时先刷新一次音乐列表的来源
-        switchMusicList();
-
-        //初始化播放主页的状态
-        initPlayStateAndInfo();
     }
 
-    /**
-     * @author wm
-     * @createTime 2023/2/13 14:56
-     * @description 初始化播放主页各按钮的状态
-     */
+    public void setDataFromMainActivity(MusicPlayService service, int listMode, int position) {
+        DebugLog.debug("");
+        musicService = service;
+        musicListMode = listMode;
+        mPosition = position;
+    }
+
+    private void initData() {
+        DebugLog.debug("service " + musicService);
+        // 重新进入界面之后都获取一下音量信息和当前音乐列表
+        if (musicService != null) {
+            //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
+            isPlaying = musicService.isPlaying();
+            //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
+            isInitPlayHelper = musicService.getInitResult();
+            firstPlay = musicService.getFirstPlay();
+            mPosition = musicService.getPosition();
+            playMode = musicService.getPlayMode();
+            musicListMode = musicService.getMusicListMode();
+            isInitPlayHelper = true;
+            int maxProgress = sbProgress.getMax();
+            DebugLog.debug("maxProgress " + maxProgress);
+            musicService.setPlayFragmentHandle(handler, maxProgress);
+        }
+    }
+
+    private void switchMusicList() {
+        if (musicListMode == 0) {
+            musicInfo = defaultList;
+        } else if (musicListMode == 1) {
+            musicInfo = favoriteList;
+        }
+        //保存上次播放的列表来源
+        DataRefreshService.setLastPlayListMode(musicListMode);
+        initServicePlayHelper();
+    }
+
     @SuppressLint("SetTextI18n")
     private void initPlayStateAndInfo() {
         //获取音乐列表之后，若是列表为不空，则将当前下标的歌曲信息显示出来
@@ -272,6 +248,7 @@ public class MusicPlayActivity extends BasicActivity{
             ivMediaPlay.setEnabled(false);
             ivMediaNext.setEnabled(false);
         }
+        ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
 
         //初始化播放模式的图标
         if (playMode == 0) {
@@ -283,23 +260,13 @@ public class MusicPlayActivity extends BasicActivity{
         }
     }
 
-    /**
-     * @author wm
-     * @createTime 2023/2/8 16:48
-     * @description 初始化PlayHelper
-     */
     private void initServicePlayHelper() {
         if (musicService != null) {
             //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
             //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
             musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
-            if (!isInitPlayHelper) {
-                isInitPlayHelper = true;
-                musicService.initPlayHelper(handler);
-            }
         }
     }
-
 
     private final View.OnClickListener mListener = new View.OnClickListener() {
         @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists"})
@@ -326,11 +293,6 @@ public class MusicPlayActivity extends BasicActivity{
         }
     };
 
-
-    /**
-     * @createTime 2023/2/4 15:09
-     * @description 音量拖动条的监听处理
-     */
     private final SeekBar.OnSeekBarChangeListener mSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -403,7 +365,7 @@ public class MusicPlayActivity extends BasicActivity{
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
-        musicViewPagerAdapter = new MusicViewPagerAdapter(this, viewPagerLists);
+        musicViewPagerAdapter = new MusicViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
         musicListViewPager.setAdapter(musicViewPagerAdapter);
     }
 
@@ -442,42 +404,6 @@ public class MusicPlayActivity extends BasicActivity{
         });
     }
 
-    /**
-     * @author wm
-     * @createTime 2023/2/8 16:55
-     * @description 处理音乐的播放和暂停等
-     */
-    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
-        initServicePlayHelper();
-        musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
-    }
-
-    /**
-     * @author wm
-     * @createTime 2023/2/8 18:12
-     * @description 更改播放模式；0->循环播放; 1->随机播放; 2->单曲播放;
-     */
-    private void changePlayMode() {
-        playMode++;
-        if (playMode >= 3) {
-            playMode = Constant.PLAY_MODE_LOOP;
-        }
-        if (playMode == Constant.PLAY_MODE_LOOP) {
-            ivMediaLoop.setImageResource(R.mipmap.media_loop);
-        } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
-            ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
-        } else if (playMode == Constant.PLAY_MODE_SINGLE) {
-            ivMediaLoop.setImageResource(R.mipmap.media_single);
-        } else {
-            ivMediaLoop.setImageResource(R.mipmap.media_loop);
-            playMode = Constant.PLAY_MODE_LOOP;
-        }
-        //保存上次播放的播放模式
-        DataRefreshService.setLastPlayMode(playMode);
-        if (musicService != null) {
-            musicService.setPlayMode(playMode);
-        }
-    }
 
     /**
      * @createTime 2023/2/8 16:55
@@ -493,11 +419,6 @@ public class MusicPlayActivity extends BasicActivity{
         mRegistered = true;
     }
 
-    @Override
-    public int getLayoutId() {
-        return R.layout.activity_music_play;
-    }
-
     /**
      * @author wm
      * @createTime 2023/2/3 18:21
@@ -511,7 +432,7 @@ public class MusicPlayActivity extends BasicActivity{
                     && (intent.getIntExtra(EXTRA_VOLUME_STREAM_TYPE, -1) == AudioManager.STREAM_MUSIC)) {
                 int changedVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 Message msg = new Message();
-                msg.what = HANDLER_MESSAGE_REFRESH_VOLUME;
+                msg.what = Constant.HANDLER_MESSAGE_REFRESH_VOLUME;
                 Bundle bundle = new Bundle();
                 bundle.putInt("volume", changedVolume);
                 msg.setData(bundle);
@@ -616,23 +537,19 @@ public class MusicPlayActivity extends BasicActivity{
     }
 
 
-    /**
-     * @createTime 2023/2/3 18:22
-     * @description 创建handler，用于更新UI
-     */
     final Handler handler = new Handler(Looper.myLooper()) {
         @SuppressLint("ResourceAsColor")
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if (msg.what == HANDLER_MESSAGE_REFRESH_VOLUME) {
+            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_VOLUME) {
                 //媒体音量发生变化--更新音量条
                 int volume = msg.getData().getInt("volume");
                 if (volume >= 0 && volume <= 150) {
                     int afterVolume = (int) (volume / 1.5);
                     sbVolume.setProgress(afterVolume);
                 }
-            } else if (msg.what == HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
                 //service发送的信息，用于更新播放状态的图标
                 boolean isPlaying = msg.getData().getBoolean("iconType");
                 ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
@@ -640,12 +557,12 @@ public class MusicPlayActivity extends BasicActivity{
                 firstPlay = false;
                 isInitPlayHelper = true;
                 mPosition = musicService.getPosition();
-            } else if (msg.what == HANDLER_MESSAGE_REFRESH_POSITION) {
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_POSITION) {
                 //service发送的信息，用于删除歌曲后自动播放下一曲或者在通知栏切歌后的mPosition
                 int newPosition = msg.getData().getInt("newPosition");
                 DebugLog.debug("after delete new position " + newPosition);
                 refreshListStatus();
-            } else if (msg.what == HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
+            } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
                 DebugLog.debug("HANDLER_MESSAGE_FROM_LIST_FRAGMENT");
                 mPosition = msg.getData().getInt("position");
                 musicListMode = msg.getData().getInt("musicListMode");
@@ -658,9 +575,10 @@ public class MusicPlayActivity extends BasicActivity{
                 }
                 firstPlay = false;
                 refreshListStatus();
-            } else if (msg.what == HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
-//                DebugLog.debug("HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER");
-                sbProgress.setProgress(msg.getData().getInt("seekbarProgress"));
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
+                int seekbarProgress = msg.getData().getInt("seekbarProgress");
+                DebugLog.debug("seekBarProgress " + seekbarProgress);
+                sbProgress.setProgress(seekbarProgress);
                 tvCurrentMusicInfo.setText(msg.getData().getString("currentPlayingInfo"));
                 tvCurrentPlayTime.setText(msg.getData().getString("currentTime"));
                 tvMediaTime.setText(msg.getData().getString("mediaTime"));
@@ -668,11 +586,33 @@ public class MusicPlayActivity extends BasicActivity{
         }
     };
 
-    /**
-     * @description 刷新列表状态
-     * @author wm
-     * @createTime 2023/8/17 16:28
-     */
+    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
+        initServicePlayHelper();
+        musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
+    }
+
+    private void changePlayMode() {
+        playMode++;
+        if (playMode >= 3) {
+            playMode = Constant.PLAY_MODE_LOOP;
+        }
+        if (playMode == Constant.PLAY_MODE_LOOP) {
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+        } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
+            ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
+        } else if (playMode == Constant.PLAY_MODE_SINGLE) {
+            ivMediaLoop.setImageResource(R.mipmap.media_single);
+        } else {
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
+            playMode = Constant.PLAY_MODE_LOOP;
+        }
+        //保存上次播放的播放模式
+        DataRefreshService.setLastPlayMode(playMode);
+        if (musicService != null) {
+            musicService.setPlayMode(playMode);
+        }
+    }
+
     private void refreshListStatus() {
         DebugLog.debug("musicListMode " + musicListMode + "; position " + mPosition);
         for (BaseFragment fragment : viewPagerLists) {
@@ -687,12 +627,4 @@ public class MusicPlayActivity extends BasicActivity{
     }
 
 
-
-
-    /*
-     *
-     * 重构首页--创建MediaMainActivity，绑定Service对象，Activity中包含Fragment
-     * 将MusicPlayActivity转变成Fragment，与其他Fragment共享Service对象
-     *
-     * */
 }

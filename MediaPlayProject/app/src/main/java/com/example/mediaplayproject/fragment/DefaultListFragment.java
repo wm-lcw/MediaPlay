@@ -4,19 +4,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.activity.MusicPlayActivity;
 import com.example.mediaplayproject.adapter.MusicAdapter;
 import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.bean.MediaFileBean;
@@ -91,9 +88,8 @@ public class DefaultListFragment extends BaseFragment {
         mDefaultListView.setAdapter(defaultListAdapter);
         mDefaultListView.setOnItemClickListener((parent, view, position, id) -> {
             mPosition = position;
-            //发送Message给MusicPlayActivity，
             Message msg = new Message();
-            msg.what = MusicPlayActivity.HANDLER_MESSAGE_FROM_LIST_FRAGMENT;
+            msg.what = Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT;
             Bundle bundle = new Bundle();
             bundle.putInt("position", position);
             bundle.putInt("musicListMode", 0);

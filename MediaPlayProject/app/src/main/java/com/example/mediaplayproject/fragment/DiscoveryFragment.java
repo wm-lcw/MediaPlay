@@ -12,11 +12,17 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.base.BaseFragment;
 
 
+/**
+ * @author wm
+ */
 public class DiscoveryFragment extends BaseFragment {
 
-    public static DiscoveryFragment newInstance(String param1, String param2) {
-        DiscoveryFragment fragment = new DiscoveryFragment();
-        return fragment;
+    private static DiscoveryFragment instance;
+    public static DiscoveryFragment getInstance() {
+        if (instance == null) {
+            instance = new DiscoveryFragment();
+        }
+        return instance;
     }
 
     @Override

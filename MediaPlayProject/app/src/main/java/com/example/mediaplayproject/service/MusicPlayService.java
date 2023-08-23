@@ -22,9 +22,10 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.activity.MusicPlayActivity;
+import com.example.mediaplayproject.activity.MainActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 
@@ -148,6 +149,11 @@ public class MusicPlayService extends Service {
         showNotify();
     }
 
+    public void setPlayFragmentHandle(Handler handler, int maxProgress){
+        mHandler = handler;
+        helper.initHandlerFromPlayFragment(handler,maxProgress);
+    }
+
 
     /**
      * @param mediaFileBean 当前播放的音乐对象
@@ -173,9 +179,9 @@ public class MusicPlayService extends Service {
                 //播放的时候保存播放的歌曲Id
                 DataRefreshService.setLastMusicId(mediaFileBean.getId());
             }
-            //发送Meeage给MusicPlayActivity，用于更新播放图标
+            //发送Meeage给MusicPlayFragment，用于更新播放图标
             Message msg = new Message();
-            msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
+            msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
             Bundle bundle = new Bundle();
             bundle.putBoolean("iconType", isPlayingStatus);
             msg.setData(bundle);
@@ -392,7 +398,7 @@ public class MusicPlayService extends Service {
     private void showNotify() {
         remoteViews = getContentView();
         //设置PendingIntent
-        Intent it = new Intent(this, MusicPlayActivity.class);
+        Intent it = new Intent(this, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 
         //创建通知栏信息
@@ -534,9 +540,9 @@ public class MusicPlayService extends Service {
      * @description 发送信息给Activity更新position
      */
     private void sendMessageRefreshPosition() {
-        //发送Message给MusicPlayActivity，更新删除后的新position
+        //发送Message给MusicPlayFragment，更新删除后的新position
         Message msg = new Message();
-        msg.what = MusicPlayActivity.HANDLER_MESSAGE_REFRESH_POSITION;
+        msg.what = Constant.HANDLER_MESSAGE_REFRESH_POSITION;
         Bundle bundle = new Bundle();
         bundle.putInt("newPosition", mPosition);
         msg.setData(bundle);
