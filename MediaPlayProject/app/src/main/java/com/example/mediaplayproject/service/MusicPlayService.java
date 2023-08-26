@@ -131,7 +131,7 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param handler   用于给Activity发送消息的Handler
+     * @param handler 用于给Activity发送消息的Handler
      * @createTime 2023/2/8 15:58
      * @description 初始化音乐播放器辅助类
      */
@@ -149,25 +149,17 @@ public class MusicPlayService extends Service {
         showNotify();
     }
 
-    public void setPlayFragmentHandle(Handler handler, int maxProgress){
-        mHandler = handler;
-        helper.initHandlerFromPlayFragment(handler,maxProgress);
-    }
-
-
     /**
      * @param mediaFileBean 当前播放的音乐对象
      * @param isRestPlayer  是否重新开始播放
-     * @param handler       handler对象，用于给Activity发送消息
      * @param mPosition     当前播放歌曲的下标
      * @createTime 2023/2/8 16:02
      * @description 播放音乐
      */
-    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler, int mPosition) {
+    public void play(MediaFileBean mediaFileBean, Boolean isRestPlayer, int mPosition) {
         if (!TextUtils.isEmpty(mediaFileBean.getData())) {
             this.mPosition = mPosition;
-//            DebugLog.debug(String.format("当前状态：%s  是否切换歌曲：%s", helper.isPlaying(), isRestPlayer));
-            //记录当前的播放状态,用于给Activity发送Message
+            // 记录当前的播放状态,用于给Activity发送Message
             boolean isPlayingStatus = false;
             // 当前若是播放，则进行暂停
             if (!isRestPlayer && helper.isPlaying()) {
@@ -179,13 +171,13 @@ public class MusicPlayService extends Service {
                 //播放的时候保存播放的歌曲Id
                 DataRefreshService.setLastMusicId(mediaFileBean.getId());
             }
-            //发送Meeage给MusicPlayFragment，用于更新播放图标
+            // 发送Message给MusicPlayFragment，用于更新播放图标
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
             Bundle bundle = new Bundle();
             bundle.putBoolean("iconType", isPlayingStatus);
             msg.setData(bundle);
-            handler.sendMessage(msg);
+            mHandler.sendMessage(msg);
             updateNotificationShow(mPosition, isPlayingStatus);
             firstPlay = false;
         } else {
@@ -195,9 +187,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title pause
-     * @author wm
      * @createTime 2023/2/8 14:34
      * @description 暂停
      */
@@ -206,9 +195,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title playPre
-     * @author wm
      * @createTime 2023/2/8 14:34
      * @description 播放上一首
      */
@@ -224,13 +210,10 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+        play(musicInfo.get(mPosition), true, mPosition);
     }
 
     /**
-     * @version V1.0
-     * @Title playNext
-     * @author wm
      * @createTime 2023/2/8 16:11
      * @description 播放下一首
      */
@@ -246,13 +229,10 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+        play(musicInfo.get(mPosition), true, mPosition);
     }
 
     /**
-     * @version V1.0
-     * @Title playNextEnd
-     * @author wm
      * @createTime 2023/2/8 18:26
      * @description 播放完毕后自动播放下一曲，用于回调
      */
@@ -269,15 +249,10 @@ public class MusicPlayService extends Service {
             mPosition = getRandomPosition();
         }
         //单曲播放，mPosition没有改变，直接重新开始播放
-        play(musicInfo.get(mPosition), true, mHandler, mPosition);
+        play(musicInfo.get(mPosition), true, mPosition);
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title getRandomPosition
-     * @author wm
      * @createTime 2023/2/8 18:11
      * @description 从歌曲列表中获取随机数（0~musicInfo.size()）
      */
@@ -289,9 +264,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title isPlaying
-     * @author wm
      * @createTime 2023/2/8 16:12
      * @description 返回当前是否正在播放
      */
@@ -300,9 +272,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title getPosition
-     * @author wm
      * @createTime 2023/2/8 16:12
      * @description 描述该方法的功能
      */
@@ -326,11 +295,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param
-     * @return
-     * @version V1.0
-     * @Title getFirstPlay
-     * @author wm
      * @createTime 2023/2/8 16:12
      * @description 描述该方法的功能
      */
@@ -339,11 +303,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @param
-     * @return getPlayMode
-     * @version V1.0
-     * @Title getPlayMode
-     * @author wm
      * @createTime 2023/2/8 17:30
      * @description 获取播放模式
      */
@@ -353,10 +312,6 @@ public class MusicPlayService extends Service {
 
     /**
      * @param mode 播放模式
-     * @return
-     * @version V1.0
-     * @Title setPlayMode
-     * @author wm
      * @createTime 2023/2/8 17:52
      * @description 设置播放模式
      */
@@ -499,7 +454,7 @@ public class MusicPlayService extends Service {
             String action = intent.getAction();
             switch (action) {
                 case PLAY:
-                    play(musicInfo.get(mPosition), firstPlay, mHandler, mPosition);
+                    play(musicInfo.get(mPosition), firstPlay, mPosition);
                     break;
                 case PREV:
                     playPre();

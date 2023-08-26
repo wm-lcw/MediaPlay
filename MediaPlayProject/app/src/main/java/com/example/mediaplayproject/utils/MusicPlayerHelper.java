@@ -17,11 +17,8 @@ import java.lang.ref.WeakReference;
 
 /**
  * @author wm
- * @Classname MusicPlayerHelper
  * @Description 音乐播放器辅助类
- * @Version 1.0.0
  * @Date 2023/2/1 19:10
- * @Created by wm
  */
 public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
@@ -41,7 +38,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private MediaFileBean mediaFileBean;
 
     private Handler mActivityHandle;
-    private int maxProgress;
+    private int maxProgress = 100;
     private String currentPlayTime;
     private boolean isPressed = false;
 
@@ -63,11 +60,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
     public void initData(Handler handler) {
         this.mActivityHandle = handler;
-    }
-
-    public void initHandlerFromPlayFragment(Handler handler, int maxProgress) {
-        this.mActivityHandle = handler;
-        this.maxProgress = maxProgress;
     }
 
     /**
@@ -258,7 +250,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                 if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
                     int position = weakReference.get().player.getCurrentPosition();
                     int duration = weakReference.get().player.getDuration();
-                    DebugLog.debug("position " + position + "; duration " + duration);
                     if (duration > 0) {
                         // 计算进度（获取进度条最大刻度*当前音乐播放位置 / 当前音乐时长）
                         seekbarProgress = (int) (weakReference.get().maxProgress * position / (duration * 1.0f));

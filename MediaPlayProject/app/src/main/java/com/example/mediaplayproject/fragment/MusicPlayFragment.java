@@ -96,8 +96,9 @@ public class MusicPlayFragment extends Fragment {
     private ViewPager2 musicListViewPager;
     private ArrayList<BaseFragment> viewPagerLists;
     private MusicViewPagerAdapter musicViewPagerAdapter;
-    private DefaultListFragment defaultListFragment;
-    private FavoriteListFragment favoriteListFragment;
+//    private DefaultListFragment defaultListFragment;
+//    private FavoriteListFragment favoriteListFragment;
+    private PlayListFragment defaultListFragment,favoriteListFragment;
 
 
     /**
@@ -140,6 +141,13 @@ public class MusicPlayFragment extends Fragment {
         DebugLog.debug("");
     }
 
+    public void setDataFromMainActivity(MusicPlayService service, int listMode, int position) {
+        DebugLog.debug("");
+        musicService = service;
+        musicListMode = listMode;
+        mPosition = position;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -152,6 +160,8 @@ public class MusicPlayFragment extends Fragment {
         switchMusicList();
         //初始化播放主页的状态
         initPlayStateAndInfo();
+        // 初始化音量条
+        initVolume();
     }
 
     @Override
@@ -192,12 +202,7 @@ public class MusicPlayFragment extends Fragment {
 
     }
 
-    public void setDataFromMainActivity(MusicPlayService service, int listMode, int position) {
-        DebugLog.debug("");
-        musicService = service;
-        musicListMode = listMode;
-        mPosition = position;
-    }
+
 
     private void initData() {
         DebugLog.debug("service " + musicService);
@@ -212,9 +217,6 @@ public class MusicPlayFragment extends Fragment {
             playMode = musicService.getPlayMode();
             musicListMode = musicService.getMusicListMode();
             isInitPlayHelper = true;
-            int maxProgress = sbProgress.getMax();
-            DebugLog.debug("maxProgress " + maxProgress);
-            musicService.setPlayFragmentHandle(handler, maxProgress);
         }
     }
 
@@ -260,6 +262,15 @@ public class MusicPlayFragment extends Fragment {
         }
     }
 
+    private void initVolume() {
+        int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        //当前设备的
+        if (currentVolume >= 0 && currentVolume <= 150) {
+            int afterVolume = (int) (currentVolume / 1.5);
+            sbVolume.setProgress(afterVolume);
+        }
+    }
+
     private void initServicePlayHelper() {
         if (musicService != null) {
             //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
@@ -280,7 +291,7 @@ public class MusicPlayFragment extends Fragment {
             } else if (view == ivMediaPlay) {
 //                DebugLog.debug("current position " + mPosition);
                 // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
-                toPlayMusic(musicInfo.get(mPosition), firstPlay, handler);
+                toPlayMusic(musicInfo.get(mPosition), firstPlay);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
                 initServicePlayHelper();
@@ -360,8 +371,8 @@ public class MusicPlayFragment extends Fragment {
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        defaultListFragment = new DefaultListFragment(mContext, defaultList, handler);
-        favoriteListFragment = new FavoriteListFragment(mContext, favoriteList, handler);
+        defaultListFragment = new PlayListFragment(mContext, defaultList, Constant.LIST_MODE_DEFAULT,handler);
+        favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE, handler);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
@@ -418,6 +429,7 @@ public class MusicPlayFragment extends Fragment {
         mContext.registerReceiver(mMusicBroadcastReceiver, filter);
         mRegistered = true;
     }
+
 
     /**
      * @author wm
@@ -549,19 +561,6 @@ public class MusicPlayFragment extends Fragment {
                     int afterVolume = (int) (volume / 1.5);
                     sbVolume.setProgress(afterVolume);
                 }
-            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
-                //service发送的信息，用于更新播放状态的图标
-                boolean isPlaying = msg.getData().getBoolean("iconType");
-                ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
-                //接收到service发送的播放状态改变之后，刷新Activity的值（针对未刷新页面的情况）
-                firstPlay = false;
-                isInitPlayHelper = true;
-                mPosition = musicService.getPosition();
-            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_POSITION) {
-                //service发送的信息，用于删除歌曲后自动播放下一曲或者在通知栏切歌后的mPosition
-                int newPosition = msg.getData().getInt("newPosition");
-                DebugLog.debug("after delete new position " + newPosition);
-                refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
                 DebugLog.debug("HANDLER_MESSAGE_FROM_LIST_FRAGMENT");
                 mPosition = msg.getData().getInt("position");
@@ -569,26 +568,39 @@ public class MusicPlayFragment extends Fragment {
                 DebugLog.debug("Fragment position " + mPosition + "; ListMode " + musicListMode);
                 switchMusicList();
                 if (musicListMode == 0) {
-                    toPlayMusic(defaultList.get(mPosition), true, handler);
+                    toPlayMusic(defaultList.get(mPosition), true);
                 } else if (musicListMode == 1) {
-                    toPlayMusic(favoriteList.get(mPosition), true, handler);
+                    toPlayMusic(favoriteList.get(mPosition), true);
                 }
                 firstPlay = false;
                 refreshListStatus();
-            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
-                int seekbarProgress = msg.getData().getInt("seekbarProgress");
-                DebugLog.debug("seekBarProgress " + seekbarProgress);
-                sbProgress.setProgress(seekbarProgress);
-                tvCurrentMusicInfo.setText(msg.getData().getString("currentPlayingInfo"));
-                tvCurrentPlayTime.setText(msg.getData().getString("currentTime"));
-                tvMediaTime.setText(msg.getData().getString("mediaTime"));
             }
         }
     };
 
-    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
+    public void setPlayState(boolean state) {
+        // 更新播放状态
+        isPlaying = state;
+        ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+    }
+
+    public void setPositionByServiceListChange(int position) {
+        mPosition = position;
+        // 更新列表高亮状态
+        refreshListStatus();
+    }
+
+    public void setCurrentPlayInfo(int seekbarProgress, String currentMusicInfo, String currentPlayTime, String mediaTime) {
+        // 刷新播放进度及时间
+        sbProgress.setProgress(seekbarProgress);
+        tvCurrentMusicInfo.setText(currentMusicInfo);
+        tvCurrentPlayTime.setText(currentPlayTime);
+        tvMediaTime.setText(mediaTime);
+    }
+
+    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer) {
         initServicePlayHelper();
-        musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
+        musicService.play(mediaFileBean, isRestPlayer, mPosition);
     }
 
     private void changePlayMode() {
@@ -626,5 +638,40 @@ public class MusicPlayFragment extends Fragment {
 
     }
 
+//    返回按钮事件
+//    Button btnBack = (Button) view.findViewById(R.id.btnBack);
+//        btnBack.setOnClickListener(new View.OnClickListener() {
+//        @Override
+//        public void onClick(View view) {
+//            getFragmentManager().popBackStack();
+//        }
+//    });
+
+
+    /*
+    * 现阶段是默认显示默认列表和收藏列表，播放列表需要重新定义,怎么显示才比较合理
+    * 拓展-->后面是否支持创建列表？列表数量是否有限制，显示多少列表比较合理
+    *
+    * 对策一：播放页面中歌的列表-只显示当前列表，
+    *       优点：不受列表数量影响，只加载当前播放的列表，逻辑简单，后期维护方便
+    *       缺点：当前代码逻辑改动较大，ViewPager需要全部改掉
+    *            一个Fragment难以满足各个列表的情况，如默认列表和收藏列表，UI不一样，Adapter也不一样
+    *
+    * 对策二：最多支持创建3/5个自定义列表，展示全部播放列表
+    *       优点：改动简单，延续当前使用的ViewPager框架，直接增加业务逻辑即可
+    *           从用户的交互更友好，不用频繁返回首页切换列表
+    *       缺点：展示所有播放列表，就必须限制列表的个数，否则管理起来太复杂，要创建多个Fragment和Adapter
+    *           后期维护成本很大--
+    *
+    * 最终决策：只显示当前列表，各个类型的列表共用一套Fragment和Adapter，根据列表类型自动适配Adapter和显示UI
+    *       音乐列表的个数可以无限制，使用SQLite数据库框架，联表方式来存储
+    *       列表单独放一个表，音乐信息放一个表（同一首歌可能存在于不同的列表中，所以会存储多条记录）
+    *       查询的时候可以使用联表查询的方式来获取音乐
+    * 播放列表的格式统一，采用默认列表的样式（即歌曲名后面带有一个删除的按钮，不带收藏按钮）
+    * 收藏按钮放置播放页面中
+    *
+    * 最终对策(new)：显示三个列表--（当前播放列表、历史播放列表、上次播放列表），共用一套Fragment和Adapter
+    *
+    * */
 
 }

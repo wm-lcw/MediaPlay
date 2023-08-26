@@ -82,9 +82,9 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     * @author wm
-     * @createTime 2023/7/13 14:46
-     * @description 初始化音乐资源
+     *  初始化音乐资源
+     *  @author wm
+     *  @createTime 2023/8/24 18:15
      */
     public static void initResource() {
         clearResource();
@@ -321,7 +321,7 @@ public class DataRefreshService extends Service {
      * @description 更新数据库中最后播放的信息，
      */
     private static void updateLastInfo() {
-        DebugLog.debug("list-mode-id: " + lastPlayListMode + " " + lastPlayMode + " " + lastMusicId);
+//        DebugLog.debug("list-mode-id: " + lastPlayListMode + " " + lastPlayMode + " " + lastMusicId);
         ContentValues values = new ContentValues();
         values.put("lastPlayListMode", lastPlayListMode);
         values.put("lastPlayMode", lastPlayMode);

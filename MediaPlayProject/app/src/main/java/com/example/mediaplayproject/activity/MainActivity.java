@@ -5,12 +5,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -29,42 +25,21 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
-import android.view.GestureDetector;
-import android.view.KeyEvent;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
-import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
-import com.example.mediaplayproject.fragment.DefaultListFragment;
-import com.example.mediaplayproject.fragment.DiscoveryFragment;
-import com.example.mediaplayproject.fragment.FavoriteListFragment;
 import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
-import com.example.mediaplayproject.fragment.PersonalPageFragment;
-import com.example.mediaplayproject.fragment.ToolsFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
-import com.example.mediaplayproject.utils.MusicPlayerHelper;
-import com.google.android.material.navigation.NavigationView;
-
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -77,16 +52,6 @@ public class MainActivity extends BasicActivity {
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
-
-    /**
-     * 手势滑动水平方向的最小距离
-     */
-    private static final int FLING_MIN_DISTANCE = 50;
-    /**
-     * 手势滑动垂直方向的最小距离
-     */
-    private static final int FLING_MIN_VELOCITY = 0;
-
 
     /**
      * 正在播放的列表
@@ -121,9 +86,9 @@ public class MainActivity extends BasicActivity {
      * MusicPlayService对象，控制音乐播放service类
      */
     private MusicPlayService musicService;
+
     /**
-     * @createTime 2023/2/4 15:02
-     * @description 创建ServiceConnection
+     * ServiceConnection对象
      */
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -133,6 +98,9 @@ public class MainActivity extends BasicActivity {
             if (musicService != null) {
                 // service创建成功的时候立即初始化
                 initServicePlayHelper();
+                // 需要等service起来之后再给Fragment传service
+                mainViewFragment.setDataFromMainActivity(musicService, myFragmentCallBack);
+                musicPlayFragment.setDataFromMainActivity(musicService, musicListMode, mPosition);
             }
         }
 
@@ -144,20 +112,38 @@ public class MainActivity extends BasicActivity {
     };
 
 
-
     final Handler handler = new Handler(Looper.myLooper()) {
         @SuppressLint("ResourceAsColor")
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
-                //service发送的信息，用于更新播放状态的图标
+                // service发送的信息，用于更新播放状态的图标
                 boolean isPlaying = msg.getData().getBoolean("iconType");
-//                ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
-                //接收到service发送的播放状态改变之后，刷新Activity的值（针对未刷新页面的情况）
+                if (musicPlayFragment.isVisible()) {
+                    musicPlayFragment.setPlayState(isPlaying);
+                }
+                if (mainViewFragment.isVisible()) {
+                    mainViewFragment.setPlayState(isPlaying);
+                }
+
                 firstPlay = false;
                 isInitPlayHelper = true;
                 mPosition = musicService.getPosition();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_POSITION) {
+                //service发送的信息，用于删除歌曲后自动播放下一曲或者在通知栏切歌后的mPosition
+                int newPosition = msg.getData().getInt("newPosition");
+                if (musicPlayFragment.isVisible()) {
+                    musicPlayFragment.setPositionByServiceListChange(newPosition);
+                }
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
+                int seekbarProgress = msg.getData().getInt("seekbarProgress");
+                String currentMusicInfo = msg.getData().getString("currentPlayingInfo");
+                String currentPlayTime = msg.getData().getString("currentTime");
+                String mediaTime = msg.getData().getString("mediaTime");
+                if (musicPlayFragment.isVisible()) {
+                    musicPlayFragment.setCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
+                }
             }
         }
     };
@@ -200,8 +186,6 @@ public class MainActivity extends BasicActivity {
 
         // 申请权限
         requestPermission();
-
-
     }
 
 
@@ -215,9 +199,10 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
+     * 申请权限
+     *
      * @author wm
-     * @createTime 2023/2/3 17:47
-     * @description 申请权限
+     * @createTime 2023/8/24 18:10
      */
     private void requestPermission() {
         // 主要是判断安卓11
@@ -256,9 +241,11 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
+     * 判断是否有悬浮窗权限
+     *
+     * @return : boolean
      * @author wm
-     * @createTime 2023/2/3 17:44
-     * @description 判断是否有悬浮窗权限
+     * @createTime 2023/8/24 18:10
      */
     private boolean hasAlertPermission() {
         AppOpsManager appOpsMgr = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
@@ -274,9 +261,11 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
+     * 判断是否有文件存储权限
+     *
+     * @return : boolean
      * @author wm
-     * @createTime 2023/8/3 18:19
-     * @description 判断是否有文件存储权限
+     * @createTime 2023/8/24 18:11
      */
     private boolean hasStorePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -286,9 +275,13 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
+     * 申请权限回调结果，主要针对API<23的情况
+     *
+     * @param requestCode:  请求码
+     * @param permissions:  权限数组
+     * @param grantResults: 请求结果
      * @author wm
-     * @createTime 2023/2/3 17:49
-     * @description 这个方法主要针对SDK<= 23 的情况
+     * @createTime 2023/8/24 18:11
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -305,15 +298,20 @@ public class MainActivity extends BasicActivity {
     }
 
 
+    /**
+     * 初始化操作(音乐资源、Ui布局)
+     *
+     * @author wm
+     * @createTime 2023/8/24 18:08
+     */
     @SuppressLint("ClickableViewAccessibility")
     private void initData() {
-        Toast.makeText(mContext, "已获取存储权限", Toast.LENGTH_SHORT).show();
-
-        //初始化音乐列表资源
+        // 初始化音乐列表资源
         DataRefreshService.initResource();
+
+        // 创建Fragment实例，并加载显示MainViewFragment
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.fl_main_view, mainViewFragment);
@@ -326,9 +324,10 @@ public class MainActivity extends BasicActivity {
         musicListMode = DataRefreshService.getLastPlayListMode();
         mPosition = DataRefreshService.getLastPosition();
 
+        // 初始化播放的列表
         switchMusicList();
 
-        //启动MusicPlayService服务
+        // 启动MusicPlayService服务
         Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
@@ -337,32 +336,22 @@ public class MainActivity extends BasicActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        // 这里应该不用每次都调用，启动app时只调用一次即可，需要处理
-        // 不然initServicePlayHelper刚设置service，下面又在service中获取，相当于是没更新
-        initServicePlayHelper();
-        // 重新进入界面之后都获取一下音量信息和当前音乐列表
+        DebugLog.debug("");
+        // 获取一次音量信息和当前音乐列表
         if (musicService != null) {
-            //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
-//            ivPlayMusic.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
-            //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
             isInitPlayHelper = musicService.getInitResult();
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
             musicListMode = musicService.getMusicListMode();
         }
-
-        mainViewFragment.setDataFromMainActivity(musicService,musicListMode,mPosition,myFragmentCallBack);
-        musicPlayFragment.setDataFromMainActivity(musicService,musicListMode,mPosition);
-        DebugLog.debug("listSize " + musicInfo.size() + "; music service "+ musicService);
     }
 
-
-
     /**
-     * 改变当前的列表
-     * @createTime 2023/8/20 10:35
+     * 根据播放模式设定当前播放列表
+     *
+     * @author wm
+     * @createTime 2023/8/24 18:14
      */
     private void switchMusicList() {
         if (musicListMode == 0) {
@@ -370,16 +359,19 @@ public class MainActivity extends BasicActivity {
         } else if (musicListMode == 1) {
             musicInfo = favoriteList;
         }
-        //保存上次播放的列表来源
+        // 保存上次播放的列表来源
         DataRefreshService.setLastPlayListMode(musicListMode);
-        //改变播放列表的时候，刷新播放器中的音乐列表来源
-        initServicePlayHelper();
     }
 
+    /**
+     *  初始化musicService
+     *  @author wm
+     *  @createTime 2023/8/24 18:18
+     */
     private void initServicePlayHelper() {
+        DebugLog.debug("");
         if (musicService != null) {
-            // 刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
-            // 初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
+            DebugLog.debug("service ");
             musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
             if (!isInitPlayHelper) {
                 isInitPlayHelper = true;
@@ -394,59 +386,60 @@ public class MainActivity extends BasicActivity {
         return R.layout.activity_main;
     }
 
-    /**
-     * 菜单、返回键响应
-     */
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            //调用双击退出函数
-            exitBy2Click();
-        }
-        return false;
-    }
+//    /**
+//     * 菜单、返回键响应
+//     */
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK) {
+//            //调用双击退出函数
+//            exitBy2Click();
+//        }
+//        return false;
+//    }
+//
+//    private static Boolean isExit = false;
+//    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(
+//            1, new BasicThreadFactory.Builder().namingPattern("scheduled-pool-%d").daemon(true).build());
+//
+//    /**
+//     * 双击退出函数
+//     */
+//    private void exitBy2Click() {
+//        if (!isExit) {
+//            // 准备退出
+//            isExit = true;
+//            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+//            // 第一个参数为执行体，第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间。
+//            scheduledExecutorService.scheduleAtFixedRate(() -> {
+//                // 取消退出
+//                isExit = false;
+//            }, 2, 10, TimeUnit.SECONDS);
+//        } else {
+//            BasicApplication.getActivityManager().finishAll();
+//        }
+//    }
 
-    private static Boolean isExit = false;
-    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(
-            1, new BasicThreadFactory.Builder().namingPattern("scheduled-pool-%d").daemon(true).build());
-
-    /**
-     * 双击退出函数
-     */
-    private void exitBy2Click() {
-        if (!isExit) {
-            // 准备退出
-            isExit = true;
-            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-            // 第一个参数为执行体，第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间。
-            scheduledExecutorService.scheduleAtFixedRate(() -> {
-                // 取消退出
-                isExit = false;
-            }, 2, 10, TimeUnit.SECONDS);
-        } else {
-            BasicApplication.getActivityManager().finishAll();
-        }
-    }
-
-    public interface FragmentCallBack{
+    public interface FragmentCallBack {
         /**
-         *  切换Fragment
-         *  @author wm
-         *  @createTime 2023/8/23 18:31
+         * 切换Fragment
+         * @author wm
+         * @createTime 2023/8/23 18:31
          */
         void changeFragment();
     }
 
     public MyFragmentCallBack myFragmentCallBack = new MyFragmentCallBack();
-    public class MyFragmentCallBack implements FragmentCallBack{
 
+    public class MyFragmentCallBack implements FragmentCallBack {
         @Override
         public void changeFragment() {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.addToBackStack(null);
             transaction.replace(R.id.fl_main_view, musicPlayFragment);
             transaction.commit();
-            musicPlayFragment.setDataFromMainActivity(musicService,musicListMode,mPosition);
+            musicPlayFragment.setDataFromMainActivity(musicService, musicListMode, mPosition);
         }
     }
 

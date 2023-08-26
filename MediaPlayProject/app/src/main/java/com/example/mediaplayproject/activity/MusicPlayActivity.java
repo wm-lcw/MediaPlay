@@ -449,7 +449,7 @@ public class MusicPlayActivity extends BasicActivity{
      */
     private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer, Handler handler) {
         initServicePlayHelper();
-        musicService.play(mediaFileBean, isRestPlayer, handler, mPosition);
+        musicService.play(mediaFileBean, isRestPlayer, mPosition);
     }
 
     /**
