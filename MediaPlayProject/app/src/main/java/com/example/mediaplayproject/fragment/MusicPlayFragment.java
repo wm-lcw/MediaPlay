@@ -13,7 +13,6 @@ import android.media.AudioManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,7 +20,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -592,9 +590,11 @@ public class MusicPlayFragment extends Fragment {
         }
     };
 
-    public void setPlayState(boolean state) {
-        // 更新播放状态
+    public void refreshPlayState(boolean state, int newPosition) {
+        DebugLog.debug("refresh play state ");
+        // 更新播放状态和收藏状态
         isPlaying = state;
+        mPosition = newPosition;
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
         boolean isLike = musicInfo.get(mPosition).isLike();
         ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);

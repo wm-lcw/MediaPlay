@@ -34,8 +34,7 @@ import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
 import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.bean.MediaFileBean;
-import com.example.mediaplayproject.fragment.DefaultListFragment;
-import com.example.mediaplayproject.fragment.FavoriteListFragment;
+import com.example.mediaplayproject.fragment.PlayListFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
@@ -97,8 +96,8 @@ public class MusicPlayActivity extends BasicActivity{
     private ViewPager2 musicListViewPager;
     private ArrayList<BaseFragment> viewPagerLists;
     private MusicViewPagerAdapter musicViewPagerAdapter;
-    private DefaultListFragment defaultListFragment;
-    private FavoriteListFragment favoriteListFragment;
+    private PlayListFragment defaultListFragment;
+    private PlayListFragment favoriteListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -398,8 +397,8 @@ public class MusicPlayActivity extends BasicActivity{
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        defaultListFragment = new DefaultListFragment(mContext, defaultList, handler);
-        favoriteListFragment = new FavoriteListFragment(mContext, favoriteList, handler);
+//        defaultListFragment = new DefaultListFragment(mContext, defaultList, handler);
+//        favoriteListFragment = new FavoriteListFragment(mContext, favoriteList, handler);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);

@@ -175,6 +175,7 @@ public class MusicPlayService extends Service {
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
             Bundle bundle = new Bundle();
+            bundle.putInt("position",mPosition);
             bundle.putBoolean("iconType", isPlayingStatus);
             msg.setData(bundle);
             mHandler.sendMessage(msg);

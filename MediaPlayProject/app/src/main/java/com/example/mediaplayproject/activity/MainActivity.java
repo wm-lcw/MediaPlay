@@ -120,8 +120,9 @@ public class MainActivity extends BasicActivity {
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
                 // service发送的信息，用于更新播放状态的图标
                 boolean isPlaying = msg.getData().getBoolean("iconType");
+                int newPosition = msg.getData().getInt("position");
                 if (musicPlayFragment.isVisible()) {
-                    musicPlayFragment.setPlayState(isPlaying);
+                    musicPlayFragment.refreshPlayState(isPlaying, newPosition);
                 }
                 if (mainViewFragment.isVisible()) {
                     mainViewFragment.setPlayState(isPlaying);
