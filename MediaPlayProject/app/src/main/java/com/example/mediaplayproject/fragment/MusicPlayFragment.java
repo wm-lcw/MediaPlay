@@ -54,7 +54,7 @@ public class MusicPlayFragment extends Fragment {
 
     private Context mContext;
     private View playView;
-    private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList;
+    private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
     private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false, isPlaying = false;
@@ -96,8 +96,6 @@ public class MusicPlayFragment extends Fragment {
     private ViewPager2 musicListViewPager;
     private ArrayList<BaseFragment> viewPagerLists;
     private MusicViewPagerAdapter musicViewPagerAdapter;
-//    private DefaultListFragment defaultListFragment;
-//    private FavoriteListFragment favoriteListFragment;
     private PlayListFragment defaultListFragment,favoriteListFragment;
 
 
@@ -180,11 +178,12 @@ public class MusicPlayFragment extends Fragment {
     }
 
     private void bindView() {
-        ivMediaLoop = playView.findViewById(R.id.bt_loop);
-        ivMediaPre = playView.findViewById(R.id.bt_pre);
-        ivMediaPlay = playView.findViewById(R.id.bt_play);
-        ivMediaNext = playView.findViewById(R.id.bt_next);
-        ivMediaList = playView.findViewById(R.id.bt_list);
+        ivMediaLoop = playView.findViewById(R.id.iv_loop);
+        ivMediaPre = playView.findViewById(R.id.iv_pre);
+        ivMediaPlay = playView.findViewById(R.id.iv_play);
+        ivMediaNext = playView.findViewById(R.id.iv_next);
+        ivMediaList = playView.findViewById(R.id.iv_list);
+        ivMediaLike = playView.findViewById(R.id.iv_like);
         sbVolume = playView.findViewById(R.id.sb_volume);
         sbProgress = playView.findViewById(R.id.sb_progress);
         tvCurrentMusicInfo = playView.findViewById(R.id.tv_music_info);
@@ -196,6 +195,7 @@ public class MusicPlayFragment extends Fragment {
         ivMediaPlay.setOnClickListener(mListener);
         ivMediaNext.setOnClickListener(mListener);
         ivMediaList.setOnClickListener(mListener);
+        ivMediaLike.setOnClickListener(mListener);
         sbVolume.setOnSeekBarChangeListener(mSeekBarListener);
         sbProgress.setOnSeekBarChangeListener(mSeekBarListener);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
@@ -241,6 +241,8 @@ public class MusicPlayFragment extends Fragment {
             ivMediaPre.setEnabled(true);
             ivMediaPlay.setEnabled(true);
             ivMediaNext.setEnabled(true);
+            boolean isLike = musicInfo.get(mPosition).isLike();
+            ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
         } else {
             //若列表为空，则播放、上下曲都不可点击
             tvCurrentMusicInfo.setText("");
@@ -299,6 +301,18 @@ public class MusicPlayFragment extends Fragment {
             } else if (view == ivMediaList) {
                 isShowList = true;
                 showFloatView();
+                refreshListStatus();
+            } else if (view == ivMediaLike) {
+                boolean isLike = musicInfo.get(mPosition).isLike();
+                ivMediaLike.setImageResource(!isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
+                musicInfo.get(mPosition).setLike(!isLike);
+                if (!isLike){
+                    // 加入收藏
+                    DataRefreshService.addMusicToFavoriteList(musicInfo.get(mPosition));
+                } else {
+                    // 取消收藏
+                    DataRefreshService.deleteMusicFromFavoriteList(musicInfo.get(mPosition));
+                }
                 refreshListStatus();
             }
         }
@@ -582,6 +596,8 @@ public class MusicPlayFragment extends Fragment {
         // 更新播放状态
         isPlaying = state;
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+        boolean isLike = musicInfo.get(mPosition).isLike();
+        ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
     }
 
     public void setPositionByServiceListChange(int position) {
