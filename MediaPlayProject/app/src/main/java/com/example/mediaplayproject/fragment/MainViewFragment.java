@@ -28,6 +28,7 @@ import com.example.mediaplayproject.activity.MainActivity;
 import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
 import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.DebugLog;
@@ -63,7 +64,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private ToolsFragment toolsFragment;
 
     private LinearLayout llSimplePlayView;
-    private ImageView ivSettings, ivPlayMusic, ivMusicList;
+    private ImageView ivSettings, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow;
     private TextView tvCurrentMusicInfo;
 
     private MainActivity.MyFragmentCallBack myFragmentCallBack;
@@ -189,9 +190,17 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivSettings = mainView.findViewById(R.id.iv_setting);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
         ivMusicList = mainView.findViewById(R.id.iv_current_list);
+        ivDiscovery = mainView.findViewById(R.id.iv_discovery);
+        ivPersonal = mainView.findViewById(R.id.iv_personal);
+        ivTools = mainView.findViewById(R.id.iv_tools);
+        ivShow = mainView.findViewById(R.id.iv_show_list);
         ivSettings.setOnClickListener(mListener);
         ivPlayMusic.setOnClickListener(mListener);
         ivMusicList.setOnClickListener(mListener);
+        ivDiscovery.setOnClickListener(mListener);
+        ivPersonal.setOnClickListener(mListener);
+        ivTools.setOnClickListener(mListener);
+        ivShow.setOnClickListener(mListener);
         llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
 
@@ -278,6 +287,28 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
             firstPlay = false;
+        } else if (view == ivDiscovery){
+            // create musicList
+            DataRefreshService.createNewMusicList("myList");
+
+        } else if (view == ivPersonal){
+            // insert music to musicList
+            List<Long> myListMusic = new ArrayList<>();
+            for (int i = 0; i<5;i++){
+                myListMusic.add(defaultList.get(i).getId());
+            }
+            DataRefreshService.insertCustomerMusic("myList",myListMusic);
+
+        } else if (view == ivTools){
+            // delete musicList
+            List<Long> myListMusic = new ArrayList<>();
+            for (int i = 0; i<2;i++){
+                myListMusic.add(defaultList.get(i).getId());
+            }
+            DataRefreshService.deleteCustomerMusic("myList",myListMusic);
+        } else if (view == ivShow){
+            List<MusicListBean> customerList = DataRefreshService.getCustomerList();
+            DebugLog.debug(""+customerList);
         }
     };
 

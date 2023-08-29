@@ -70,7 +70,7 @@
 
 
         <ImageView
-            android:id="@+id/bt_music"
+            android:id="@+id/iv_show_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -85,12 +85,14 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/iv_discovery"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dp_55"
                 android:layout_weight="1"
                 android:src="@mipmap/ic_discovery_nor"/>
 
             <ImageView
+                android:id="@+id/iv_personal"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dp_45"
                 android:layout_weight="1"
@@ -98,6 +100,7 @@
                 android:src="@mipmap/ic_personal_nor" />
 
             <ImageView
+                android:id="@+id/iv_tools"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dp_45"
                 android:layout_weight="1"
