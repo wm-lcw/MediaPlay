@@ -32,8 +32,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
-import com.example.mediaplayproject.base.BaseFragment;
+import com.example.mediaplayproject.adapter.ListViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
@@ -50,51 +49,30 @@ import java.util.List;
  */
 public class MusicPlayFragment extends Fragment {
 
-    private Context mContext;
+    private final Context mContext;
     private View playView;
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
-    private boolean isShowList = false, mRegistered = false, firstPlay = true, isInitPlayHelper = false, isPlaying = false;
+    private boolean isShowList = false, mRegistered = false, firstPlay = true, isPlaying = false;
     private LinearLayout mFloatLayout;
-    private WindowManager.LayoutParams wmParams;
     private WindowManager mWindowManager;
     private AudioManager mAudioManager;
+    private WindowManager.LayoutParams wmParams;
+    private ArrayList<PlayListFragment> viewPagerLists;
+    private Handler mActivityHandle;
+
     private MusicBroadcastReceiver mMusicBroadcastReceiver;
     private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
     private final String VOLUME_CHANGE_ACTION = "android.media.VOLUME_CHANGED_ACTION";
     private final String VOLUME_MUTE = "android.media.STREAM_MUTE_CHANGED_ACTION";
-    /**
-     * 正在播放的列表
-     */
+
     private List<MediaFileBean> musicInfo = new ArrayList<>();
-    /**
-     * 默认的列表
-     */
     private List<MediaFileBean> defaultList = new ArrayList<>();
-    /**
-     * 收藏的列表
-     */
     private List<MediaFileBean> favoriteList = new ArrayList<>();
-    /**
-     * 当前播放歌曲的下标
-     */
     private int mPosition = 0;
-    /**
-     * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
-     * 主要是控制播放上下曲的position
-     */
     private int playMode = 0;
-
-    /**
-     * musicListMode:播放的来源 0->默认列表; 1->收藏列表; 后面可以扩展其他的列表
-     */
-    private int musicListMode = 0;
-
-    private ViewPager2 musicListViewPager;
-    private ArrayList<BaseFragment> viewPagerLists;
-    private MusicViewPagerAdapter musicViewPagerAdapter;
-    private PlayListFragment defaultListFragment,favoriteListFragment;
+    private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
 
 
     /**
@@ -137,10 +115,10 @@ public class MusicPlayFragment extends Fragment {
         DebugLog.debug("");
     }
 
-    public void setDataFromMainActivity(MusicPlayService service, int listMode, int position) {
+    public void setDataFromMainActivity(MusicPlayService service, String listName, int position) {
         DebugLog.debug("");
         musicService = service;
-        musicListMode = listMode;
+        musicListName = listName;
         mPosition = position;
     }
 
@@ -171,7 +149,7 @@ public class MusicPlayFragment extends Fragment {
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         playMode = DataRefreshService.getLastPlayMode();
-        musicListMode = DataRefreshService.getLastPlayListMode();
+        musicListName = DataRefreshService.getLastPlayListName();
         mPosition = DataRefreshService.getLastPosition();
     }
 
@@ -208,24 +186,20 @@ public class MusicPlayFragment extends Fragment {
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             isPlaying = musicService.isPlaying();
-            //isInitPlayHelper：是否已经初始化; firstPlay :首次播放
-            isInitPlayHelper = musicService.getInitResult();
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
-            musicListMode = musicService.getMusicListMode();
-            isInitPlayHelper = true;
+            musicListName = musicService.getMusicListName();
         }
     }
 
     private void switchMusicList() {
-        if (musicListMode == 0) {
-            musicInfo = defaultList;
-        } else if (musicListMode == 1) {
-            musicInfo = favoriteList;
+        List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(musicListName);
+        if (tempList != null && tempList.size() > 0){
+            // 更新播放列表等数据
+            musicInfo = tempList;
         }
-        //保存上次播放的列表来源
-        DataRefreshService.setLastPlayListMode(musicListMode);
+
         initServicePlayHelper();
     }
 
@@ -241,6 +215,7 @@ public class MusicPlayFragment extends Fragment {
             ivMediaNext.setEnabled(true);
             boolean isLike = musicInfo.get(mPosition).isLike();
             ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
+            ivMediaLike.setEnabled(true);
         } else {
             //若列表为空，则播放、上下曲都不可点击
             tvCurrentMusicInfo.setText("");
@@ -249,6 +224,7 @@ public class MusicPlayFragment extends Fragment {
             ivMediaPre.setEnabled(false);
             ivMediaPlay.setEnabled(false);
             ivMediaNext.setEnabled(false);
+            ivMediaLike.setEnabled(false);
         }
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
 
@@ -275,7 +251,7 @@ public class MusicPlayFragment extends Fragment {
         if (musicService != null) {
             //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
             //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
-            musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
+            musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
         }
     }
 
@@ -309,7 +285,7 @@ public class MusicPlayFragment extends Fragment {
                     DataRefreshService.addMusicToFavoriteList(musicInfo.get(mPosition));
                 } else {
                     // 取消收藏
-                    DataRefreshService.deleteMusicFromFavoriteList(musicInfo.get(mPosition));
+                    DataRefreshService.removeFavoriteMusic(musicInfo.get(mPosition));
                 }
                 refreshListStatus();
             }
@@ -333,7 +309,6 @@ public class MusicPlayFragment extends Fragment {
             if (seekBar == sbProgress) {
                 musicService.removeMessage();
             }
-
         }
 
         @Override
@@ -343,7 +318,6 @@ public class MusicPlayFragment extends Fragment {
                 int maxProgress = seekBar.getMax();
                 musicService.changeSeekbarProgress(progress, maxProgress);
             }
-
         }
     };
 
@@ -354,21 +328,21 @@ public class MusicPlayFragment extends Fragment {
      */
     private void createFloatView() {
         wmParams = new WindowManager.LayoutParams();
-        //获取的是WindowManagerImpl.CompatModeWrapper
+        // 获取的是WindowManagerImpl.CompatModeWrapper
         mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
-        //设置window type
+        // 设置window type
         wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        //设置背景为透明，否则滑动ListView会出现残影
+        // 设置背景为透明，否则滑动ListView会出现残影
         wmParams.format = PixelFormat.TRANSPARENT;
         // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        //调整悬浮窗显示的停靠位置为右侧底部
+        // 调整悬浮窗显示的停靠位置为左侧顶部
         wmParams.gravity = Gravity.LEFT | Gravity.TOP;
-        // 以屏幕右下角为原点，设置x、y初始值，相对于gravity
+        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = 0;
         wmParams.y = 0;
 
-        //设置悬浮窗口长宽数据
+        // 设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
         initFloatView();
@@ -382,22 +356,24 @@ public class MusicPlayFragment extends Fragment {
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
-        musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        defaultListFragment = new PlayListFragment(mContext, defaultList, Constant.LIST_MODE_DEFAULT,handler);
-        favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE, handler);
+        ViewPager2 musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
+        PlayListFragment defaultListFragment = new PlayListFragment(mContext, defaultList, Constant.LIST_MODE_DEFAULT_NAME, handler);
+        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, handler);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
-        musicViewPagerAdapter = new MusicViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
-        musicListViewPager.setAdapter(musicViewPagerAdapter);
+        ListViewPagerAdapter listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
+        musicListViewPager.setAdapter(listViewPagerAdapter);
     }
 
+
     /**
-     * @createTime 2023/8/14 10:19
-     * @description 显示悬浮窗
+     *  显示悬浮窗
+     *  @author wm
+     *  @createTime 2023/9/2 14:18
      */
     private void showFloatView() {
-        //添加mFloatLayout
+        // 添加mFloatLayout
         mWindowManager.addView(mFloatLayout, wmParams);
     }
 
@@ -464,7 +440,7 @@ public class MusicPlayFragment extends Fragment {
             } else if (Constant.DELETE_MUSIC_ACTION.equals(intent.getAction())) {
                 //删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
                 int deletePosition = intent.getExtras().getInt("musicPosition");
-                int listSource = intent.getExtras().getInt("musicListSource");
+                String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
             }
         }
@@ -476,15 +452,15 @@ public class MusicPlayFragment extends Fragment {
      * @createTime 2023/8/16 22:54
      * @description 删除音乐的处理
      */
-    private void dealDeleteMusic(int listSource, int deletePosition) {
-        // 删除的音乐列表是当前正在播放的列表
-        if (musicListMode == listSource) {
+    private void dealDeleteMusic(String listSource, int deletePosition) {
+        // 删除的音乐列表是当前正在播放的列表,这里要判断的逻辑需要改动，情况比较复杂
+        if (musicListName.equalsIgnoreCase(listSource)) {
             if (musicInfo.size() <= 0) {
                 // 如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
                 stopPlayByDelete();
             } else {
                 // 刷新列表Ui高亮状态
-                int result = viewPagerLists.get(listSource).checkRefreshPosition(deletePosition);
+                int result = viewPagerLists.get(0).checkRefreshPosition(deletePosition);
                 if (result == Constant.RESULT_BEFORE_CURRENT_POSITION) {
                     // 删除的是小于当前播放下标的歌曲，只刷新service中的position即可，UI操作在Fragment已完成
                     mPosition--;
@@ -496,20 +472,9 @@ public class MusicPlayFragment extends Fragment {
                     musicService.setPosition(mPosition);
                     musicService.playNext();
                     mPosition = musicService.getPosition();
-                    viewPagerLists.get(listSource).setSelectPosition(mPosition);
-                    viewPagerLists.get(listSource).setSelection(mPosition);
+                    viewPagerLists.get(0).setSelectPosition(mPosition);
+                    viewPagerLists.get(0).setSelection(mPosition);
                 }
-            }
-        } else {
-            switch (listSource) {
-                case Constant.LIST_MODE_FAVORITE:
-                    if (favoriteList.size() <= 0 && viewPagerLists.size() > 0) {
-                        DebugLog.debug("to DefaultList ");
-                        toDefaultList();
-                    }
-                    break;
-                default:
-                    break;
             }
         }
 
@@ -522,25 +487,16 @@ public class MusicPlayFragment extends Fragment {
     private void stopPlayByDelete() {
         DebugLog.debug("stopPlayByDeleteMusic");
         musicService.toStop();
-        musicListMode = 0;
         mPosition = 0;
         firstPlay = true;
-        isInitPlayHelper = false;
-        switchMusicList();
+        isPlaying = false;
         //UI上刷新播放信息和播放状态
         initPlayStateAndInfo();
-        //刷新播放按钮
-        ivMediaPlay.setImageResource(R.mipmap.media_play);
         //刷新通知栏的播放按钮状态
-        musicService.updateNotificationShow(0, false);
-        //保存最后播放歌曲的id--直接保存
+        musicService.updateNotificationShow(-1, false);
+        // 直接保存默认列表的第一首歌作为最后的播放，避免此时关闭应用，导致下次打开时无法获取上次播放的信息
+        DataRefreshService.setLastPosition(mPosition);
         DataRefreshService.setLastMusicId(defaultList.get(mPosition).getId());
-        toDefaultList();
-    }
-
-    private void toDefaultList() {
-        musicListViewPager.setCurrentItem(0);
-        musicViewPagerAdapter.notifyItemChanged(0);
     }
 
     /**
@@ -573,31 +529,19 @@ public class MusicPlayFragment extends Fragment {
                     int afterVolume = (int) (volume / 1.5);
                     sbVolume.setProgress(afterVolume);
                 }
-            } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
-                DebugLog.debug("HANDLER_MESSAGE_FROM_LIST_FRAGMENT");
-                mPosition = msg.getData().getInt("position");
-                musicListMode = msg.getData().getInt("musicListMode");
-                DebugLog.debug("Fragment position " + mPosition + "; ListMode " + musicListMode);
-                switchMusicList();
-                if (musicListMode == 0) {
-                    toPlayMusic(defaultList.get(mPosition), true);
-                } else if (musicListMode == 1) {
-                    toPlayMusic(favoriteList.get(mPosition), true);
-                }
-                firstPlay = false;
-                refreshListStatus();
             }
         }
     };
 
-    public void refreshPlayState(boolean state, int newPosition) {
+    public void refreshPlayState(boolean state, int newPosition, String musicListName, List<MediaFileBean> musicInfo) {
         DebugLog.debug("refresh play state ");
         // 更新播放状态和收藏状态
         isPlaying = state;
         mPosition = newPosition;
-        ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
-        boolean isLike = musicInfo.get(mPosition).isLike();
-        ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
+        this.musicListName = musicListName;
+        this.musicInfo = musicInfo;
+        initPlayStateAndInfo();
+        refreshListStatus();
     }
 
     public void setPositionByServiceListChange(int position) {
@@ -642,16 +586,15 @@ public class MusicPlayFragment extends Fragment {
     }
 
     private void refreshListStatus() {
-        DebugLog.debug("musicListMode " + musicListMode + "; position " + mPosition);
-        for (BaseFragment fragment : viewPagerLists) {
-            if (fragment.getListMode() == musicListMode) {
+        DebugLog.debug("musicListName " + musicListName + "; position " + mPosition);
+        for (PlayListFragment fragment : viewPagerLists) {
+            if (musicListName.equalsIgnoreCase(fragment.getListName())) {
                 fragment.setSelectPosition(mPosition);
                 fragment.setSelection(mPosition);
             } else {
                 fragment.setSelectPosition(-1);
             }
         }
-
     }
 
 //    返回按钮事件

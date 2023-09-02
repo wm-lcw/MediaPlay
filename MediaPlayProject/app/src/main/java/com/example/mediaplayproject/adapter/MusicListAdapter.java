@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * @author wm
  * @Classname MusicListAdapter
- * @Description TODO
  * @Version 1.0.0
  * @Date 2023/8/26 14:57
  * @Created by wm
@@ -34,12 +33,27 @@ public class MusicListAdapter extends BaseAdapter {
     private int text_selected_color;
     private int bg_selected_color;
     private ColorStateList colors;
-    private int listMode;
+    private String listName;
+
+    public String getListName() {
+        return listName;
+    }
+
+    public void changePlayList(List<MediaFileBean> list, String listName){
+        this.listName = listName;
+        this.musicInfoList = list;
+        notifyDataSetChanged();
+    }
+
+    public void setListName(String listName) {
+        this.listName = listName;
+        notifyDataSetChanged();
+    }
 
     @SuppressLint("UseCompatLoadingForColorStateLists")
-    public MusicListAdapter(Context mContext, int listMode, List<MediaFileBean> musicList) {
+    public MusicListAdapter(Context mContext, String listName, List<MediaFileBean> musicList) {
         this.mContext = mContext;
-        this.listMode = listMode;
+        this.listName = listName;
         this.musicInfoList = musicList;
         Resources resources = mContext.getResources();
         // 文字选中的颜色
@@ -89,19 +103,19 @@ public class MusicListAdapter extends BaseAdapter {
         } else {
             holder.tvMusicName.setTextColor(colors);
         }
-        if (listMode == Constant.LIST_MODE_DEFAULT) {
+        if (listName == Constant.LIST_MODE_DEFAULT_NAME) {
             // 默认列表不支持删除操作
             holder.ivDeleteMusic.setEnabled(false);
             holder.ivDeleteMusic.setVisibility(View.GONE);
         } else {
             // 监听item里面的删除按钮事件，需要在自定义Adapter的getView方法首个参数前添加final关键字(final int position...)
             convertView.findViewById(R.id.iv_delete_music).setOnClickListener(v -> {
-                DataRefreshService.deleteMusicFromFavoriteList(musicInfoList.get(position));
-                DebugLog.debug("delete position " + position);
+                // 这里删除歌曲需要传递列表的具体信息
+                DataRefreshService.deleteMusic(listName, position);
+                DebugLog.debug("delete listName " + listName + "position " + position);
                 notifyDataSetChanged();
             });
         }
-
         return convertView;
     }
 

@@ -126,7 +126,7 @@
 
             <LinearLayout
                 android:layout_gravity="center"
-                android:layout_width="@dimen/dp_150"
+                android:layout_width="@dimen/dp_180"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/dp_50">
             <TextView
@@ -141,10 +141,11 @@
                 android:layout_gravity="center"
                 android:layout_width="@dimen/dp_30"
                 android:layout_height="@dimen/dp_30"
-                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginLeft="@dimen/dp_30"
                 android:src="@mipmap/media_play" />
 
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/iv_current_list"
                 android:layout_width="25dp"
                 android:layout_height="27dp"

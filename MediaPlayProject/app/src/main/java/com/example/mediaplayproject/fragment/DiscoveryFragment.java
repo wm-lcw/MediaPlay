@@ -15,7 +15,7 @@ import com.example.mediaplayproject.base.BaseFragment;
 /**
  * @author wm
  */
-public class DiscoveryFragment extends BaseFragment {
+public class DiscoveryFragment extends Fragment {
 
     private static DiscoveryFragment instance;
     public static DiscoveryFragment getInstance() {
@@ -34,30 +34,5 @@ public class DiscoveryFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_discovery, container, false);
-    }
-
-    @Override
-    public int getListMode() {
-        return 0;
-    }
-
-    @Override
-    public void setSelectPosition(int position) {
-
-    }
-
-    @Override
-    public void setSelection(int position) {
-
-    }
-
-    @Override
-    public int checkRefreshPosition(int deletePosition) {
-        return 0;
-    }
-
-    @Override
-    public void refreshListView() {
-
     }
 }

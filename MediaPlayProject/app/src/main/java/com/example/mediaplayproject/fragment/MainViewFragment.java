@@ -1,7 +1,10 @@
 package com.example.mediaplayproject.fragment;
 
+import static com.example.mediaplayproject.base.BasicApplication.getApplication;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,25 +15,26 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
-import android.os.Looper;
+import android.os.Message;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
-import com.example.mediaplayproject.adapter.MusicViewPagerAdapter;
-import com.example.mediaplayproject.base.BaseFragment;
+import com.example.mediaplayproject.adapter.MainViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.google.android.material.navigation.NavigationView;
 
@@ -56,9 +60,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private DrawerLayout drawerLayout;
     private GestureDetector mGestureDetector;
 
-    private MusicViewPagerAdapter mainViewPagerAdapter;
+    private MainViewPagerAdapter mainViewPagerAdapter;
     private ViewPager2 musicListViewPager;
-    private ArrayList<BaseFragment> mainViewPagerLists;
+    private ArrayList<Fragment> mainViewPagerLists;
     private DiscoveryFragment discoveryFragment;
     private PersonalPageFragment personalPageFragment;
     private ToolsFragment toolsFragment;
@@ -69,39 +73,16 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     private MainActivity.MyFragmentCallBack myFragmentCallBack;
 
-    /**
-     * 正在播放的列表
-     */
     private List<MediaFileBean> musicInfo = new ArrayList<>();
-    /**
-     * 默认的列表
-     */
     private List<MediaFileBean> defaultList = new ArrayList<>();
-    /**
-     * 收藏的列表
-     */
     private List<MediaFileBean> favoriteList = new ArrayList<>();
-    /**
-     * 当前播放歌曲的下标
-     */
     private int mPosition = 0;
-    /**
-     * playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
-     * 主要是控制播放上下曲的position
-     */
     private int playMode = 0;
-
-    /**
-     * musicListMode:播放的来源 0->默认列表; 1->收藏列表; 后面可以扩展其他的列表
-     */
-    private int musicListMode = 0;
-
-    private boolean firstPlay = true, isInitPlayHelper = false, isPlaying = false;
-
-    /**
-     * MusicPlayService对象，控制音乐播放service类
-     */
+    private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
+    private boolean firstPlay = true, isPlaying = false;
     private MusicPlayService musicService;
+
+    private Handler mActivityHandle;
 
     public MainViewFragment(Context context) {
         mContext = context;
@@ -115,7 +96,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
         return instance;
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -135,7 +115,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     @Override
     public void onStart() {
         super.onStart();
-        DebugLog.debug("");
         initMusicSource();
     }
 
@@ -154,9 +133,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      * 要等Activity获取service之后调用该方法传service过来，再去做service相关的初始化工作
      * 该方法调用时机--处于onResume到Fragment运行的中间阶段
      */
-    public void setDataFromMainActivity(MusicPlayService service, MainActivity.MyFragmentCallBack fragmentCallBack) {
+    public void setDataFromMainActivity(MusicPlayService service, Handler handler, MainActivity.MyFragmentCallBack fragmentCallBack) {
         DebugLog.debug("");
         musicService = service;
+        this.mActivityHandle = handler;
+
         myFragmentCallBack = fragmentCallBack;
         // 进入界面获取一下音量信息和当前音乐列表
         getInfoFromService();
@@ -173,7 +154,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         playMode = DataRefreshService.getLastPlayMode();
-        musicListMode = DataRefreshService.getLastPlayListMode();
+        musicListName = DataRefreshService.getLastPlayListName();
         mPosition = DataRefreshService.getLastPosition();
     }
 
@@ -212,7 +193,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         mainViewPagerLists.add(discoveryFragment);
         mainViewPagerLists.add(personalPageFragment);
         mainViewPagerLists.add(toolsFragment);
-        mainViewPagerAdapter = new MusicViewPagerAdapter((FragmentActivity) mContext, mainViewPagerLists);
+        mainViewPagerAdapter = new MainViewPagerAdapter((FragmentActivity) mContext, mainViewPagerLists);
         musicListViewPager.setAdapter(mainViewPagerAdapter);
 
         // 侧滑栏的监听设定
@@ -230,12 +211,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private void getInfoFromService(){
         if (musicService != null) {
             ivPlayMusic.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
-            isInitPlayHelper = musicService.getInitResult();
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
             isPlaying = musicService.isPlaying();
-            musicListMode = musicService.getMusicListMode();
+            musicListName = musicService.getMusicListName();
         }
     }
 
@@ -246,12 +226,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      */
     @SuppressLint("SetTextI18n")
     private void initPlayStateAndInfo() {
-        if (musicListMode == 0) {
-            musicInfo = defaultList;
-        } else if (musicListMode == 1) {
-            musicInfo = favoriteList;
-        }
-
+        musicInfo = DataRefreshService.getMusicListByName(musicListName);
         //获取音乐列表之后，若是列表为不空，则将当前下标的歌曲信息显示出来
         if (musicInfo.size() > 0) {
             tvCurrentMusicInfo.setText(musicInfo.get(mPosition).getTitle());
@@ -274,9 +249,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     private void initServicePlayHelper() {
         if (musicService != null) {
-            //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
-            //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
-            musicService.initPlayData(musicInfo, mPosition, musicListMode, playMode);
+            // 刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
+            // 初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
+            musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
         }
     }
 
@@ -290,7 +265,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         } else if (view == ivDiscovery){
             // create musicList
             DataRefreshService.createNewMusicList("myList");
-
         } else if (view == ivPersonal){
             // insert music to musicList
             List<Long> myListMusic = new ArrayList<>();
@@ -337,6 +311,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return mGestureDetector.onTouchEvent(event);
+//        return false;
     }
 
     /**
@@ -365,13 +340,21 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      *  @author wm
      *  @createTime 2023/8/24 19:23
      */
-    public void setPlayState(boolean isPlaying) {
-        ivPlayMusic.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
-    }
+    public void refreshPlayState(boolean isPlaying, int mPosition, String musicListName, List<MediaFileBean> musicInfo) {
+        this.isPlaying = isPlaying;
+        this.mPosition = mPosition;
+        this.musicListName = musicListName;
+        this.musicInfo = musicInfo;
 
+        // 刷新播放状态信息
+        initPlayStateAndInfo();
+    }
 
     /*
     * 列表主页面->点击展开列表-传列表给ShowListFragment
     * -->点击列表中的歌曲-->回调Activity-->跳转到PlayFragment直接播放
+    *
+    * 播放列表的标志位--用什么去判定当前的播放列表
+    * 主页的列表管理界面
     * */
 }

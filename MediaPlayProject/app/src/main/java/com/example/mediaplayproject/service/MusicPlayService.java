@@ -34,10 +34,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @ClassName: MusicPlayService
  * @Description: 音乐播放器service，用于支持后台播放
- * @Author: wm
- * @CreateDate: 2023/2/4
  */
 public class MusicPlayService extends Service {
 
@@ -46,7 +43,7 @@ public class MusicPlayService extends Service {
     private Handler mHandler;
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private int mPosition = 0;
-    private IBinder myBinder = new MyBinder();
+    private final IBinder myBinder = new MyBinder();
     private MusicReceiver musicReceiver;
     private boolean firstPlay = true, isInitPlayHelper = false;
     private RemoteViews remoteViews;
@@ -63,11 +60,7 @@ public class MusicPlayService extends Service {
      * 主要是控制播放上下曲的position
      */
     private int playMode = 0;
-
-    /**
-     * musicListMode:播放的来源 0->默认列表; 1->收藏列表; 后面可以扩展其他的列表
-     */
-    private int musicListMode = 0;
+    private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
 
     @Override
     public void onCreate() {
@@ -123,10 +116,10 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/11 15:44
      * @description 将Activity中的一些属性和状态同步到Service中
      */
-    public void initPlayData(List<MediaFileBean> musicInfo, int position, int musicListMode, int playMode) {
+    public void initPlayData(List<MediaFileBean> musicInfo, int position, String musicListName, int playMode) {
         this.musicInfo = musicInfo;
         this.mPosition = position;
-        this.musicListMode = musicListMode;
+        this.musicListName = musicListName;
         this.playMode = playMode;
     }
 
@@ -141,11 +134,9 @@ public class MusicPlayService extends Service {
         helper = MusicPlayerHelper.getInstance();
         helper.initData(handler);
         //实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
-        helper.setOnCompletionListener(mp -> {
-            playNextEnd();
-        });
+        helper.setOnCompletionListener(mp -> playNextEnd());
         isInitPlayHelper = true;
-        //初始化之后再显示通知栏
+        // 初始化之后再显示通知栏
         showNotify();
     }
 
@@ -176,7 +167,7 @@ public class MusicPlayService extends Service {
             msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
             Bundle bundle = new Bundle();
             bundle.putInt("position",mPosition);
-            bundle.putBoolean("iconType", isPlayingStatus);
+            bundle.putBoolean("isPlayingStatus", isPlayingStatus);
             msg.setData(bundle);
             mHandler.sendMessage(msg);
             updateNotificationShow(mPosition, isPlayingStatus);
@@ -201,13 +192,13 @@ public class MusicPlayService extends Service {
      */
     public void playPre() {
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
-        if (playMode == 0 || playMode == 2) {
+        if (playMode == Constant.PLAY_MODE_LOOP || playMode == Constant.PLAY_MODE_SINGLE) {
             //如果当前是第一首，则播放最后一首
             if (mPosition <= 0) {
                 mPosition = musicInfo.size();
             }
             mPosition--;
-        } else if (playMode == 1) {
+        } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
             //随机播放
             mPosition = getRandomPosition();
         }
@@ -220,13 +211,13 @@ public class MusicPlayService extends Service {
      */
     public void playNext() {
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
-        if (playMode == 0 || playMode == 2) {
+        if (playMode == Constant.PLAY_MODE_LOOP || playMode == Constant.PLAY_MODE_SINGLE) {
             mPosition++;
             //如果下一曲大于歌曲数量则取第一首
             if (mPosition >= musicInfo.size()) {
                 mPosition = 0;
             }
-        } else if (playMode == 1) {
+        } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
             //随机播放
             mPosition = getRandomPosition();
         }
@@ -285,9 +276,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title getInitResult
-     * @author wm
      * @createTime 2023/2/8 16:12
      * @description 描述该方法的功能
      */
@@ -320,14 +308,11 @@ public class MusicPlayService extends Service {
         playMode = mode;
     }
 
-    public int getMusicListMode() {
-        return musicListMode;
+    public String getMusicListName() {
+        return musicListName;
     }
 
     /**
-     * @version V1.0
-     * @Title createNotificationChannel
-     * @author wm
      * @createTime 2023/2/8 14:33
      * @description 创建通知栏通道
      */
@@ -345,9 +330,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title showNotify
-     * @author wm
      * @createTime 2023/2/8 14:32
      * @description 显示通知栏
      */
@@ -383,10 +365,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @return RemoteViews
-     * @version V1.0
-     * @Title getContentView
-     * @author wm
      * @createTime 2023/2/8 14:32
      * @description 获取通知栏布局对象
      */
@@ -416,18 +394,12 @@ public class MusicPlayService extends Service {
         //为close控件注册事件
         mRemoteViews.setOnClickPendingIntent(R.id.iv_notify_close, closePendingIntent);
 
-        //若音乐列表不为空，初始化通知栏的歌曲信息
-        if (musicInfo.size() > 0) {
-            mRemoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(mPosition).getTitle());
-            mRemoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(mPosition).getArtist());
-        }
+        // 若音乐列表不为空，初始化通知栏的歌曲信息
+        setNotificationEnable(mRemoteViews, musicInfo.size()>0);
         return mRemoteViews;
     }
 
     /**
-     * @version V1.0
-     * @Title registerMusicReceiver
-     * @author wm
      * @createTime 2023/2/8 16:15
      * @description 注册动态广播
      */
@@ -442,12 +414,8 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @author wm
-     * @version V1.0
-     * @Title
      * @createTime 2023/2/8 16:15
      * @description 广播接收器 , 接收来自通知栏的广播
-     * @return
      */
     public class MusicReceiver extends BroadcastReceiver {
         @Override
@@ -477,9 +445,6 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title closeApp
-     * @author wm
      * @createTime 2023/2/13 15:07
      * @description 点击通知栏按钮关闭整个应用
      */
@@ -489,14 +454,12 @@ public class MusicPlayService extends Service {
 
 
     /**
-     * @version V1.0
-     * @Title sendMessageRefreshPosition
-     * @author wm
-     * @createTime 2023/2/13 15:16
-     * @description 发送信息给Activity更新position
+     *  发送信息给Activity更新position
+     *  @author wm
+     *  @createTime 2023/8/31 15:14
      */
     private void sendMessageRefreshPosition() {
-        //发送Message给MusicPlayFragment，更新删除后的新position
+        //发送Message给MainActivity，更新删除后的新position
         Message msg = new Message();
         msg.what = Constant.HANDLER_MESSAGE_REFRESH_POSITION;
         Bundle bundle = new Bundle();
@@ -506,30 +469,24 @@ public class MusicPlayService extends Service {
     }
 
     /**
-     * @version V1.0
-     * @Title toStop
-     * @author wm
      * @createTime 2023/2/12 22:08
      * @description 若当前播放的是收藏列表且删除了所有歌曲，则停止播放
      */
     public void toStop() {
         helper.stop();
-        //若收藏列表为空之后，播放的列表转为默认列表；需要刷新Activity和通知栏的内容
-        //先通知Activity修改播放列表及mPosition，再调用Service中的initPlayHelper来重新显示通知栏
+        // 若收藏列表为空之后，播放的列表转为默认列表；需要刷新Activity和通知栏的内容
+        // 先通知Activity修改播放列表及mPosition，再调用Service中的initPlayHelper来重新显示通知栏
         firstPlay = true;
     }
 
     /**
      * @param position     歌曲位置, changeToPlay 歌曲位置
      * @param changeToPlay true表示接下来的状态是播放，false接下来的状态是暂停
-     * @return
-     * @version V1.0
-     * @Title updateNotificationShow
-     * @author wm
-     * @createTime 2023/2/8 16:16
      * @description 更改通知的信息和UI
      */
     public void updateNotificationShow(int position, boolean changeToPlay) {
+        boolean enable = position == -1;
+        setNotificationEnable(remoteViews, !enable);
         if (changeToPlay) {
             remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
         } else {
@@ -537,13 +494,38 @@ public class MusicPlayService extends Service {
         }
         //封面专辑
 //        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
-        //歌曲名
+
         remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
-        //歌手名
         remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
 
         //发送通知
         notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    /**
+     *  设定通知栏的状态
+     *  @author wm
+     *  @createTime 2023/8/31 18:47
+     * @param enable: true 可用； false不可用
+     */
+    private void setNotificationEnable(RemoteViews rv, boolean enable){
+        if (enable){
+            rv.setTextViewText(R.id.tv_song_title, musicInfo.get(mPosition).getTitle());
+            rv.setTextViewText(R.id.tv_song_artist, musicInfo.get(mPosition).getArtist());
+            if (isPlaying()) {
+                rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
+            } else {
+                rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
+            }
+        } else {
+            // 当前播放列表为空的情况
+            rv.setTextViewText(R.id.tv_song_title,"");
+            rv.setTextViewText(R.id.tv_song_artist, "");
+            rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
+        }
+        rv.setBoolean(R.id.btn_play,"setEnabled",enable);
+        rv.setBoolean(R.id.btn_play_prev,"setEnabled",enable);
+        rv.setBoolean(R.id.btn_play_next,"setEnabled",enable);
     }
 
 }

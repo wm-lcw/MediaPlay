@@ -19,7 +19,6 @@ import com.example.mediaplayproject.utils.SearchFiles;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,37 +31,21 @@ public class DataRefreshService extends Service {
     private static Context context;
     private static SQLiteDatabase db;
 
-    /**
-     * 自定义音乐列表的集合
-     */
     private static HashMap<String, MusicListBean> customerListsMap = new HashMap<>();
-    /**
-     * 默认列表的集合
-     */
     private static HashMap<Long, MediaFileBean> defaultListMap = new HashMap<>();
-
-    /**
-     * 从数据库中获取的收藏列表标记
-     */
     private static HashMap<Long, Integer> musicListFromData = new HashMap<>();
-    /**
-     * 默认的列表
-     */
     private static List<MediaFileBean> defaultList = new ArrayList<>();
-    /**
-     * 收藏的列表
-     */
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
+    private static List<MediaFileBean> historyList = new ArrayList<>();
+    private static HashMap<Long, MediaFileBean> historyListMap = new HashMap<>();
 
-    private static int lastPlayListMode = 0;
+    private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
     private static int lastPlayMode = 0;
     private static int lastPosition = 0;
     private static long lastMusicId = 0;
 
     private final static String FAVORITE_LIST_TABLE_NAME = "musiclistrecord";
-
     private final static String LAST_MUSIC_INFO_TABLE_NAME = "lastplayinforecord";
-
     private final static String CUSTOMER_LIST_TABLE_NAME = "Playlist";
     private final static String CUSTOMER_MUSIC_TABLE_NAME = "Music";
 
@@ -223,7 +206,7 @@ public class DataRefreshService extends Service {
         // 存在数据才返回true
         if (cursor.moveToFirst()) {
             do {
-                lastPlayListMode = cursor.getInt(cursor.getColumnIndex("lastPlayListMode"));
+                lastPlayListName = cursor.getString(cursor.getColumnIndex("lastPlayListName"));
                 lastPlayMode = cursor.getInt(cursor.getColumnIndex("lastPlayMode"));
                 lastMusicId = cursor.getLong(cursor.getColumnIndex("lastMusicId"));
             } while (cursor.moveToNext());
@@ -233,14 +216,13 @@ public class DataRefreshService extends Service {
             //首次使用时数据库中还没有数据,先插入一条空数据
             ContentValues values = new ContentValues();
             values.put("infoRecord", "lastMusicInfo");
-            values.put("lastPlayListMode", lastPlayListMode);
+            values.put("lastPlayListName", lastPlayListName);
             values.put("lastPlayMode", lastPlayMode);
             values.put("lastMusicId", lastMusicId);
             //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
             db.insert(LAST_MUSIC_INFO_TABLE_NAME, null, values);
         }
         cursor.close();
-
     }
 
     /**
@@ -249,13 +231,8 @@ public class DataRefreshService extends Service {
      * @description 根据播放的列表和音乐的ID确定position
      */
     private static void findPositionFromList() {
-        List<MediaFileBean> tempList = new ArrayList<MediaFileBean>();
-        if (lastPlayListMode == 0) {
-            tempList = defaultList;
-        } else if (lastPlayListMode == 1) {
-            tempList = favoriteList;
-        }
-        if (tempList.size() <= 0) {
+        List<MediaFileBean> tempList = getMusicListByName(lastPlayListName);
+        if ((tempList == null) || (tempList.size() <= 0)) {
             //列表为空，直接返回
             return;
         }
@@ -299,6 +276,12 @@ public class DataRefreshService extends Service {
         }
     }
 
+    public static void removeFavoriteMusic(MediaFileBean mediaFileBean){
+        deleteMusicFromFavoriteList(mediaFileBean);
+        int position = favoriteList.indexOf(mediaFileBean);
+        sendDeleteMusicBroadcast(position, Constant.LIST_MODE_FAVORITE_NAME);
+    }
+
     /**
      * @author wm
      * @createTime 2023/2/11 15:46
@@ -307,14 +290,6 @@ public class DataRefreshService extends Service {
     public static void deleteMusicFromFavoriteList(MediaFileBean mediaFileBean) {
         DebugLog.debug("mediaFileBean " + mediaFileBean);
         if (favoriteList.contains(mediaFileBean)) {
-            int removePosition = favoriteList.indexOf(mediaFileBean);
-            DebugLog.debug("removePosition " + removePosition);
-            Intent intent = new Intent(Constant.DELETE_MUSIC_ACTION);
-            Bundle bundle = new Bundle();
-            bundle.putInt("musicPosition", removePosition);
-            bundle.putInt("musicListSource", Constant.LIST_MODE_FAVORITE);
-            intent.putExtras(bundle);
-            context.sendBroadcast(intent);
             favoriteList.remove(mediaFileBean);
             //从数据库中删除信息
             db.execSQL("DELETE FROM musiclistrecord WHERE musicId = ?",
@@ -327,12 +302,12 @@ public class DataRefreshService extends Service {
         }
     }
 
-    public static int getLastPlayListMode() {
-        return lastPlayListMode;
+    public static String getLastPlayListName() {
+        return lastPlayListName;
     }
 
-    public static void setLastPlayListMode(int lastPlayListMode) {
-        DataRefreshService.lastPlayListMode = lastPlayListMode;
+    public static void setLastPlayListName(String lastPlayListName) {
+        DataRefreshService.lastPlayListName = lastPlayListName;
         updateLastInfo();
     }
 
@@ -366,7 +341,7 @@ public class DataRefreshService extends Service {
      */
     private static void updateLastInfo() {
         ContentValues values = new ContentValues();
-        values.put("lastPlayListMode", lastPlayListMode);
+        values.put("lastPlayListName", lastPlayListName);
         values.put("lastPlayMode", lastPlayMode);
         values.put("lastMusicId", lastMusicId);
         String selection = "infoRecord LIKE ?";
@@ -379,22 +354,22 @@ public class DataRefreshService extends Service {
 
     public static List<MusicListBean> getCustomerList() {
         List<MusicListBean> list = new ArrayList<>();
-        try{
-            for (Map.Entry<String,MusicListBean> entry:customerListsMap.entrySet()) {
+        try {
+            for (Map.Entry<String, MusicListBean> entry : customerListsMap.entrySet()) {
                 MusicListBean musicListBean = entry.getValue();
                 list.add(musicListBean);
             }
             DebugLog.debug("lists size " + list.size());
             return list;
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
             return null;
         }
     }
 
     public static void createNewMusicList(String listName) {
-        try{
-            new Runnable(){
+        try {
+            new Runnable() {
                 @Override
                 public void run() {
                     if (!customerListsMap.containsKey(listName)) {
@@ -409,7 +384,7 @@ public class DataRefreshService extends Service {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                            DebugLog.debug("error interrupted " );
+                            DebugLog.debug("error interrupted ");
                         }
 
                         String query = "SELECT id FROM Playlist WHERE list_name=" + listName;
@@ -420,7 +395,7 @@ public class DataRefreshService extends Service {
                                 listId = cursor.getInt(cursor.getColumnIndex("id"));
                             } while (cursor.moveToNext());
                         }
-                        if (listId!=0){
+                        if (listId != 0) {
                             MusicListBean musicListBean = new MusicListBean(listName);
                             musicListBean.setListId(listId);
                             // 将列表对象添加到动态列表中
@@ -430,41 +405,42 @@ public class DataRefreshService extends Service {
                 }
             };
 
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
         }
     }
 
     public static void deleteMusicList(String listName) {
-        try{
+        try {
             if (customerListsMap.containsKey(listName)) {
                 DebugLog.debug("delete list " + listName);
-                db.execSQL("DELETE FROM "+CUSTOMER_LIST_TABLE_NAME+" WHERE list_name = ?",
+                db.execSQL("DELETE FROM " + CUSTOMER_LIST_TABLE_NAME + " WHERE list_name = ?",
                         new String[]{listName});
                 customerListsMap.get(listName).setMusicList(null);
                 customerListsMap.remove(customerListsMap.get(listName));
             }
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
         }
     }
 
     /**
-     *  往自定义列表中插入歌曲，需要满足多个条件才插入：
-     *  列表存在、默认列表中包含插入的歌曲、自定义列表中未包含该歌曲
-     *  @author wm
-     *  @createTime 2023/8/29 22:35
-     * @param listName: 列表名
+     * 往自定义列表中插入歌曲，需要满足多个条件才插入：
+     * 列表存在、默认列表中包含插入的歌曲、自定义列表中未包含该歌曲
+     *
+     * @param listName:  列表名
      * @param musicList: 要插入的列表
+     * @author wm
+     * @createTime 2023/8/29 22:35
      */
     public static void insertCustomerMusic(String listName, List<Long> musicList) {
-        try{
-            DebugLog.debug("listName "  + listName + "; musicList " + musicList);
+        try {
+            DebugLog.debug("listName " + listName + "; musicList " + musicList);
             if (customerListsMap.containsKey(listName)) {
                 int listId = customerListsMap.get(listName).getListId();
                 for (long musicId : musicList) {
                     if (defaultListMap.containsKey(musicId)) {
-                        if (!customerListsMap.get(listName).getMusicList().contains(defaultListMap.get(musicId))){
+                        if (!customerListsMap.get(listName).getMusicList().contains(defaultListMap.get(musicId))) {
                             // 列表中还未存在该歌曲才插入数据
                             ContentValues values = new ContentValues();
                             values.put("music_bean_id", musicId);
@@ -476,33 +452,93 @@ public class DataRefreshService extends Service {
                     }
                 }
             }
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
         }
     }
 
-    public static void deleteCustomerMusic(String listName, List<Long> musicList){
-        try{
+    public static void deleteCustomerMusic(String listName, List<Long> musicList) {
+        try {
             if (customerListsMap.containsKey(listName)) {
                 for (long musicId : musicList) {
                     if (defaultListMap.containsKey(musicId)) {
-                        if (customerListsMap.get(listName).getMusicList().contains(defaultListMap.get(musicId))){
+                        if (customerListsMap.get(listName).getMusicList().contains(defaultListMap.get(musicId))) {
                             // 列表中存在该歌曲才能删除数据
                             customerListsMap.get(listName).getMusicList().remove(defaultListMap.get(musicId));
-                            db.execSQL("DELETE FROM "+CUSTOMER_MUSIC_TABLE_NAME+" WHERE music_bean_id = ?",
+                            db.execSQL("DELETE FROM " + CUSTOMER_MUSIC_TABLE_NAME + " WHERE music_bean_id = ?",
                                     new Long[]{musicId});
                         }
                     }
                 }
             }
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
         }
     }
 
-    /*
-     * HashMap<String, MusicListBean> customerListsMap用来管理自定义的音乐列表
-     * 里面的数据是从默认列表中拷贝过来的，不需要考虑是否是收藏歌曲
-     * */
+    public static List<MediaFileBean> getMusicListByName(String listName) {
+        List<MediaFileBean> musicInfo;
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)) {
+            musicInfo = defaultList;
+        } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)) {
+            musicInfo = favoriteList;
+        } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)) {
+            // 历史列表的逻辑暂未添加
+            musicInfo = null;
+        } else if (customerListsMap.containsKey(listName)) {
+            musicInfo = customerListsMap.get(listName).getMusicList();
+        } else {
+            musicInfo = null;
+            DebugLog.debug("名称为”" + listName + "“的列表不存在");
+        }
+        return musicInfo;
+
+    }
+
+    public static void deleteMusic(String listName, int position) {
+        try {
+            boolean needToSendBroadcast = true;
+            switch (listName) {
+                case Constant.LIST_MODE_FAVORITE_NAME:
+                    deleteMusicFromFavoriteList(favoriteList.get(position));
+                    break;
+                case Constant.LIST_MODE_CUSTOMER_NAME:
+                    List<Long> list = new ArrayList<>();
+                    list.add(customerListsMap.get(listName).getMusicList().get(position).getId());
+                    deleteCustomerMusic(listName, list);
+                    break;
+                case Constant.LIST_MODE_HISTORY_NAME:
+                    break;
+                default:
+                    needToSendBroadcast = false;
+                    break;
+            }
+            if (needToSendBroadcast){
+                sendDeleteMusicBroadcast(position,listName);
+            }
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+        }
+    }
+
+    private static void sendDeleteMusicBroadcast(int position, String listName){
+        Intent intent = new Intent(Constant.DELETE_MUSIC_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putInt("musicPosition", position);
+        bundle.putString("musicListSource", listName);
+        intent.putExtras(bundle);
+        context.sendBroadcast(intent);
+    }
+
+    public static void addHistoryMusic(MediaFileBean mediaFileBean){
+        long musicId = mediaFileBean.getId();
+        if (historyListMap.containsKey(musicId)){
+            // 历史列表里面已存在该歌曲记录，需要先删除记录，然后将其添加到列表最后
+            historyList.remove(mediaFileBean);
+            // 删除数据库里的内容
+        }
+        historyList.add(mediaFileBean);
+        // 数据库写入历史播放记录
+    }
 
 }

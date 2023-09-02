@@ -15,7 +15,7 @@ import com.example.mediaplayproject.base.BaseFragment;
 /**
  * @author wm
  */
-public class ToolsFragment extends BaseFragment {
+public class ToolsFragment extends Fragment {
 
     private static ToolsFragment instance;
     public static ToolsFragment getInstance() {
@@ -35,30 +35,5 @@ public class ToolsFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_tools, container, false);
-    }
-
-    @Override
-    public int getListMode() {
-        return 0;
-    }
-
-    @Override
-    public void setSelectPosition(int position) {
-
-    }
-
-    @Override
-    public void setSelection(int position) {
-
-    }
-
-    @Override
-    public int checkRefreshPosition(int deletePosition) {
-        return 0;
-    }
-
-    @Override
-    public void refreshListView() {
-
     }
 }

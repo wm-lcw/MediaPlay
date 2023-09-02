@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.mediaplayproject.base.BaseFragment;
+import com.example.mediaplayproject.fragment.PlayListFragment;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ import java.util.List;
  * @Description 音乐列表悬浮窗 Adapter
  * @Date 2023/8/4 14:48
  */
-public class MusicViewPagerAdapter extends FragmentStateAdapter {
+public class ListViewPagerAdapter extends FragmentStateAdapter {
 
-    private List<BaseFragment> fragmentLists;
-    public MusicViewPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<BaseFragment> fragmentLists) {
+    private List<PlayListFragment> fragmentLists;
+    public ListViewPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<PlayListFragment> fragmentLists) {
         super(fragmentActivity);
         this.fragmentLists = fragmentLists;
     }

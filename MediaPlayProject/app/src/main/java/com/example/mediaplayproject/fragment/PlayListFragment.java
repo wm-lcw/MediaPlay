@@ -35,12 +35,13 @@ public class PlayListFragment extends BaseFragment {
     private View fragmentView;
     private MusicListAdapter musicListAdapter;
     private Handler mHandler;
-    private int listMode, currentListMode, mPosition;
+    private int currentListMode, mPosition;
+    private String listName;
 
-    public PlayListFragment(Context context, List<MediaFileBean> list, int listMode, Handler handler) {
+    public PlayListFragment(Context context, List<MediaFileBean> list, String listName, Handler handler) {
         this.mContext = context;
         this.musicList = list;
-        this.listMode = listMode;
+        this.listName = listName;
         this.mHandler = handler;
     }
 
@@ -70,15 +71,9 @@ public class PlayListFragment extends BaseFragment {
 
     private void init() {
         DebugLog.debug("");
-        musicListAdapter = new MusicListAdapter(mContext, listMode, musicList);
+        musicListAdapter = new MusicListAdapter(mContext, "", musicList);
         tvListTitle = fragmentView.findViewById(R.id.tv_list_title);
-
-        if (listMode == Constant.LIST_MODE_DEFAULT){
-            tvListTitle.setText("默认列表");
-        } else if (listMode == Constant.LIST_MODE_FAVORITE){
-            tvListTitle.setText("收藏列表");
-        }
-
+        refreshListTitle();
 
         // 定位当前播放歌曲
         ivLocalList = fragmentView.findViewById(R.id.iv_local_music);
@@ -92,7 +87,7 @@ public class PlayListFragment extends BaseFragment {
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT;
             Bundle bundle = new Bundle();
-            bundle.putInt("musicListMode",listMode);
+            bundle.putString("musicListName",listName);
             bundle.putInt("position", position);
             msg.setData(bundle);
             mHandler.sendMessage(msg);
@@ -102,13 +97,16 @@ public class PlayListFragment extends BaseFragment {
         musicListView.setVisibility(View.VISIBLE);
     }
 
+    private void refreshListTitle(){
+            tvListTitle.setText(listName);
+    }
+
     private View.OnClickListener mListener = view -> {
             if (view == ivLocalList) {
                 setSelection(mPosition);
             }
     };
 
-    @Override
     public int checkRefreshPosition(int deletePosition) {
         int isRefreshResult = musicListAdapter.checkRefreshPosition(deletePosition);
         DebugLog.debug("isRefreshResult " + isRefreshResult);
@@ -124,29 +122,44 @@ public class PlayListFragment extends BaseFragment {
         return isRefreshResult;
     }
 
-    @Override
     public void refreshListView() {
         if (musicListAdapter != null) {
             musicListAdapter.notifyDataSetChanged();
         }
     }
 
-    @Override
-    public int getListMode() {
-        return listMode;
+    public String getListName() {
+        return listName;
     }
 
-    @Override
     public void setSelectPosition(int position) {
         if (musicListAdapter != null) {
             musicListAdapter.setSelectPosition(position);
         }
     }
 
-    @Override
     public void setSelection(int position) {
         if (musicListView != null) {
             musicListView.setSelection(position);
         }
+    }
+
+    /**
+     *  更改播放列表
+     *  @author wm
+     *  @createTime 2023/8/31 10:48
+     * @param list: 音乐列表
+     * @param listName: 播放模式
+     * @param position: 播放的下标
+     */
+    public void changePlayList(List<MediaFileBean> list, String listName, int position){
+        this.listName = listName;
+        this.musicList = list;
+        this.mPosition = position;
+        refreshListTitle();
+        musicListAdapter.changePlayList(list,listName);
+        setSelection(mPosition);
+        setSelectPosition(mPosition);
+        refreshListView();
     }
 }

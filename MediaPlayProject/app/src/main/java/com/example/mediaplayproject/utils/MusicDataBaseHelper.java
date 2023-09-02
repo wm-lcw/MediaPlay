@@ -27,14 +27,15 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
             "musicRecordId integer primary key autoincrement," +
             "musicId long(20),isLike integer)";
 
-
     /**
      * 创建上次播放信息数据表的指令
      * */
     public static final String CREATE_LAST_PLAY_INFO_TABLE = "create table lastplayinforecord(" +
             "musicInfoId integer primary key autoincrement," +
-            "infoRecord TEXT,lastPlayListMode integer DEFAULT 0," +
-            "lastPlayMode integer DEFAULT 0,lastMusicId long(20))";
+            "infoRecord TEXT," +
+            "lastPlayListName TEXT," +
+            "lastPlayMode integer DEFAULT 0," +
+            "lastMusicId long(20))";
 
     /**
      * 创建音乐列表的表，这里要先比Music表先建立，因为Music表中使用了Playlist表的id作为外键

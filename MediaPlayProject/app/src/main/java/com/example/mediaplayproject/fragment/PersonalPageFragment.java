@@ -15,7 +15,7 @@ import com.example.mediaplayproject.base.BaseFragment;
 /**
  * @author wm
  */
-public class PersonalPageFragment extends BaseFragment {
+public class PersonalPageFragment extends Fragment {
 
     private static PersonalPageFragment instance;
     public static PersonalPageFragment getInstance() {
@@ -35,30 +35,5 @@ public class PersonalPageFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_personal_page, container, false);
-    }
-
-    @Override
-    public int getListMode() {
-        return 0;
-    }
-
-    @Override
-    public void setSelectPosition(int position) {
-
-    }
-
-    @Override
-    public void setSelection(int position) {
-
-    }
-
-    @Override
-    public int checkRefreshPosition(int deletePosition) {
-        return 0;
-    }
-
-    @Override
-    public void refreshListView() {
-
     }
 }
