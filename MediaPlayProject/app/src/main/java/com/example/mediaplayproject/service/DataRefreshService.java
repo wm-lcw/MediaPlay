@@ -22,6 +22,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -59,8 +64,6 @@ public class DataRefreshService extends Service {
         context = getApplicationContext();
         MusicDataBaseHelper musicDataBaseHelper = new MusicDataBaseHelper(context, "musicplay.db", null, 1);
         db = musicDataBaseHelper.getReadableDatabase();
-        DebugLog.debug("db : " + db);
-//        initResource();
     }
 
     @Override
@@ -70,14 +73,12 @@ public class DataRefreshService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        DebugLog.debug("-");
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DebugLog.debug("---");
     }
 
     /**
@@ -297,7 +298,6 @@ public class DataRefreshService extends Service {
             if (defaultList.contains(mediaFileBean)) {
                 //需要删除默认列表中的收藏状态,直接操作对象
                 mediaFileBean.setLike(false);
-                DebugLog.debug("mediaFileBean1 " + mediaFileBean);
             }
         }
     }
@@ -355,6 +355,7 @@ public class DataRefreshService extends Service {
     public static List<MusicListBean> getCustomerList() {
         List<MusicListBean> list = new ArrayList<>();
         try {
+            DebugLog.debug("cus map " + customerListsMap.size());
             for (Map.Entry<String, MusicListBean> entry : customerListsMap.entrySet()) {
                 MusicListBean musicListBean = entry.getValue();
                 list.add(musicListBean);
@@ -367,33 +368,35 @@ public class DataRefreshService extends Service {
         }
     }
 
+    private static ExecutorService threadPool = new ThreadPoolExecutor(
+            2,
+            5,
+            2L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(3),
+            Executors.defaultThreadFactory(),
+            new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
+
     public static void createNewMusicList(String listName) {
         try {
-            new Runnable() {
+            threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
+                    DebugLog.debug("map contains list : " + customerListsMap.containsKey(listName));
                     if (!customerListsMap.containsKey(listName)) {
                         DebugLog.debug("insert new list " + listName);
                         // 插入数据
                         ContentValues values = new ContentValues();
                         values.put("list_name", listName);
                         //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
-                        db.insert(CUSTOMER_LIST_TABLE_NAME, null, values);
+                        long listId = db.insert(CUSTOMER_LIST_TABLE_NAME, null, values);
 
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            DebugLog.debug("error interrupted ");
-                        }
 
-                        String query = "SELECT id FROM Playlist WHERE list_name=" + listName;
-                        Cursor cursor = db.rawQuery(query, null);
-                        int listId = 0;
+                        // 获取刚插入的自动递增id
+                        Cursor cursor = db.rawQuery("SELECT last_insert_rowid() AS id", null);
                         if (cursor != null && cursor.moveToFirst()) {
-                            do {
-                                listId = cursor.getInt(cursor.getColumnIndex("id"));
-                            } while (cursor.moveToNext());
+                            listId = cursor.getLong(cursor.getColumnIndex("id"));
                         }
                         if (listId != 0) {
                             MusicListBean musicListBean = new MusicListBean(listName);
@@ -403,7 +406,7 @@ public class DataRefreshService extends Service {
                         }
                     }
                 }
-            };
+            });
 
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
@@ -437,7 +440,8 @@ public class DataRefreshService extends Service {
         try {
             DebugLog.debug("listName " + listName + "; musicList " + musicList);
             if (customerListsMap.containsKey(listName)) {
-                int listId = customerListsMap.get(listName).getListId();
+                DebugLog.debug("exist list -- " + listName);
+                long listId = customerListsMap.get(listName).getListId();
                 for (long musicId : musicList) {
                     if (defaultListMap.containsKey(musicId)) {
                         if (!customerListsMap.get(listName).getMusicList().contains(defaultListMap.get(musicId))) {

@@ -95,7 +95,7 @@ public class MainActivity extends BasicActivity {
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    DebugLog.debug("resultCode" + result.getResultCode());
+//                    DebugLog.debug("resultCode" + result.getResultCode());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         if (hasStorePermission()) {
                             if (hasAlertPermission()) {
@@ -105,7 +105,6 @@ public class MainActivity extends BasicActivity {
                                     Toast.makeText(mContext, "缺少必要权限,程序即将退出", Toast.LENGTH_SHORT).show();
                                     BasicApplication.getActivityManager().finishAll();
                                 }
-                                DebugLog.debug("store permission ok,request alert permission");
                                 Toast.makeText(MainActivity.this, "请打开悬浮窗权限!", Toast.LENGTH_LONG).show();
                                 isFloatWindowPermissionRequested = true;
                                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
@@ -142,13 +141,10 @@ public class MainActivity extends BasicActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // 先判断有没有权限
             if (hasStorePermission()) {
-                DebugLog.debug("store permission ok");
                 if (hasAlertPermission()) {
-                    DebugLog.debug("alert permission ok");
                     initData();
                 } else {
                     Toast.makeText(MainActivity.this, "请打开文件存储权限!", Toast.LENGTH_LONG).show();
-                    DebugLog.debug("request alert permission");
                     Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                     intentActivityResultLauncher.launch(intent);
                 }
@@ -365,7 +361,7 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
                 int newPosition = msg.getData().getInt("position");
                 String newMusicListName = msg.getData().getString("musicListName");
-                DebugLog.debug("Fragment position " + newPosition + "; ListMode " + newMusicListName);
+//                DebugLog.debug("Fragment position " + newPosition + "; ListMode " + newMusicListName);
                 List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(musicListName);
                 if (tempList != null && tempList.size() > 0){
                     // 更新播放列表等数据

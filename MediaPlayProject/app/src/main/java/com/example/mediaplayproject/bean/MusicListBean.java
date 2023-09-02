@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class MusicListBean {
     private String listName;
-    private int listId;
+    private long listId;
     /**
     * 注意：这里的size并不能同步的获取list的音乐数量需要手动的获取list.size()
     * */
@@ -33,11 +33,11 @@ public class MusicListBean {
         this.listName = listName;
     }
 
-    public int getListId() {
+    public long getListId() {
         return listId;
     }
 
-    public void setListId(int listId) {
+    public void setListId(long listId) {
         this.listId = listId;
     }
 
