@@ -54,13 +54,10 @@ public class MusicPlayFragment extends Fragment {
     private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
-    private boolean isShowList = false, mRegistered = false, firstPlay = true, isPlaying = false;
-    private LinearLayout mFloatLayout;
-    private WindowManager mWindowManager;
+    private boolean mRegistered = false, firstPlay = true, isPlaying = false;
     private AudioManager mAudioManager;
-    private WindowManager.LayoutParams wmParams;
-    private ArrayList<PlayListFragment> viewPagerLists;
     private Handler mActivityHandle;
+    private ArrayList<PlayListFragment> viewPagerLists;
 
     private MusicBroadcastReceiver mMusicBroadcastReceiver;
     private static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
@@ -111,12 +108,13 @@ public class MusicPlayFragment extends Fragment {
         super.onStart();
         initMusicSource();
         registerReceiver();
-        createFloatView();
         DebugLog.debug("");
     }
 
-    public void setDataFromMainActivity(MusicPlayService service, String listName, int position) {
+    public void setDataFromMainActivity(MusicPlayService service, Handler handler,ArrayList<PlayListFragment> viewPagerLists, String listName, int position) {
         DebugLog.debug("");
+        this.mActivityHandle = handler;
+        this.viewPagerLists = viewPagerLists;
         musicService = service;
         musicListName = listName;
         mPosition = position;
@@ -136,6 +134,11 @@ public class MusicPlayFragment extends Fragment {
         initPlayStateAndInfo();
         // 初始化音量条
         initVolume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -273,8 +276,9 @@ public class MusicPlayFragment extends Fragment {
                 initServicePlayHelper();
                 musicService.playNext();
             } else if (view == ivMediaList) {
-                isShowList = true;
-                showFloatView();
+                Message msg = new Message();
+                msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
+                mActivityHandle.sendMessage(msg);
                 refreshListStatus();
             } else if (view == ivMediaLike) {
                 boolean isLike = musicInfo.get(mPosition).isLike();
@@ -320,89 +324,6 @@ public class MusicPlayFragment extends Fragment {
             }
         }
     };
-
-    /**
-     * @author wm
-     * @createTime 2023/2/3 18:19
-     * @description 创建悬浮窗
-     */
-    private void createFloatView() {
-        wmParams = new WindowManager.LayoutParams();
-        // 获取的是WindowManagerImpl.CompatModeWrapper
-        mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
-        // 设置window type
-        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        // 设置背景为透明，否则滑动ListView会出现残影
-        wmParams.format = PixelFormat.TRANSPARENT;
-        // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
-        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        // 调整悬浮窗显示的停靠位置为左侧顶部
-        wmParams.gravity = Gravity.LEFT | Gravity.TOP;
-        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        wmParams.x = 0;
-        wmParams.y = 0;
-
-        // 设置悬浮窗口长宽数据
-        wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
-        initFloatView();
-    }
-
-    /**
-     * 初始化悬浮窗中的视图、初始化Fragment等
-     */
-    private void initFloatView() {
-        LayoutInflater inflater = LayoutInflater.from(getApplication());
-        //获取浮动窗口视图所在布局
-        mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
-        setWindowOutTouch();
-        ViewPager2 musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        PlayListFragment defaultListFragment = new PlayListFragment(mContext, defaultList, Constant.LIST_MODE_DEFAULT_NAME, handler);
-        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, handler);
-        viewPagerLists = new ArrayList<>();
-        viewPagerLists.add(defaultListFragment);
-        viewPagerLists.add(favoriteListFragment);
-        ListViewPagerAdapter listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
-        musicListViewPager.setAdapter(listViewPagerAdapter);
-    }
-
-
-    /**
-     *  显示悬浮窗
-     *  @author wm
-     *  @createTime 2023/9/2 14:18
-     */
-    private void showFloatView() {
-        // 添加mFloatLayout
-        mWindowManager.addView(mFloatLayout, wmParams);
-    }
-
-    /**
-     * 点击窗口外部区域关闭列表窗口
-     */
-    private void setWindowOutTouch() {
-        /* 点击窗口外部区域可消除
-         将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域,
-         所以点击内容区域外部视为点击悬浮窗外部
-         其中popupWindowView为全屏，listWindow为列表区域，触摸点没有落在列表区域，则隐藏列表*/
-        final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
-        final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
-        popupWindowView.setOnTouchListener(new View.OnTouchListener() {
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int x = (int) event.getX();
-                int y = (int) event.getY();
-                Rect rect = new Rect();
-                listWindow.getGlobalVisibleRect(rect);
-                if (!rect.contains(x, y) && isShowList) {
-                    mWindowManager.removeView(mFloatLayout);
-                }
-                return false;
-            }
-        });
-    }
-
 
     /**
      * @createTime 2023/2/8 16:55

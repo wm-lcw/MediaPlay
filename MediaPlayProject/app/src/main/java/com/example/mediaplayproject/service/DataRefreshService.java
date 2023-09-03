@@ -138,7 +138,7 @@ public class DataRefreshService extends Service {
                 String playListName = cursor.getString(cursor.getColumnIndex("list_name"));
                 if (customerListsMap.containsKey(playListName)) {
                     long musicBeanId = cursor.getLong(cursor.getColumnIndex("music_bean_id"));
-                    DebugLog.debug("listName " + playListName + "; musicId " + musicBeanId);
+//                    DebugLog.debug("listName " + playListName + "; musicId " + musicBeanId);
                     if (defaultListMap.containsKey(musicBeanId)) {
                         customerListsMap.get(playListName).getMusicList().add(defaultListMap.get(musicBeanId));
                     }
@@ -355,7 +355,6 @@ public class DataRefreshService extends Service {
     public static List<MusicListBean> getCustomerList() {
         List<MusicListBean> list = new ArrayList<>();
         try {
-            DebugLog.debug("cus map " + customerListsMap.size());
             for (Map.Entry<String, MusicListBean> entry : customerListsMap.entrySet()) {
                 MusicListBean musicListBean = entry.getValue();
                 list.add(musicListBean);
@@ -389,7 +388,7 @@ public class DataRefreshService extends Service {
                         // 插入数据
                         ContentValues values = new ContentValues();
                         values.put("list_name", listName);
-                        //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
+                        // 参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
                         long listId = db.insert(CUSTOMER_LIST_TABLE_NAME, null, values);
 
 

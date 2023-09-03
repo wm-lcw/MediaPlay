@@ -5,8 +5,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -17,6 +19,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,14 +29,21 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.adapter.ListViewPagerAdapter;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
+import com.example.mediaplayproject.fragment.PlayListFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
@@ -61,6 +71,12 @@ public class MainActivity extends BasicActivity {
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private List<MediaFileBean> favoriteList = new ArrayList<>();
 
+    private LinearLayout mFloatLayout;
+    private WindowManager mWindowManager;
+    private WindowManager.LayoutParams wmParams;
+    private ArrayList<PlayListFragment> viewPagerLists;
+    private boolean isShowList = false;
+
 
     private MusicPlayService musicService;
     private final ServiceConnection connection = new ServiceConnection() {
@@ -73,8 +89,8 @@ public class MainActivity extends BasicActivity {
                 musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
                 musicService.initPlayHelper(handler);
                 // 需要等service起来之后再给Fragment传service
-                mainViewFragment.setDataFromMainActivity(musicService,handler, myFragmentCallBack);
-                musicPlayFragment.setDataFromMainActivity(musicService, musicListName, mPosition);
+                mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
+                musicPlayFragment.setDataFromMainActivity(musicService, handler, viewPagerLists, musicListName, mPosition);
             }
         }
 
@@ -89,13 +105,13 @@ public class MainActivity extends BasicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DebugLog.debug("");
         mContext = this;
 
         // 申请权限的结果回调处理
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-//                    DebugLog.debug("resultCode" + result.getResultCode());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         if (hasStorePermission()) {
                             if (hasAlertPermission()) {
@@ -114,17 +130,27 @@ public class MainActivity extends BasicActivity {
                             Toast.makeText(mContext, "缺少必要权限,程序即将退出", Toast.LENGTH_SHORT).show();
                             BasicApplication.getActivityManager().finishAll();
                         }
-
                     }
                 }
         );
-        // 申请权限
         requestPermission();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        DebugLog.debug("");
+        if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
+            // 在MainActivity失去焦点时，悬浮窗关闭
+            // 这里需要判断mFloatLayout正在显示才执行移除，否则会报错
+            mWindowManager.removeView(mFloatLayout);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        DebugLog.debug("");
         // 解绑服务：注意bindService后 必须要解绑服务，否则会报-连接资源异常
         if (null != connection) {
             unbindService(connection);
@@ -133,6 +159,7 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 申请权限
+     *
      * @author wm
      * @createTime 2023/8/24 18:10
      */
@@ -171,6 +198,7 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 判断是否有悬浮窗权限
+     *
      * @return : boolean
      * @author wm
      * @createTime 2023/8/24 18:10
@@ -190,6 +218,7 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 判断是否有文件存储权限
+     *
      * @return : boolean
      * @author wm
      * @createTime 2023/8/24 18:11
@@ -203,6 +232,7 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 申请权限回调结果，主要针对API<23的情况
+     *
      * @param requestCode:  请求码
      * @param permissions:  权限数组
      * @param grantResults: 请求结果
@@ -225,6 +255,7 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 初始化操作(音乐资源、Ui布局)
+     *
      * @author wm
      * @createTime 2023/8/24 18:08
      */
@@ -233,6 +264,15 @@ public class MainActivity extends BasicActivity {
         // 初始化音乐列表资源
         DataRefreshService.initResource();
 
+        // 从BasicApplication中获取音乐列表，上次播放的信息等
+        playMode = DataRefreshService.getLastPlayMode();
+        musicListName = DataRefreshService.getLastPlayListName();
+        mPosition = DataRefreshService.getLastPosition();
+        musicInfo = DataRefreshService.getMusicListByName(musicListName);
+        favoriteList = DataRefreshService.getFavoriteList();
+
+        createFloatView();
+
         // 创建Fragment实例，并加载显示MainViewFragment
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
@@ -240,13 +280,6 @@ public class MainActivity extends BasicActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.fl_main_view, mainViewFragment);
         transaction.commit();
-
-        // 从BasicApplication中获取音乐列表，上次播放的信息等
-        playMode = DataRefreshService.getLastPlayMode();
-        musicListName = DataRefreshService.getLastPlayListName();
-        mPosition = DataRefreshService.getLastPosition();
-        musicInfo = DataRefreshService.getMusicListByName(musicListName);
-        favoriteList = DataRefreshService.getFavoriteList();
 
         // 启动MusicPlayService服务
         Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
@@ -308,6 +341,7 @@ public class MainActivity extends BasicActivity {
     public interface FragmentCallBack {
         /**
          * 切换Fragment
+         *
          * @author wm
          * @createTime 2023/8/23 18:31
          */
@@ -325,7 +359,7 @@ public class MainActivity extends BasicActivity {
             transaction.addToBackStack(null);
             transaction.replace(R.id.fl_main_view, musicPlayFragment);
             transaction.commit();
-            musicPlayFragment.setDataFromMainActivity(musicService, musicListName, mPosition);
+            musicPlayFragment.setDataFromMainActivity(musicService, handler, viewPagerLists, musicListName, mPosition);
         }
     }
 
@@ -361,17 +395,19 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
                 int newPosition = msg.getData().getInt("position");
                 String newMusicListName = msg.getData().getString("musicListName");
-//                DebugLog.debug("Fragment position " + newPosition + "; ListMode " + newMusicListName);
                 List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(musicListName);
-                if (tempList != null && tempList.size() > 0){
+                if (tempList != null && tempList.size() > 0) {
                     // 更新播放列表等数据
                     changeMusicPlayList(tempList, newPosition, newMusicListName);
                 }
+            } else if (msg.what == Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT) {
+                DebugLog.debug("show list");
+                showFloatView();
             }
         }
     };
 
-    private void changeMusicPlayList(List<MediaFileBean> list, int position, String newMusicListName){
+    private void changeMusicPlayList(List<MediaFileBean> list, int position, String newMusicListName) {
         // 更新Activity中的数据
         musicInfo = list;
         mPosition = position;
@@ -398,39 +434,85 @@ public class MainActivity extends BasicActivity {
         }
     }
 
+    /**
+     *  创建悬浮窗
+     *  @author wm
+     *  @createTime 2023/9/3 11:48
+     */
+    private void createFloatView() {
+        wmParams = new WindowManager.LayoutParams();
+        // 获取的是WindowManagerImpl.CompatModeWrapper
+        mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+        // 设置window type
+        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // 设置背景为透明，否则滑动ListView会出现残影
+        wmParams.format = PixelFormat.TRANSPARENT;
+        // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
+        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        // 调整悬浮窗显示的停靠位置为左侧顶部
+        wmParams.gravity = Gravity.LEFT | Gravity.TOP;
+        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
+        wmParams.x = 0;
+        wmParams.y = 0;
 
+        // 设置悬浮窗口长宽数据
+        wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        initFloatView();
+    }
 
-    /*
-     * listMode的使用
-     * MusicListAdapter：播放列表显示的时候可以筛选默认列表，不显示删除ui
-     * PlayListFragment：播放列表头部的列表名称根据listMode来显示，创建MusicListAdapter的参数，作为切换歌曲的Handle回调参数
-     * MusicPlayFragment：确定当前的播放列表，传给service，用来判定删除歌曲时是否是当前列表，切换列表播放时根据handle回传的数据去调用play，刷新列表高亮效果
-     * MainViewFragment：设置当前播放列表，初始化service
-     * MusicPlayService：提供给各个地方调用获取
-     *
-     * listMode:用数字来标记：
-     * 0:默认列表
-     * 1:收藏列表
-     * 2:自定义列表
-     * 3:最近播放列表（历史播放）
-     * 4:指代前面几个播放列表，用来创建和初始化Adapter
-     *
-     * 最近播放的列表是常驻的，其他的列表根据情况实时显示,
-     * 在Adapter初始化阶段就需要一个listMode来做逻辑判断，所以在创建Adapter的时候要先传入listMode，等具体播放的时候再更改listMode
-     *
-     *
-     *
-     * MainActivity、 MainViewFragment、 MusicPlayFragment 三者之间的音乐信息共享框架
-     *
-     * MainActivity需要实时获取 当前播放的列表、当前播放歌曲、播放状态 --- 用于更新MainViewFragment
-     *              切换列表这个操作需要调用Service播放，避免两个Fragment、做重复工作
-     *
-     * MainViewFragment 从Activity获取当前播放列表、播放歌曲、播放状态，
-     *              需要控制播放暂停、切换上下曲、切换播放列表
-     *
-     * MusicPlayFragment 从Activity获取当前播放列表、播放歌曲、播放状态，
-     *              需要控制播放暂停、切换上下曲、切换播放列表
-     *
-     * */
+    /**
+     * 初始化悬浮窗中的视图、初始化Fragment等
+     */
+    private void initFloatView() {
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        //获取浮动窗口视图所在布局
+        mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
+        setWindowOutTouch();
+        ViewPager2 musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
+        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, handler);
+        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, handler);
+        viewPagerLists = new ArrayList<>();
+        viewPagerLists.add(defaultListFragment);
+        viewPagerLists.add(favoriteListFragment);
+        ListViewPagerAdapter listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
+        musicListViewPager.setAdapter(listViewPagerAdapter);
+    }
 
+    /**
+     * 显示悬浮窗
+     *
+     * @author wm
+     * @createTime 2023/9/2 14:18
+     */
+    private void showFloatView() {
+        // 添加mFloatLayout
+        mWindowManager.addView(mFloatLayout, wmParams);
+        isShowList = true;
+    }
+
+    /**
+     * 点击窗口外部区域关闭列表窗口
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private void setWindowOutTouch() {
+        /* 点击窗口外部区域可消除
+         将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域,
+         所以点击内容区域外部视为点击悬浮窗外部
+         其中popupWindowView为全屏，listWindow为列表区域，触摸点没有落在列表区域，则隐藏列表*/
+        final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
+        final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
+        popupWindowView.setOnTouchListener((v, event) -> {
+            DebugLog.debug("---");
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            Rect rect = new Rect();
+            listWindow.getGlobalVisibleRect(rect);
+            if (!rect.contains(x, y) && isShowList) {
+                mWindowManager.removeView(mFloatLayout);
+                isShowList = false;
+            }
+            return true;
+        });
+    }
 }
