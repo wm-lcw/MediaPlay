@@ -103,16 +103,15 @@ public class MusicListAdapter extends BaseAdapter {
         } else {
             holder.tvMusicName.setTextColor(colors);
         }
-        if (listName == Constant.LIST_MODE_DEFAULT_NAME) {
+        if (listName.equals(Constant.LIST_MODE_DEFAULT_NAME)) {
             // 默认列表不支持删除操作
             holder.ivDeleteMusic.setEnabled(false);
             holder.ivDeleteMusic.setVisibility(View.GONE);
         } else {
             // 监听item里面的删除按钮事件，需要在自定义Adapter的getView方法首个参数前添加final关键字(final int position...)
             convertView.findViewById(R.id.iv_delete_music).setOnClickListener(v -> {
-                // 这里删除歌曲需要传递列表的具体信息
+                // 删除歌曲需要传递列表的具体信息
                 DataRefreshService.deleteMusic(listName, position);
-                DebugLog.debug("delete listName " + listName + "position " + position);
                 notifyDataSetChanged();
             });
         }
@@ -128,6 +127,12 @@ public class MusicListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    /**
+     *  选中高亮效果
+     *  @author wm
+     *  @createTime 2023/9/3 18:06
+     * @param position: 需要高亮的歌曲下标
+     */
     public void setSelectPosition(int position) {
         if (position == -1) {
             //若传进来的值是-1，则代表要取消播放歌曲高亮效果

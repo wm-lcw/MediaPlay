@@ -256,11 +256,11 @@ public class DataRefreshService extends Service {
         return favoriteList;
     }
 
-
     /**
-     * @author wm
-     * @createTime 2023/2/11 15:46
-     * @description 将歌曲加入收藏列表
+     *  将歌曲加入收藏列表
+     *  @author wm
+     *  @createTime 2023/9/3 16:57
+     * @param mediaFileBean: 添加收藏的音乐对象
      */
     public static void addMusicToFavoriteList(MediaFileBean mediaFileBean) {
         DebugLog.debug("mediaFileBean " + mediaFileBean);
@@ -277,6 +277,12 @@ public class DataRefreshService extends Service {
         }
     }
 
+    /**
+     *  取消收藏音乐
+     *  @author wm
+     *  @createTime 2023/9/3 16:57
+     * @param mediaFileBean: 取消收藏的音乐对象
+     */
     public static void removeFavoriteMusic(MediaFileBean mediaFileBean){
         deleteMusicFromFavoriteList(mediaFileBean);
         int position = favoriteList.indexOf(mediaFileBean);
@@ -284,9 +290,10 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     * @author wm
-     * @createTime 2023/2/11 15:46
-     * @description 从收藏列表移除歌曲
+     *  从收藏列表移除歌曲
+     *  @author wm
+     *  @createTime 2023/9/3 16:58
+     * @param mediaFileBean: 需要移除的音乐对象
      */
     public static void deleteMusicFromFavoriteList(MediaFileBean mediaFileBean) {
         DebugLog.debug("mediaFileBean " + mediaFileBean);
@@ -305,39 +312,37 @@ public class DataRefreshService extends Service {
     public static String getLastPlayListName() {
         return lastPlayListName;
     }
-
-    public static void setLastPlayListName(String lastPlayListName) {
-        DataRefreshService.lastPlayListName = lastPlayListName;
-        updateLastInfo();
-    }
-
     public static int getLastPlayMode() {
         return lastPlayMode;
     }
-
-    public static void setLastPlayMode(int lastPlayMode) {
-        DataRefreshService.lastPlayMode = lastPlayMode;
-        updateLastInfo();
-
-    }
-
     public static int getLastPosition() {
         return lastPosition;
     }
 
-    public static void setLastPosition(int lastPosition) {
-        DataRefreshService.lastPosition = lastPosition;
-    }
-
-    public static void setLastMusicId(long lastMusicId) {
-        DataRefreshService.lastMusicId = lastMusicId;
-        updateLastInfo();
+    /**
+     *  保存上次播放的音乐信息
+     *  @author wm
+     *  @createTime 2023/9/3 18:31
+     * @param lastPlayListName: 列表名
+     * @param lastPosition: 音乐下标
+     * @param lastMusicId: 音乐的id
+     * @param lastPlayMode: 播放模式
+     */
+    public static void setLastPlayInfo(String lastPlayListName, int lastPosition, long lastMusicId, int  lastPlayMode){
+        boolean isListNameChange = DataRefreshService.lastPlayListName.equalsIgnoreCase(lastPlayListName);
+        boolean isPositionChange = DataRefreshService.lastPosition == lastPosition;
+        boolean isMusicIdChange = DataRefreshService.lastMusicId == lastMusicId;
+        boolean isPlayModeChange = DataRefreshService.lastPlayMode == lastPlayMode;
+        if (isListNameChange || isPositionChange || isMusicIdChange || isPlayModeChange){
+            // 有数据更改时才更新，否则不处理
+            updateLastInfo();
+        }
     }
 
     /**
-     * @author wm
-     * @createTime 2023/2/16 17:22
-     * @description 更新数据库中最后播放的信息，
+     *  更新数据库中最后播放的信息
+     *  @author wm
+     *  @createTime 2023/9/3 18:31
      */
     private static void updateLastInfo() {
         ContentValues values = new ContentValues();
@@ -346,10 +351,7 @@ public class DataRefreshService extends Service {
         values.put("lastMusicId", lastMusicId);
         String selection = "infoRecord LIKE ?";
         String[] selectionArgs = {"lastMusicInfo"};
-        db.update(LAST_MUSIC_INFO_TABLE_NAME,
-                values,
-                selection,
-                selectionArgs);
+        db.update(LAST_MUSIC_INFO_TABLE_NAME, values, selection, selectionArgs);
     }
 
     public static List<MusicListBean> getCustomerList() {
@@ -377,32 +379,34 @@ public class DataRefreshService extends Service {
             new ThreadPoolExecutor.DiscardOldestPolicy()
     );
 
+    /**
+     *  创建音乐列表
+     *  @author wm
+     *  @createTime 2023/9/3 17:01
+     * @param listName: 列表名
+     */
     public static void createNewMusicList(String listName) {
         try {
-            threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    DebugLog.debug("map contains list : " + customerListsMap.containsKey(listName));
-                    if (!customerListsMap.containsKey(listName)) {
-                        DebugLog.debug("insert new list " + listName);
-                        // 插入数据
-                        ContentValues values = new ContentValues();
-                        values.put("list_name", listName);
-                        // 参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
-                        long listId = db.insert(CUSTOMER_LIST_TABLE_NAME, null, values);
+            threadPool.execute(() -> {
+                DebugLog.debug("map contains list : " + customerListsMap.containsKey(listName));
+                if (!customerListsMap.containsKey(listName)) {
+                    DebugLog.debug("insert new list " + listName);
+                    // 插入数据
+                    ContentValues values = new ContentValues();
+                    values.put("list_name", listName);
+                    // 参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
+                    long listId = db.insert(CUSTOMER_LIST_TABLE_NAME, null, values);
 
-
-                        // 获取刚插入的自动递增id
-                        Cursor cursor = db.rawQuery("SELECT last_insert_rowid() AS id", null);
-                        if (cursor != null && cursor.moveToFirst()) {
-                            listId = cursor.getLong(cursor.getColumnIndex("id"));
-                        }
-                        if (listId != 0) {
-                            MusicListBean musicListBean = new MusicListBean(listName);
-                            musicListBean.setListId(listId);
-                            // 将列表对象添加到动态列表中
-                            customerListsMap.put(listName, musicListBean);
-                        }
+                    // 获取刚插入的自动递增id
+                    Cursor cursor = db.rawQuery("SELECT last_insert_rowid() AS id", null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        listId = cursor.getLong(cursor.getColumnIndex("id"));
+                    }
+                    if (listId != 0) {
+                        MusicListBean musicListBean = new MusicListBean(listName);
+                        musicListBean.setListId(listId);
+                        // 将列表对象添加到动态列表中
+                        customerListsMap.put(listName, musicListBean);
                     }
                 }
             });
@@ -412,6 +416,12 @@ public class DataRefreshService extends Service {
         }
     }
 
+    /**
+     *  删除列表
+     *  @author wm
+     *  @createTime 2023/9/3 17:01
+     * @param listName: 要删除列表的列表名
+     */
     public static void deleteMusicList(String listName) {
         try {
             if (customerListsMap.containsKey(listName)) {
@@ -460,6 +470,13 @@ public class DataRefreshService extends Service {
         }
     }
 
+    /**
+     *  删除自定义列表中的歌曲
+     *  @author wm
+     *  @createTime 2023/9/3 17:02
+     * @param listName: 列表名
+     * @param musicList: 要删除的音乐集合
+     */
     public static void deleteCustomerMusic(String listName, List<Long> musicList) {
         try {
             if (customerListsMap.containsKey(listName)) {
@@ -479,6 +496,13 @@ public class DataRefreshService extends Service {
         }
     }
 
+    /**
+     *  通过列表名获取列表
+     *  @author wm
+     *  @createTime 2023/9/3 17:02
+     * @param listName: 列表名
+     * @return : java.util.List<com.example.mediaplayproject.bean.MediaFileBean>
+     */
     public static List<MediaFileBean> getMusicListByName(String listName) {
         List<MediaFileBean> musicInfo;
         if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)) {
@@ -498,8 +522,16 @@ public class DataRefreshService extends Service {
 
     }
 
+    /**
+     *  删除音乐，默认列表不能执行删除操作
+     *  @author wm
+     *  @createTime 2023/9/3 17:03
+     * @param listName: 列表名
+     * @param position: 要删除音乐的下标
+     */
     public static void deleteMusic(String listName, int position) {
         try {
+            DebugLog.debug("listName " + listName + "; position " + position);
             boolean needToSendBroadcast = true;
             switch (listName) {
                 case Constant.LIST_MODE_FAVORITE_NAME:
@@ -524,6 +556,13 @@ public class DataRefreshService extends Service {
         }
     }
 
+    /**
+     *  发送删除音乐的广播
+     *  @author wm
+     *  @createTime 2023/9/3 17:09
+     * @param position: 删除音乐的下标
+     * @param listName: 删除音乐的列表名
+     */
     private static void sendDeleteMusicBroadcast(int position, String listName){
         Intent intent = new Intent(Constant.DELETE_MUSIC_ACTION);
         Bundle bundle = new Bundle();
@@ -544,4 +583,9 @@ public class DataRefreshService extends Service {
         // 数据库写入历史播放记录
     }
 
+
+    /*
+    * 这里删除自定义列表音乐的逻辑需要优化，调用deleteCustomerMusic()方法删除多首音乐时，并没有发送广播的操作
+    *
+    * */
 }

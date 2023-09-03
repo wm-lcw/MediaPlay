@@ -1,10 +1,8 @@
 package com.example.mediaplayproject.fragment;
 
-import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,7 +20,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -67,7 +64,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private PersonalPageFragment personalPageFragment;
     private ToolsFragment toolsFragment;
 
-    private LinearLayout llSimplePlayView;
     private ImageView ivSettings, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow;
     private TextView tvCurrentMusicInfo;
 
@@ -75,7 +71,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private List<MediaFileBean> defaultList = new ArrayList<>();
-    private List<MediaFileBean> favoriteList = new ArrayList<>();
     private int mPosition = 0;
     private int playMode = 0;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
@@ -154,7 +149,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      */
     private void initMusicSource() {
         defaultList = DataRefreshService.getDefaultList();
-        favoriteList = DataRefreshService.getFavoriteList();
         playMode = DataRefreshService.getLastPlayMode();
         musicListName = DataRefreshService.getLastPlayListName();
         mPosition = DataRefreshService.getLastPosition();
@@ -185,7 +179,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivPersonal.setOnClickListener(mListener);
         ivTools.setOnClickListener(mListener);
         ivShow.setOnClickListener(mListener);
-        llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
+        LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
 
         // 初始化主页ViewPager
@@ -213,7 +207,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     /**
      * 从service中获取音量信息和当前音乐列表
-     *
      * @author wm
      * @createTime 2023/8/24 19:28
      */
@@ -247,28 +240,29 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
 
         ivPlayMusic.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
-
     }
 
+    /**
+     *  播放音乐
+     *  @author wm
+     *  @createTime 2023/9/3 17:48
+     * @param mediaFileBean: 即将播放的音乐对象
+     * @param isRestPlayer: 是否需要重头开始播放
+     */
     private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer) {
-        initServicePlayHelper();
-        DebugLog.debug("service " + musicService);
-        musicService.play(mediaFileBean, isRestPlayer, mPosition);
-    }
-
-    private void initServicePlayHelper() {
         if (musicService != null) {
-            // 刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
-            // 初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
+            // 播放前先初始化service
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
         }
+        musicService.play(mediaFileBean, isRestPlayer, mPosition);
     }
 
     private final View.OnClickListener mListener = view -> {
         if (view == ivSettings) {
+            // 打开侧滑栏
             drawerLayout.openDrawer(GravityCompat.START);
         } else if (view == ivPlayMusic) {
-            // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
+            // 需要用firstPlay来判断当前是否是首次播放
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
             firstPlay = false;
         } else if (view == ivDiscovery) {
@@ -288,11 +282,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             for (int i = 0; i < 2; i++) {
                 myListMusic.add(defaultList.get(i).getId());
             }
-            DataRefreshService.deleteCustomerMusic("myList2", myListMusic);
+            DataRefreshService.deleteCustomerMusic("myList3", myListMusic);
         } else if (view == ivShow) {
             List<MusicListBean> customerList = DataRefreshService.getCustomerList();
             DebugLog.debug("" + customerList);
         } else if (view == ivMusicList) {
+            // 展示播放列表
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
             mActivityHandle.sendMessage(msg);
@@ -301,11 +296,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     private final View.OnClickListener simplePlayViewListener = view -> {
         if (view instanceof ImageView) {
-            // 点击底部播放控制栏，若是点击到按钮(ImageView)就不处理
+            // 点击底部播放控制栏，若是点击到自定义的按钮(ImageView)就不处理，在其他地方单独处理
             return;
         }
 
-        // 点击到其他地方，就跳转进去MusicPlayFragment页面
+        // 点击到其他区域，就跳转进去MusicPlayFragment页面
         myFragmentCallBack.changeFragment();
     };
 
@@ -339,7 +334,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     /**
      * 更改播放状态和信息，Activity接收到service发出的更新通知后调用
-     *
      * @author wm
      * @createTime 2023/8/24 19:23
      */

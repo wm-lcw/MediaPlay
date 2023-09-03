@@ -12,13 +12,4 @@ import androidx.fragment.app.Fragment;
  */
 public abstract class BaseFragment extends Fragment {
 
-//    public abstract int getListMode();
-//
-//    public abstract void setSelectPosition(int position);
-//
-//    public abstract void setSelection(int position);
-//
-//    public abstract int checkRefreshPosition(int deletePosition);
-//
-//    public abstract void refreshListView();
 }

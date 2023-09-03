@@ -13,9 +13,11 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
@@ -69,14 +71,15 @@ public class MainActivity extends BasicActivity {
     private int playMode = Constant.PLAY_MODE_LOOP;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
     private List<MediaFileBean> musicInfo = new ArrayList<>();
+    private List<MediaFileBean> defaultList = new ArrayList<>();
     private List<MediaFileBean> favoriteList = new ArrayList<>();
 
     private LinearLayout mFloatLayout;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams wmParams;
     private ArrayList<PlayListFragment> viewPagerLists;
-    private boolean isShowList = false;
-
+    private boolean isShowList = false, mRegistered = false;
+    private MainMusicBroadcastReceiver mainMusicBroadcastReceiver;
 
     private MusicPlayService musicService;
     private final ServiceConnection connection = new ServiceConnection() {
@@ -90,7 +93,7 @@ public class MainActivity extends BasicActivity {
                 musicService.initPlayHelper(handler);
                 // 需要等service起来之后再给Fragment传service
                 mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
-                musicPlayFragment.setDataFromMainActivity(musicService, handler, viewPagerLists, musicListName, mPosition);
+                musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
             }
         }
 
@@ -155,6 +158,7 @@ public class MainActivity extends BasicActivity {
         if (null != connection) {
             unbindService(connection);
         }
+        unregisterReceiver();
     }
 
     /**
@@ -269,8 +273,10 @@ public class MainActivity extends BasicActivity {
         musicListName = DataRefreshService.getLastPlayListName();
         mPosition = DataRefreshService.getLastPosition();
         musicInfo = DataRefreshService.getMusicListByName(musicListName);
+        defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
 
+        // 创建悬浮窗视图
         createFloatView();
 
         // 创建Fragment实例，并加载显示MainViewFragment
@@ -284,8 +290,9 @@ public class MainActivity extends BasicActivity {
         // 启动MusicPlayService服务
         Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
-    }
 
+        registerReceiver();
+    }
 
     @Override
     protected void onResume() {
@@ -293,6 +300,7 @@ public class MainActivity extends BasicActivity {
         DebugLog.debug("");
         // 从service获取音量信息和当前音乐列表，应对息屏唤醒等的情况
         if (musicService != null) {
+            isPlaying = musicService.isPlaying();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
             musicListName = musicService.getMusicListName();
@@ -341,97 +349,98 @@ public class MainActivity extends BasicActivity {
     public interface FragmentCallBack {
         /**
          * 切换Fragment
-         *
          * @author wm
          * @createTime 2023/8/23 18:31
          */
         void changeFragment();
     }
-
     public MyFragmentCallBack myFragmentCallBack = new MyFragmentCallBack();
-
     public class MyFragmentCallBack implements FragmentCallBack {
         @Override
         public void changeFragment() {
-            // 切换Fragment，后续拓展，多个Fragment
+            // 切换Fragment，后续拓展多个Fragment
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.addToBackStack(null);
             transaction.replace(R.id.fl_main_view, musicPlayFragment);
             transaction.commit();
-            musicPlayFragment.setDataFromMainActivity(musicService, handler, viewPagerLists, musicListName, mPosition);
+            musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
         }
     }
 
+    /**
+     *  处理各种Handler消息
+     *  @createTime 2023/9/3 15:44
+     */
     final Handler handler = new Handler(Looper.myLooper()) {
         @SuppressLint("ResourceAsColor")
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON) {
-                // service发送的信息，更新播放状态的图标
+            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_STATE) {
+                // service发送的信息，更新播放状态
                 isPlaying = msg.getData().getBoolean("isPlayingStatus");
                 mPosition = msg.getData().getInt("position");
-                if (musicPlayFragment.isVisible()) {
-                    musicPlayFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
-                }
-                if (mainViewFragment.isVisible()) {
-                    mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
-                }
-            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_POSITION) {
-                // service删除歌曲后自动播放下一曲、在通知栏切歌后更新mPosition发送的信息，
-                int newPosition = msg.getData().getInt("newPosition");
-                if (musicPlayFragment.isVisible()) {
-                    musicPlayFragment.setPositionByServiceListChange(newPosition);
-                }
+                refreshFragmentStatus();
+                refreshListStatus();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE) {
+                // MusicPlayFragment发送的消息，播放页面收藏/取消收藏时刷新列表
+                refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
+                // playHelper发送的消息，用于更新播放进度，目前只用于MusicPlayFragment
                 int seekbarProgress = msg.getData().getInt("seekbarProgress");
                 String currentMusicInfo = msg.getData().getString("currentPlayingInfo");
                 String currentPlayTime = msg.getData().getString("currentTime");
                 String mediaTime = msg.getData().getString("mediaTime");
                 if (musicPlayFragment.isVisible()) {
-                    musicPlayFragment.setCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
+                    musicPlayFragment.refreshCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
                 }
             } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
+                // 音乐列表Fragment发送的消息，用于通知切换播放歌曲/播放列表
                 int newPosition = msg.getData().getInt("position");
                 String newMusicListName = msg.getData().getString("musicListName");
-                List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(musicListName);
-                if (tempList != null && tempList.size() > 0) {
-                    // 更新播放列表等数据
-                    changeMusicPlayList(tempList, newPosition, newMusicListName);
-                }
+                changeMusicPlayList(newPosition, newMusicListName);
             } else if (msg.what == Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT) {
-                DebugLog.debug("show list");
+                // 显示音乐列表悬浮窗
                 showFloatView();
             }
         }
     };
 
-    private void changeMusicPlayList(List<MediaFileBean> list, int position, String newMusicListName) {
-        // 更新Activity中的数据
-        musicInfo = list;
+    /**
+     *  切换播放列表
+     *  @author wm
+     *  @createTime 2023/9/3 15:45
+     *  @param position: 播放的音乐下标
+     *  @param newMusicListName: 音乐列表名
+     */
+    private void changeMusicPlayList(int position, String newMusicListName) {
+        // 更新mPosition
         mPosition = position;
-        musicListName = newMusicListName;
-        isPlaying = true;
+        DebugLog.debug("newListName " + newMusicListName);
 
-        // 保存上次播放的列表来源
-        DataRefreshService.setLastPlayListName(musicListName);
-        DataRefreshService.setLastPosition(mPosition);
-        DataRefreshService.setLastMusicId(musicInfo.get(mPosition).getId());
+        if (!musicListName.equalsIgnoreCase(newMusicListName)){
+            // 有切换播放列表的操作才更新当前播放列表的信息
+            List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
+            if (tempList != null && tempList.size() > 0) {
+                // 更新播放列表等数据
+                musicInfo = tempList;
+                musicListName = newMusicListName;
+                // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+                viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
+            }
+        }
 
-        // 更新各个Fragment的数据
-        if (musicPlayFragment.isVisible()) {
-            musicPlayFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
-        }
-        if (mainViewFragment.isVisible()) {
-            mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
-        }
+        // 保存播放信息
+        DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
 
         // 调用service播放
         if (musicService != null) {
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
             musicService.play(musicInfo.get(mPosition), true, mPosition);
         }
+
+        // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
     }
 
     /**
@@ -450,7 +459,7 @@ public class MainActivity extends BasicActivity {
         // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         // 调整悬浮窗显示的停靠位置为左侧顶部
-        wmParams.gravity = Gravity.LEFT | Gravity.TOP;
+        wmParams.gravity = Gravity.START | Gravity.TOP;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = 0;
         wmParams.y = 0;
@@ -462,8 +471,11 @@ public class MainActivity extends BasicActivity {
     }
 
     /**
-     * 初始化悬浮窗中的视图、初始化Fragment等
+     *  初始化悬浮窗中的视图、初始化Fragment等
+     *  @author wm
+     *  @createTime 2023/9/3 16:50
      */
+    @SuppressLint("InflateParams")
     private void initFloatView() {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
@@ -481,18 +493,19 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 显示悬浮窗
-     *
      * @author wm
      * @createTime 2023/9/2 14:18
      */
     private void showFloatView() {
-        // 添加mFloatLayout
         mWindowManager.addView(mFloatLayout, wmParams);
         isShowList = true;
+        refreshListStatus();
     }
 
     /**
-     * 点击窗口外部区域关闭列表窗口
+     *  点击窗口外部区域关闭列表窗口
+     *  @author wm
+     *  @createTime 2023/9/3 16:51
      */
     @SuppressLint("ClickableViewAccessibility")
     private void setWindowOutTouch() {
@@ -514,5 +527,142 @@ public class MainActivity extends BasicActivity {
             }
             return true;
         });
+    }
+
+    /**
+     *  刷新悬浮窗列表的状态
+     *  @author wm
+     *  @createTime 2023/9/3 15:36
+     */
+    private void refreshListStatus() {
+        for (PlayListFragment fragment : viewPagerLists) {
+            if (musicListName.equalsIgnoreCase(fragment.getListName())) {
+                fragment.setSelectPosition(mPosition);
+                fragment.setSelection(mPosition);
+            } else {
+                fragment.setSelectPosition(-1);
+            }
+        }
+    }
+
+    /**
+     *  刷新Fragment的数据和UI状态
+     *  @author wm
+     *  @createTime 2023/9/3 15:36
+     */
+    private void refreshFragmentStatus(){
+        if (musicPlayFragment.isVisible()) {
+            musicPlayFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
+        }
+        if (mainViewFragment.isVisible()) {
+            mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
+        }
+    }
+
+    /**
+     *  删除音乐的广播
+     *  @author wm
+     *  @createTime 2023/9/3 15:38
+     */
+    private class MainMusicBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Constant.DELETE_MUSIC_ACTION.equals(intent.getAction())) {
+                // 删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
+                int deletePosition = intent.getExtras().getInt("musicPosition");
+                String listSource = intent.getExtras().getString("musicListSource");
+                dealDeleteMusic(listSource, deletePosition);
+            }
+        }
+    }
+
+    /**
+     *  删除音乐的处理
+     *  @author wm
+     *  @createTime 2023/9/3 15:38
+     *  @param listSource: 音乐列表类型
+     *  @param deletePosition: 删除音乐所在列表的下标
+     */
+    private void dealDeleteMusic(String listSource, int deletePosition) {
+        // 删除的音乐列表是当前正在播放的列表才需要处理
+        if (musicListName.equalsIgnoreCase(listSource)) {
+            if (musicInfo.size() <= 0) {
+                // 如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
+                stopPlayByDelete();
+            } else {
+                // 删除的是当前列表，且剩余列表不为空
+                for (PlayListFragment fragment : viewPagerLists) {
+                    if (musicListName.equalsIgnoreCase(fragment.getListName())) {
+                        int result = fragment.checkRefreshPosition(deletePosition);
+                        if (result == Constant.RESULT_BEFORE_CURRENT_POSITION) {
+                            // 删除的是小于当前播放下标的歌曲，只刷新service中的position即可，UI操作在Fragment已完成
+                            mPosition--;
+                            musicService.setPosition(mPosition);
+                        } else if (result == Constant.RESULT_IS_CURRENT_POSITION) {
+                            // 删除的是当前的歌曲，需要重新设置高亮
+                            // 删除歌曲后，列表整体上移，position指向的是下首歌了，所以需要减一再播放下一曲（直接播放可能会出现越界问题）
+                            mPosition--;
+                            musicService.setPosition(mPosition);
+                            musicService.playNext();
+                            mPosition = musicService.getPosition();
+                            fragment.setSelectPosition(mPosition);
+                            fragment.setSelection(mPosition);
+                        }
+                    } else {
+                        fragment.setSelectPosition(-1);
+                    }
+                }
+            }
+
+            // 更新各个Fragment的数据
+            refreshFragmentStatus();
+            // 更新列表Ui
+            refreshListStatus();
+        }
+    }
+
+    /**
+     *  删除歌曲后列表为空的操作
+     *  @author wm
+     *  @createTime 2023/9/3 15:39
+     */
+    private void stopPlayByDelete() {
+        DebugLog.debug("");
+        musicService.toStop();
+        mPosition = 0;
+        isPlaying = false;
+
+        // 直接保存默认列表的第一首歌作为最后的播放，避免此时关闭应用，导致下次打开时无法获取上次播放的信息
+        DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_DEFAULT_NAME,mPosition,defaultList.get(mPosition).getId(),playMode);
+    }
+
+    /**
+     *  注册广播
+     *  @author wm
+     *  @createTime 2023/9/3 15:39
+     */
+    public void registerReceiver() {
+        mainMusicBroadcastReceiver = new MainMusicBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constant.DELETE_MUSIC_ACTION);
+        mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
+        mRegistered = true;
+    }
+
+    /**
+     *  注销广播
+     *  @author wm
+     *  @createTime 2023/9/3 15:40
+     */
+    public void unregisterReceiver() {
+        if (mRegistered) {
+            try {
+                mContext.unregisterReceiver(mainMusicBroadcastReceiver);
+                mainMusicBroadcastReceiver = null;
+                mRegistered = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

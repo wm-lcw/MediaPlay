@@ -10,11 +10,6 @@ public class Constant {
     public static final int PLAY_MODE_SHUFFLE = 1;
     public static final int PLAY_MODE_SINGLE = 2;
 
-    public static final int LIST_MODE_DEFAULT = 0;
-    public static final int LIST_MODE_FAVORITE = 1;
-    public static final int LIST_MODE_CUSTOMER = 2;
-    public static final int LIST_MODE_HISTORY = 3;
-
     public static final String LIST_MODE_DEFAULT_NAME = "默认列表";
     public static final String LIST_MODE_FAVORITE_NAME = "收藏列表";
     public static final String LIST_MODE_CUSTOMER_NAME = "自定义";
@@ -26,8 +21,8 @@ public class Constant {
     public final static int RESULT_AFTER_CURRENT_POSITION = 2;
 
     public static final int HANDLER_MESSAGE_REFRESH_VOLUME = 0;
-    public static final int HANDLER_MESSAGE_REFRESH_PLAY_ICON = 1;
-    public static final int HANDLER_MESSAGE_REFRESH_POSITION = 2;
+    public static final int HANDLER_MESSAGE_REFRESH_PLAY_STATE = 1;
+    public static final int HANDLER_MESSAGE_REFRESH_LIST_STATE = 2;
     public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
     public static final int HANDLER_MESSAGE_FROM_LIST_FRAGMENT = 4;
     public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 5;

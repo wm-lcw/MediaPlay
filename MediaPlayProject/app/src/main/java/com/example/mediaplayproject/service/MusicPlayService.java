@@ -159,12 +159,12 @@ public class MusicPlayService extends Service {
                 //首次播放歌曲、切换歌曲播放、继续播放
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
-                //播放的时候保存播放的歌曲Id
-                DataRefreshService.setLastMusicId(mediaFileBean.getId());
+                // 在播放时保存信息
+                DataRefreshService.setLastPlayInfo(musicListName,mPosition,mediaFileBean.getId(),playMode);
             }
-            // 发送Message给MusicPlayFragment，用于更新播放图标
+            // 发送Message给MusicPlayFragment，用于更新播放状态
             Message msg = new Message();
-            msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_ICON;
+            msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_STATE;
             Bundle bundle = new Bundle();
             bundle.putInt("position",mPosition);
             bundle.putBoolean("isPlayingStatus", isPlayingStatus);
@@ -427,13 +427,9 @@ public class MusicPlayService extends Service {
                     break;
                 case PREV:
                     playPre();
-                    //播放列表显示的时候，下拉通知栏播放上下曲之后，需要刷新播放列表
-                    sendMessageRefreshPosition();
                     break;
                 case NEXT:
                     playNext();
-                    //播放列表显示的时候，下拉通知栏播放上下曲之后，需要刷新播放列表
-                    sendMessageRefreshPosition();
                     break;
                 case CLOSE:
                     closeApp();
@@ -452,31 +448,16 @@ public class MusicPlayService extends Service {
         BasicApplication.getActivityManager().finishAll();
     }
 
-
-    /**
-     *  发送信息给Activity更新position
-     *  @author wm
-     *  @createTime 2023/8/31 15:14
-     */
-    private void sendMessageRefreshPosition() {
-        //发送Message给MainActivity，更新删除后的新position
-        Message msg = new Message();
-        msg.what = Constant.HANDLER_MESSAGE_REFRESH_POSITION;
-        Bundle bundle = new Bundle();
-        bundle.putInt("newPosition", mPosition);
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
-    }
-
     /**
      * @createTime 2023/2/12 22:08
      * @description 若当前播放的是收藏列表且删除了所有歌曲，则停止播放
      */
     public void toStop() {
         helper.stop();
-        // 若收藏列表为空之后，播放的列表转为默认列表；需要刷新Activity和通知栏的内容
-        // 先通知Activity修改播放列表及mPosition，再调用Service中的initPlayHelper来重新显示通知栏
         firstPlay = true;
+
+        // 更新通知栏
+        updateNotificationShow(-1, false);
     }
 
     /**
