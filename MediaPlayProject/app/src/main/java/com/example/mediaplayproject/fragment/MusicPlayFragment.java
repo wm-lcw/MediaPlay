@@ -385,18 +385,20 @@ public class MusicPlayFragment extends Fragment {
      *  更新播放状态
      *  @author wm
      *  @createTime 2023/9/3 16:23
-     *  @param state: 是否正在播放：true-播放；false-暂停
-     *  @param newPosition:播放歌曲的下标
-     *  @param musicListName:播放歌曲所属的列表名
-     *  @param musicInfo:播放歌曲所属列表
+     * @param state : 是否正在播放：true-播放；false-暂停
+     * @param newPosition :播放歌曲的下标
+     * @param musicListName :播放歌曲所属的列表名
+     * @param musicInfo :播放歌曲所属列表
+     * @param firstPlay :标识是否是首次播放
      */
-    public void refreshPlayState(boolean state, int newPosition, String musicListName, List<MediaFileBean> musicInfo) {
+    public void refreshPlayState(boolean state, int newPosition, String musicListName, List<MediaFileBean> musicInfo, boolean firstPlay) {
         DebugLog.debug("refresh play state ");
         // 更新播放状态和收藏状态
         isPlaying = state;
         mPosition = newPosition;
         this.musicListName = musicListName;
         this.musicInfo = musicInfo;
+        this.firstPlay = firstPlay;
         initPlayStateAndInfo();
     }
 

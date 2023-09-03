@@ -337,11 +337,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      * @author wm
      * @createTime 2023/8/24 19:23
      */
-    public void refreshPlayState(boolean isPlaying, int mPosition, String musicListName, List<MediaFileBean> musicInfo) {
+    public void refreshPlayState(boolean isPlaying, int mPosition, String musicListName, List<MediaFileBean> musicInfo, boolean firstPlay) {
         this.isPlaying = isPlaying;
         this.mPosition = mPosition;
         this.musicListName = musicListName;
         this.musicInfo = musicInfo;
+        this.firstPlay = firstPlay;
 
         // 刷新播放状态信息
         initPlayStateAndInfo();

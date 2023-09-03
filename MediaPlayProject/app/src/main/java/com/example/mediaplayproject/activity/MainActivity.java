@@ -66,7 +66,7 @@ public class MainActivity extends BasicActivity {
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
 
-    private boolean isPlaying = false;
+    private boolean isPlaying = false, firstPlay = true;
     private int mPosition = 0;
     private int playMode = Constant.PLAY_MODE_LOOP;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
@@ -163,7 +163,6 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 申请权限
-     *
      * @author wm
      * @createTime 2023/8/24 18:10
      */
@@ -202,7 +201,6 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 判断是否有悬浮窗权限
-     *
      * @return : boolean
      * @author wm
      * @createTime 2023/8/24 18:10
@@ -222,7 +220,6 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 判断是否有文件存储权限
-     *
      * @return : boolean
      * @author wm
      * @createTime 2023/8/24 18:11
@@ -236,7 +233,6 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 申请权限回调结果，主要针对API<23的情况
-     *
      * @param requestCode:  请求码
      * @param permissions:  权限数组
      * @param grantResults: 请求结果
@@ -259,7 +255,6 @@ public class MainActivity extends BasicActivity {
 
     /**
      * 初始化操作(音乐资源、Ui布局)
-     *
      * @author wm
      * @createTime 2023/8/24 18:08
      */
@@ -381,6 +376,7 @@ public class MainActivity extends BasicActivity {
                 // service发送的信息，更新播放状态
                 isPlaying = msg.getData().getBoolean("isPlayingStatus");
                 mPosition = msg.getData().getInt("position");
+                firstPlay = musicService.getFirstPlay();
                 refreshFragmentStatus();
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE) {
@@ -552,10 +548,10 @@ public class MainActivity extends BasicActivity {
      */
     private void refreshFragmentStatus(){
         if (musicPlayFragment.isVisible()) {
-            musicPlayFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
+            musicPlayFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
         }
         if (mainViewFragment.isVisible()) {
-            mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo);
+            mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
         }
     }
 
@@ -631,6 +627,7 @@ public class MainActivity extends BasicActivity {
         musicService.toStop();
         mPosition = 0;
         isPlaying = false;
+        firstPlay = true;
 
         // 直接保存默认列表的第一首歌作为最后的播放，避免此时关闭应用，导致下次打开时无法获取上次播放的信息
         DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_DEFAULT_NAME,mPosition,defaultList.get(mPosition).getId(),playMode);
