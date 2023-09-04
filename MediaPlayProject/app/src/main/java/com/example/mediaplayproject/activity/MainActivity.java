@@ -438,6 +438,11 @@ public class MainActivity extends BasicActivity {
             musicService.play(musicInfo.get(mPosition), true, mPosition);
         }
 
+        if (mainViewFragment.isVisible()){
+            // 更新PersonalPageFragment中的当前播放列表，用于刷新列表的显示状态
+            mainViewFragment.refreshCurrentPlayingList(newMusicListName);
+        }
+
         // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
     }
 

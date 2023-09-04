@@ -22,6 +22,7 @@ import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private ListView lvCustomer;
     private CustomerMusicListAdapter customerMusicListAdapter;
     private ImageView ivAddList;
+    private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
 
     private static PersonalPageFragment instance;
 
@@ -72,7 +74,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private void initData() {
         lvCustomer = myView.findViewById(R.id.lv_customer_list);
         DebugLog.debug("---" + customerLists);
-        customerMusicListAdapter = new CustomerMusicListAdapter(mContext,customerLists);
+        customerMusicListAdapter = new CustomerMusicListAdapter(mContext,customerLists,currentPlayingListName);
         customerMusicListAdapter.setOnImageViewClickListener(this);
         lvCustomer.setAdapter(customerMusicListAdapter);
         registerForContextMenu(lvCustomer);
@@ -98,7 +100,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     }
 
     /**
-     *  从DataRefreshService中获取音乐列表
+     *  从DataRefreshService中获取音乐列表等信息
      *  @author wm
      *  @createTime 2023/8/24 19:27
      */
@@ -106,6 +108,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         customerLists = DataRefreshService.getCustomerList();
+        currentPlayingListName = DataRefreshService.getLastPlayListName();
     }
 
     private final View.OnClickListener mListener = view -> {
@@ -114,6 +117,11 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
     };
 
+    /**
+     *  显示创建列表的弹框
+     *  @author wm
+     *  @createTime 2023/9/4 15:57
+     */
     private void showCreateListAliasDialog() {
         EditText inputText = new EditText(mContext);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -143,19 +151,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         dialog.show();
     }
 
-    /**
-     *  更新自定义列表的状态
-     *  @author wm
-     *  @createTime 2023/9/3 23:02
-     */
-    public void refreshCustomerList() {
-        initMusicSource();
-        DebugLog.debug("--" + customerLists);
-        if (customerMusicListAdapter != null){
-            DebugLog.debug("update customer list");
-            customerMusicListAdapter.changeCustomerList(customerLists);
-        }
-    }
+
 
     @Override
     public void onImageViewClick(View view) {
@@ -193,4 +189,29 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
         return true;
     }
+
+
+    /**
+     *  更新自定义列表的状态
+     *  @author wm
+     *  @createTime 2023/9/3 23:02
+     */
+    public void refreshCustomerList() {
+        initMusicSource();
+        if (customerMusicListAdapter != null){
+            customerMusicListAdapter.changeCustomerList(customerLists);
+        }
+    }
+
+    /**
+     *  更新当前播放列表
+     *  @author wm
+     *  @createTime 2023/9/4 16:46
+     * @param musicListName: 当前播放列表名称
+     */
+    public void refreshCurrentPlayingList(String musicListName) {
+        this.currentPlayingListName = musicListName;
+        customerMusicListAdapter.setCurrentPlayingListName(musicListName);
+    }
+
 }

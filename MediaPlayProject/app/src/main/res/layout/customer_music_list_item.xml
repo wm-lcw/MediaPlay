@@ -13,9 +13,9 @@
         android:src="@mipmap/ic_music_bottom" />
 
     <RelativeLayout
+        android:id="@+id/rl_list_info"
         android:layout_width="250dp"
         android:layout_height="@dimen/dp_50"
-        android:orientation="horizontal"
         android:layout_toEndOf="@+id/head_left"
         android:layout_marginStart="@dimen/dp_20">
 
@@ -36,12 +36,22 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_15"
-            android:text="siz"/>
+            android:text="size"/>
         <!--
             这个属性可以设置长按文字复制等操作
             android:textIsSelectable="true"-->
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/iv_is_playing"
+        android:layout_toStartOf="@+id/rl_list_settings"
+        android:layout_marginRight="@dimen/dp_35"
+        android:layout_marginTop="@dimen/dp_7"
+        android:layout_width="@dimen/dp_35"
+        android:layout_height="@dimen/dp_35"
+        android:background="@mipmap/ic_is_playing"/>
     <RelativeLayout
+        android:id="@+id/rl_list_settings"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dp_50"
         android:layout_alignParentEnd="true"
