@@ -92,7 +92,7 @@ public class CustomerMusicListAdapter extends BaseAdapter {
             // 对列表做操作
             DebugLog.debug("settings ");
             if (mListener != null){
-                mListener.onImageViewClick(v);
+                mListener.onImageViewClick(v, musicInfoList.get(position).getListName());
             }
         });
 
@@ -112,9 +112,10 @@ public class CustomerMusicListAdapter extends BaseAdapter {
          *  ‘更多’按钮点击回调方法
          *  @author wm
          *  @createTime 2023/9/4 11:32
-         * @param view:
+         *  @param view:
+         *  @param listName:
          */
-        void onImageViewClick(View view);
+        void onImageViewClick(View view,String listName);
     }
 
     public void setOnImageViewClickListener(OnImageViewClickListener listener){

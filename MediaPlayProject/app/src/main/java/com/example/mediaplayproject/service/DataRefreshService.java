@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -409,7 +410,7 @@ public class DataRefreshService extends Service {
                         customerListsMap.put(listName, musicListBean);
                     }
                 }
-            sendCustomerMusicListChangeBroadcast();
+            sendCustomerMusicListChangeBroadcast(listName,Constant.CUSTOMER_LIST_OPERATOR_CREATE);
 //            });
 
         } catch (Exception exception) {
@@ -429,8 +430,9 @@ public class DataRefreshService extends Service {
                 DebugLog.debug("delete list " + listName);
                 db.execSQL("DELETE FROM " + CUSTOMER_LIST_TABLE_NAME + " WHERE list_name = ?",
                         new String[]{listName});
-                customerListsMap.get(listName).setMusicList(null);
-                customerListsMap.remove(customerListsMap.get(listName));
+                customerListsMap.remove(listName);
+                DebugLog.debug("listSize After delete "+customerListsMap.size());
+                sendCustomerMusicListChangeBroadcast(listName, Constant.CUSTOMER_LIST_OPERATOR_DELETE);
             }
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
@@ -573,13 +575,19 @@ public class DataRefreshService extends Service {
         context.sendBroadcast(intent);
     }
 
+
     /**
      *  发送自定义列表更新的广播
      *  @author wm
-     *  @createTime 2023/9/3 23:06
+     *  @createTime 2023/9/4 18:30
+     * @param operation: 列表操作类型
      */
-    private static void sendCustomerMusicListChangeBroadcast(){
+    private static void sendCustomerMusicListChangeBroadcast(String listName, int operation){
         Intent intent = new Intent(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putInt("listOperation",operation);
+        bundle.putString("listName", listName);
+        intent.putExtras(bundle);
         context.sendBroadcast(intent);
     }
 

@@ -578,6 +578,16 @@ public class MainActivity extends BasicActivity {
                 String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
             } else if(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION.equals(intent.getAction())){
+                int operation = intent.getExtras().getInt("listOperation");
+                String listName = intent.getExtras().getString("listName");
+                if (operation == Constant.CUSTOMER_LIST_OPERATOR_DELETE && musicListName.equalsIgnoreCase(listName)){
+                    // 删除列表的操作，且是当前正在播放的列表，需要做停止播放的操作
+                    stopPlayByDelete();
+                    // 更新各个Fragment的数据
+                    refreshFragmentStatus();
+                    // 更新列表Ui
+                    refreshListStatus();
+                }
                 mainViewFragment.refreshCustomerList();
             }
         }

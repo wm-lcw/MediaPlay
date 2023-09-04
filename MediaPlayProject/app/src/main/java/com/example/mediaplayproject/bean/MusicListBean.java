@@ -17,7 +17,7 @@ public class MusicListBean {
     /**
     * 注意：这里的size并不能同步的获取list的音乐数量需要手动的获取list.size()
     * */
-    private int listSize;
+    private int listSize = 0;
     private List<MediaFileBean> musicList;
 
     public MusicListBean(String listName) {
@@ -42,7 +42,12 @@ public class MusicListBean {
     }
 
     public int getListSize() {
-        return musicList.size();
+        if (musicList != null){
+            return musicList.size();
+        } else {
+            return 0;
+        }
+
     }
 
     public void setListSize(int listSize) {

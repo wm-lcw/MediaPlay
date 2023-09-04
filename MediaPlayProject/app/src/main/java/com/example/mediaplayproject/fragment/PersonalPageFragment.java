@@ -43,6 +43,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private CustomerMusicListAdapter customerMusicListAdapter;
     private ImageView ivAddList;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
+    private String itemClickListName;
 
     private static PersonalPageFragment instance;
 
@@ -154,7 +155,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
 
     @Override
-    public void onImageViewClick(View view) {
+    public void onImageViewClick(View view, String listName) {
+        itemClickListName = listName;
         view.showContextMenu();
     }
 
@@ -182,6 +184,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
                 DebugLog.debug("edit");
                 break;
             case R.id.delete:
+                showDeleteListAliasDialog();
                 DebugLog.debug("delete");
                 break;
             default:
@@ -190,6 +193,49 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         return true;
     }
 
+    /**
+     *  删除音乐列表
+     *  @author wm
+     *  @createTime 2023/9/4 17:54
+     */
+    private void toDeleteMusicList() {
+        DataRefreshService.deleteMusicList(itemClickListName);
+    }
+
+    /**
+     *  显示删除列表的弹框
+     *  @author wm
+     *  @createTime 2023/9/4 15:57
+     */
+    private void showDeleteListAliasDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle("是否删除'" + itemClickListName +"'列表?");
+        if (currentPlayingListName.equalsIgnoreCase(itemClickListName)){
+            builder.setMessage("当前正在播放此列表，是否删除该列表？");
+        } else {
+            builder.setMessage("是否删除该列表？");
+        }
+
+        builder.setIcon(R.mipmap.ic_launcher);
+        //点击对话框以外的区域是否让对话框消失
+        builder.setCancelable(true);
+
+        // 设置正面按钮
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            toDeleteMusicList();
+            dialog.dismiss();
+        });
+
+        // 设置反面按钮
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+
+        // 创建AlertDialog对象
+        AlertDialog dialog = builder.create();
+        // 显示对话框
+        dialog.show();
+    }
+
+
 
     /**
      *  更新自定义列表的状态
@@ -197,6 +243,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      *  @createTime 2023/9/3 23:02
      */
     public void refreshCustomerList() {
+        DebugLog.debug("");
         initMusicSource();
         if (customerMusicListAdapter != null){
             customerMusicListAdapter.changeCustomerList(customerLists);
