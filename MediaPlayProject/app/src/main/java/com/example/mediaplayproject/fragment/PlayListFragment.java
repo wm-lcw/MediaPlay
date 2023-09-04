@@ -13,9 +13,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicListAdapter;
-import com.example.mediaplayproject.base.BaseFragment;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
@@ -26,7 +27,7 @@ import java.util.List;
 /**
  * @author wm
  */
-public class PlayListFragment extends BaseFragment {
+public class PlayListFragment extends Fragment {
     private ImageView ivLocalList;
     private ListView musicListView;
     private TextView tvListTitle;

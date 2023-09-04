@@ -28,4 +28,5 @@ public class Constant {
     public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 5;
 
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
+    public static final String OPERATE_CUSTOMER_MUSIC_LIST_ACTION = "com.example.media.play.operate.customer.music.list.action";
 }

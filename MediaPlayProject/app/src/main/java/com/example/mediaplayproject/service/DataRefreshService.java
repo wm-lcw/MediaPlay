@@ -387,7 +387,7 @@ public class DataRefreshService extends Service {
      */
     public static void createNewMusicList(String listName) {
         try {
-            threadPool.execute(() -> {
+//            threadPool.execute(() -> {
                 DebugLog.debug("map contains list : " + customerListsMap.containsKey(listName));
                 if (!customerListsMap.containsKey(listName)) {
                     DebugLog.debug("insert new list " + listName);
@@ -409,7 +409,8 @@ public class DataRefreshService extends Service {
                         customerListsMap.put(listName, musicListBean);
                     }
                 }
-            });
+            sendCustomerMusicListChangeBroadcast();
+//            });
 
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
@@ -569,6 +570,16 @@ public class DataRefreshService extends Service {
         bundle.putInt("musicPosition", position);
         bundle.putString("musicListSource", listName);
         intent.putExtras(bundle);
+        context.sendBroadcast(intent);
+    }
+
+    /**
+     *  发送自定义列表更新的广播
+     *  @author wm
+     *  @createTime 2023/9/3 23:06
+     */
+    private static void sendCustomerMusicListChangeBroadcast(){
+        Intent intent = new Intent(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
         context.sendBroadcast(intent);
     }
 

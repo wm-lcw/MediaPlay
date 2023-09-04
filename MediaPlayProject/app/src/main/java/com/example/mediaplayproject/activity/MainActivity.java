@@ -65,6 +65,8 @@ public class MainActivity extends BasicActivity {
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
+    private ListViewPagerAdapter listViewPagerAdapter;
+    private ViewPager2 musicListViewPager;
 
     private boolean isPlaying = false, firstPlay = true;
     private int mPosition = 0;
@@ -477,13 +479,13 @@ public class MainActivity extends BasicActivity {
         //获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
-        ViewPager2 musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
+        musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
         PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, handler);
         PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, handler);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
-        ListViewPagerAdapter listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
+        listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
         musicListViewPager.setAdapter(listViewPagerAdapter);
     }
 
@@ -532,7 +534,9 @@ public class MainActivity extends BasicActivity {
      */
     private void refreshListStatus() {
         for (PlayListFragment fragment : viewPagerLists) {
+            DebugLog.debug("listName " + musicListName);
             if (musicListName.equalsIgnoreCase(fragment.getListName())) {
+                DebugLog.debug("highLight " + mPosition);
                 fragment.setSelectPosition(mPosition);
                 fragment.setSelection(mPosition);
             } else {
@@ -568,6 +572,8 @@ public class MainActivity extends BasicActivity {
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
+            } else if(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION.equals(intent.getAction())){
+                mainViewFragment.refreshCustomerList();
             }
         }
     }
@@ -642,6 +648,7 @@ public class MainActivity extends BasicActivity {
         mainMusicBroadcastReceiver = new MainMusicBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constant.DELETE_MUSIC_ACTION);
+        filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
     }

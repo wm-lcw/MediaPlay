@@ -349,4 +349,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     }
 
 
+    public void refreshCustomerList() {
+        personalPageFragment.refreshCustomerList();
+    }
 }

@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.base.BaseFragment;
 
 
 /**

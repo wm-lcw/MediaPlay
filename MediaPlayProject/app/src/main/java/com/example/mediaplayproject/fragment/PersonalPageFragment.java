@@ -1,26 +1,56 @@
 package com.example.mediaplayproject.fragment;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.base.BaseFragment;
+import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
+import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.bean.MusicListBean;
+import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.DebugLog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * @author wm
  */
-public class PersonalPageFragment extends Fragment {
+public class PersonalPageFragment extends Fragment implements CustomerMusicListAdapter.OnImageViewClickListener {
+
+    private Context mContext;
+    private View myView;
+    private List<MediaFileBean> defaultList = new ArrayList<>();
+    private List<MediaFileBean> favoriteList = new ArrayList<>();
+    private List<MusicListBean> customerLists = new ArrayList<>();
+    private ListView lvCustomer;
+    private CustomerMusicListAdapter customerMusicListAdapter;
+    private ImageView ivAddList;
 
     private static PersonalPageFragment instance;
-    public static PersonalPageFragment getInstance() {
+
+    public PersonalPageFragment(Context context) {
+        mContext = context;
+    }
+
+    public static PersonalPageFragment getInstance(Context context) {
         if (instance == null) {
-            instance = new PersonalPageFragment();
+            instance = new PersonalPageFragment(context);
         }
         return instance;
     }
@@ -33,7 +63,134 @@ public class PersonalPageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_personal_page, container, false);
+        myView = inflater.inflate(R.layout.fragment_personal_page, container, false);
+        initMusicSource();
+        initData();
+        return myView;
+    }
+
+    private void initData() {
+        lvCustomer = myView.findViewById(R.id.lv_customer_list);
+        DebugLog.debug("---" + customerLists);
+        customerMusicListAdapter = new CustomerMusicListAdapter(mContext,customerLists);
+        customerMusicListAdapter.setOnImageViewClickListener(this);
+        lvCustomer.setAdapter(customerMusicListAdapter);
+        registerForContextMenu(lvCustomer);
+
+        ivAddList = myView.findViewById(R.id.iv_add_list);
+        ivAddList.setOnClickListener(mListener);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initMusicSource();
+        if (lvCustomer!= null && customerMusicListAdapter!=null){
+            DebugLog.debug("");
+        }
+    }
+
+    /**
+     *  从DataRefreshService中获取音乐列表
+     *  @author wm
+     *  @createTime 2023/8/24 19:27
+     */
+    private void initMusicSource() {
+        defaultList = DataRefreshService.getDefaultList();
+        favoriteList = DataRefreshService.getFavoriteList();
+        customerLists = DataRefreshService.getCustomerList();
+    }
+
+    private final View.OnClickListener mListener = view -> {
+        if (view == ivAddList) {
+            showCreateListAliasDialog();
+        }
+    };
+
+    private void showCreateListAliasDialog() {
+        EditText inputText = new EditText(mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle("创建列表");
+        builder.setMessage("请输入列表名称：");
+        builder.setIcon(R.mipmap.ic_launcher);
+        builder.setView(inputText);
+        //点击对话框以外的区域是否让对话框消失
+        builder.setCancelable(true);
+
+        //设置正面按钮
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            String inputListName = inputText.getText().toString().trim();
+            if (!"".equals(inputListName)){
+                DataRefreshService.createNewMusicList(inputListName);
+            }
+            dialog.dismiss();
+        });
+
+        //设置反面按钮
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+
+        //创建AlertDialog对象
+        AlertDialog dialog = builder.create();
+
+        //显示对话框
+        dialog.show();
+    }
+
+    /**
+     *  更新自定义列表的状态
+     *  @author wm
+     *  @createTime 2023/9/3 23:02
+     */
+    public void refreshCustomerList() {
+        initMusicSource();
+        DebugLog.debug("--" + customerLists);
+        if (customerMusicListAdapter != null){
+            DebugLog.debug("update customer list");
+            customerMusicListAdapter.changeCustomerList(customerLists);
+        }
+    }
+
+    @Override
+    public void onImageViewClick(View view) {
+        view.showContextMenu();
+    }
+
+    @Override
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(mContext).inflate(R.menu.customer_list_function_menu, menu);
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    /**
+     *  上下文菜单被点击时触发该方法
+     *  @author wm
+     *  @createTime 2023/9/4 11:40
+     *  @param item:
+     *  @return : boolean
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.share:
+                DebugLog.debug("share");
+                break;
+            case R.id.edit:
+                DebugLog.debug("edit");
+                break;
+            case R.id.delete:
+                DebugLog.debug("delete");
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 }
