@@ -266,8 +266,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
             firstPlay = false;
         } else if (view == ivDiscovery) {
-            // create musicList
-            DataRefreshService.createNewMusicList("myList3");
         } else if (view == ivPersonal) {
             // insert music to musicList
             List<Long> myListMusic = new ArrayList<>();
@@ -287,7 +285,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             List<MusicListBean> customerList = DataRefreshService.getCustomerList();
             DebugLog.debug("" + customerList);
         } else if (view == ivMusicList) {
-            // 展示播放列表
+            // 主页展示播放列表
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
             mActivityHandle.sendMessage(msg);
