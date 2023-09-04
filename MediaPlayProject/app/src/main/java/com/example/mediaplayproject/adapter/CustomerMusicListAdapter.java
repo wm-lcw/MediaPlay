@@ -26,16 +26,23 @@ public class CustomerMusicListAdapter extends BaseAdapter {
     private final Context mContext;
     private List<MusicListBean> musicInfoList;
     private OnImageViewClickListener mListener;
+    private String currentPlayingListName;
 
     @SuppressLint("UseCompatLoadingForColorStateLists")
-    public CustomerMusicListAdapter(Context mContext, List<MusicListBean> musicList) {
+    public CustomerMusicListAdapter(Context mContext, List<MusicListBean> musicList, String currentPlayingListName) {
         this.mContext = mContext;
         this.musicInfoList = musicList;
+        this.currentPlayingListName = currentPlayingListName;
         DebugLog.debug("--" + this.musicInfoList);
     }
 
     public void changeCustomerList(List<MusicListBean> musicList){
         this.musicInfoList = musicList;
+        notifyDataSetChanged();
+    }
+
+    public void setCurrentPlayingListName(String musicListName) {
+        this.currentPlayingListName = musicListName;
         notifyDataSetChanged();
     }
 
@@ -64,6 +71,7 @@ public class CustomerMusicListAdapter extends BaseAdapter {
             holder.ivListIcon = convertView.findViewById(R.id.iv_current_list);
             holder.tvCustomerListName = convertView.findViewById(R.id.tv_list_name);
             holder.tvCustomerListSize = convertView.findViewById(R.id.tv_list_size);
+            holder.ivListPlaying = convertView.findViewById(R.id.iv_is_playing);
             holder.ivListSettings = convertView.findViewById(R.id.iv_customer_list_settings);
             //将Holder存储到convertView中
             convertView.setTag(holder);
@@ -74,6 +82,11 @@ public class CustomerMusicListAdapter extends BaseAdapter {
 
         holder.tvCustomerListName.setText(musicInfoList.get(position).getListName());
         holder.tvCustomerListSize.setText(musicInfoList.get(position).getListSize() + "首");
+        if (currentPlayingListName.equals(musicInfoList.get(position).getListName())){
+            holder.ivListPlaying.setVisibility(View.VISIBLE);
+        } else {
+            holder.ivListPlaying.setVisibility(View.GONE);
+        }
 
         convertView.findViewById(R.id.iv_customer_list_settings).setOnClickListener(v -> {
             // 对列表做操作
@@ -86,9 +99,11 @@ public class CustomerMusicListAdapter extends BaseAdapter {
         return convertView;
     }
 
+
+
     static class ViewHolder {
         TextView tvCustomerListName, tvCustomerListSize;
-        ImageView ivListIcon, ivListSettings;
+        ImageView ivListIcon, ivListPlaying, ivListSettings;
     }
 
     public interface OnImageViewClickListener {
