@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     @SuppressLint("NotifyDataSetChanged")
     public void changeList(List<MediaFileBean> newList){
-        musicList = newList;
+        this.musicList = newList;
         notifyDataSetChanged();
     }
 

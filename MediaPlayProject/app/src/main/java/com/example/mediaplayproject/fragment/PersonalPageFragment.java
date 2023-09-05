@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.ContextMenu;
@@ -340,7 +341,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         setWindowOutTouch();
         mainListAdapter = new MainListAdapter(mContext,defaultList);
         rvMainList = mFloatLayout.findViewById(R.id.rv_musicList);
+        DebugLog.debug("recycleView " + rvMainList);
         rvMainList.setAdapter(mainListAdapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        rvMainList.setLayoutManager(linearLayoutManager);
 
     }
 
