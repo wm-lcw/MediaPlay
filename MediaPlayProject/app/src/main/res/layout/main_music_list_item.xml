@@ -18,7 +18,7 @@
         android:singleLine="true"
         android:textColor="@color/white"
         android:textSize="@dimen/sp_18"
-        android:gravity="left"
+        android:gravity="center_vertical|left"
         android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_35"

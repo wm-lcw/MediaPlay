@@ -84,17 +84,17 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="@dimen/dp_20"
                 android:background="@mipmap/ic_add_nor"/>
-
         </RelativeLayout>
-
-
     </RelativeLayout>
 
     <ListView
         android:layout_below="@+id/rv_customs"
         android:id="@+id/lv_customer_list"
+        android:divider="@null"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingTop="-8dp"/>
 
     </RelativeLayout>
 </LinearLayout>
