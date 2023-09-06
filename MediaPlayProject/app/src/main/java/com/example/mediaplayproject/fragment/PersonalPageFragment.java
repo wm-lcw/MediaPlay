@@ -213,14 +213,11 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.share:
-                DebugLog.debug("share");
                 break;
             case R.id.edit:
-                DebugLog.debug("edit");
                 break;
             case R.id.delete:
                 showDeleteListAliasDialog();
-                DebugLog.debug("delete");
                 break;
             default:
                 break;
@@ -341,7 +338,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         setWindowOutTouch();
         mainListAdapter = new MainListAdapter(mContext,defaultList);
         rvMainList = mFloatLayout.findViewById(R.id.rv_musicList);
-        DebugLog.debug("recycleView " + rvMainList);
         rvMainList.setAdapter(mainListAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         rvMainList.setLayoutManager(linearLayoutManager);
@@ -375,7 +371,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
         final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
         popupWindowView.setOnTouchListener((v, event) -> {
-            DebugLog.debug("---");
             int x = (int) event.getX();
             int y = (int) event.getY();
             Rect rect = new Rect();

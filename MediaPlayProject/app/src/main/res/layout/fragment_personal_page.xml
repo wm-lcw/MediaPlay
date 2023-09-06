@@ -9,7 +9,15 @@
     <LinearLayout
         android:id="@+id/ll_default_list"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_50">
+        android:layout_height="@dimen/dp_50"
+        android:background="@drawable/bg_music_list_view">
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/dp_15"
+            android:background="@mipmap/medialist"/>
+
         <TextView
             android:id="@+id/tv_default_list"
             android:layout_marginStart="@dimen/dp_20"
@@ -20,9 +28,19 @@
     </LinearLayout>
 
     <LinearLayout
+        android:layout_marginTop="@dimen/dp_10"
         android:id="@+id/ll_favorite_list"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_50">
+        android:layout_height="@dimen/dp_50"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_music_list_view">
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/dp_15"
+            android:background="@mipmap/ic_list_like_choose"/>
+
         <TextView
             android:id="@+id/tv_favorite_list"
             android:layout_marginStart="@dimen/dp_20"
@@ -34,12 +52,19 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_3"
-        android:background="@color/black"/>
+        android:background="@color/black"
+        android:visibility="gone"/>
 
     <RelativeLayout
+        android:layout_marginTop="@dimen/dp_10"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_music_list_view">
+
+    <RelativeLayout
+        android:id="@+id/rv_customs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -66,9 +91,10 @@
     </RelativeLayout>
 
     <ListView
+        android:layout_below="@+id/rv_customs"
         android:id="@+id/lv_customer_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-
+    </RelativeLayout>
 </LinearLayout>

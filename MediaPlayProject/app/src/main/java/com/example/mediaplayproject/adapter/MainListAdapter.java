@@ -64,4 +64,11 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
             textView = itemView.findViewById(R.id.textView);
         }
     }
+
+    /*
+    * 首次加载时，哪部分展示出来了，就执行以下逻辑- 执行顺序：onCreateViewHolder--> new ViewHolder --> onBindViewHolder
+    *
+    * 全部加载完之后，哪部分展示，就只加载onBindViewHolder，因为已经创建过了，直接复用
+    *
+    * */
 }

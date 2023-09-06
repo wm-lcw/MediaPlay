@@ -12,4 +12,6 @@
     <color name="bg_normal">#ff00ff00</color><!-- 绿色 -->
     <color name="text_pressed">#FF03DAC5</color><!-- 浅蓝色 -->
     <color name="text_choose">#D6F2E9</color><!-- 浅蓝色 -->
+
+    <color name="bg_list_view">#73222932</color><!-- 列表背景 -->
 </resources>
