@@ -6,14 +6,14 @@
     android:orientation="horizontal">
 
     <CheckBox
-        android:id="@+id/checkBox"
+        android:id="@+id/cb_music"
         android:textColor="@color/white"
         android:layout_marginLeft="@dimen/dp_15"
         android:layout_width="@dimen/dp_35"
         android:layout_height="@dimen/dp_35" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tv_music_name"
         android:text="title"
         android:singleLine="true"
         android:textColor="@color/white"

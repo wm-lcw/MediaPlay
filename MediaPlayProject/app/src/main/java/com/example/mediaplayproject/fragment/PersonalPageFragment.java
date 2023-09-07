@@ -352,6 +352,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     @SuppressLint("NotifyDataSetChanged")
     private void showFloatView(List<MediaFileBean> musicList) {
         mainListAdapter.changeList(musicList);
+        mainListAdapter.setCheckoutState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
         isShowList = true;

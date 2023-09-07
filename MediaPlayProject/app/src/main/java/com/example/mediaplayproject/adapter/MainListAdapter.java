@@ -5,6 +5,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,7 +16,9 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.DebugLog;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author wm
@@ -26,6 +30,8 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     private List<MediaFileBean> musicList;
     private Context mContext;
+    private Set<Integer> selectedItems = new HashSet<>();
+    private boolean isSelectionMode = false;
 
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
@@ -48,7 +54,48 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull MainListAdapter.ViewHolder holder, int position) {
         MediaFileBean mediaFileBean = musicList.get(position);
-        holder.textView.setText(mediaFileBean.getTitle());
+        holder.musicName.setText(mediaFileBean.getTitle());
+        holder.musicName.setOnLongClickListener(v -> {
+            // 长按切换选中状态
+            isSelectionMode = true;
+            selectedItems.clear();
+            toggleSelection(position);
+            notifyDataSetChanged();
+            return false;
+        });
+
+        holder.musicName.setOnClickListener(v -> {
+            if (isSelectionMode){
+                // 多选模式下，点击歌曲名也能选中跟取消
+                toggleSelection(position);
+            } else {
+                // 非多选模式下，通知Activity播放音乐
+            }
+        });
+
+        holder.musicCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
+                selectedItems.add(position);
+            } else {
+                if (selectedItems.contains(position)) {
+                    selectedItems.remove(position);
+                }
+            }
+            notifyItemChanged(position);
+        });
+
+
+        holder.musicCheckBox.setChecked(selectedItems.contains(position));
+        holder.musicCheckBox.setVisibility(isSelectionMode ? View.VISIBLE : View.GONE);
+    }
+
+    private void toggleSelection(int position) {
+        if (selectedItems.contains(position)) {
+            selectedItems.remove(position);
+        } else {
+            selectedItems.add(position);
+        }
+        notifyItemChanged(position);
     }
 
     @Override
@@ -57,12 +104,19 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textView;
+        TextView musicName;
+        CheckBox musicCheckBox;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView = itemView.findViewById(R.id.textView);
+            musicName = itemView.findViewById(R.id.tv_music_name);
+            musicCheckBox = itemView.findViewById(R.id.cb_music);
+            musicCheckBox.setVisibility(View.GONE);
         }
+    }
+
+    public void setCheckoutState(boolean state){
+        isSelectionMode = state;
     }
 
     /*
