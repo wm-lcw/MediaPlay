@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
@@ -293,7 +294,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         customerMusicListAdapter.setCurrentPlayingListName(musicListName);
     }
 
-    private LinearLayout mFloatLayout;
+    private RelativeLayout mFloatLayout;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams wmParams;
     boolean isShowList = false;
@@ -334,7 +335,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private void initFloatView() {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
-        mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_main_list_view, null);
+        mFloatLayout = (RelativeLayout) inflater.inflate(R.layout.layout_main_list_view, null);
         setWindowOutTouch();
         mainListAdapter = new MainListAdapter(mContext,defaultList);
         rvMainList = mFloatLayout.findViewById(R.id.rv_musicList);
@@ -369,8 +370,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
          将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域,
          所以点击内容区域外部视为点击悬浮窗外部
          其中popupWindowView为全屏，listWindow为列表区域，触摸点没有落在列表区域，则隐藏列表*/
-        final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
-        final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
+        final View popupWindowView = mFloatLayout.findViewById(R.id.rl_popup_window);
+        final View listWindow = mFloatLayout.findViewById(R.id.rl_listWindow);
         popupWindowView.setOnTouchListener((v, event) -> {
             int x = (int) event.getX();
             int y = (int) event.getY();
