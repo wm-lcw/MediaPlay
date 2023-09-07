@@ -81,7 +81,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                     selectedItems.remove(position);
                 }
             }
-            notifyItemChanged(position);
         });
 
 
