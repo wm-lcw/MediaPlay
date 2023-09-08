@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.Constant;
-import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,14 +30,22 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     private List<MediaFileBean> musicList;
     private Context mContext;
     private Set<Integer> selectedItems = new HashSet<>();
-    private boolean isSelectionMode = false, isSelectionAll = false;
+    private boolean isSelectionMode = false, isSelectionAll = false, isSelectSetEmpty = true;
     private String listName = Constant.LIST_MODE_DEFAULT_NAME;
+    private MainListAdapterOnClickListener mListener;
 
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
         this.musicList = musicList;
     }
 
+    /**
+     *  更改Adapter的数据来源
+     *  @author wm
+     *  @createTime 2023/9/8 22:40
+     * @param newList: 新的音乐列表
+     * @param listName: 新列表的列表名
+     */
     @SuppressLint("NotifyDataSetChanged")
     public void changeList(List<MediaFileBean> newList, String listName){
         this.musicList = newList;
@@ -54,6 +60,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
         return new ViewHolder(view);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull MainListAdapter.ViewHolder holder, int position) {
         MediaFileBean mediaFileBean = musicList.get(position);
@@ -64,6 +71,9 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
             selectedItems.clear();
             toggleSelection(position);
             notifyDataSetChanged();
+            if (mListener != null){
+                mListener.onLongClickToCheckBoxState();
+            }
             return false;
         });
 
@@ -84,18 +94,29 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                     selectedItems.remove(position);
                 }
             }
+            if (checkSelectedItem()){
+                mListener.onSelectedItem(isSelectSetEmpty);
+            }
         });
-
 
         holder.musicCheckBox.setChecked(selectedItems.contains(position));
         holder.musicCheckBox.setVisibility(isSelectionMode ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     *  多选状态下，对歌曲名的点击事件做选中/取消选中处理
+     *  @author wm
+     *  @createTime 2023/9/8 22:50
+     * @param position: 下标
+     */
     private void toggleSelection(int position) {
         if (selectedItems.contains(position)) {
             selectedItems.remove(position);
         } else {
             selectedItems.add(position);
+        }
+        if (checkSelectedItem()){
+            mListener.onSelectedItem(isSelectSetEmpty);
         }
         notifyItemChanged(position);
     }
@@ -117,10 +138,37 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
         }
     }
 
-    public void setCheckoutState(boolean state){
+    /**
+     *  设置当前的状态（是否为多选状态）
+     *  @author wm
+     *  @createTime 2023/9/8 22:55
+     * @param state: true-多选状态； false-点击播放状态
+     */
+    public void setSelectionState(boolean state){
         isSelectionMode = state;
+        if (!state){
+            selectedItems.clear();
+            isSelectSetEmpty = true;
+        }
+        notifyDataSetChanged();
     }
 
+    /**
+     *  获取当前是否是多选状态
+     *  @author wm
+     *  @createTime 2023/9/8 22:56
+     * @return : boolean： true-选中状态； false-非选中状态
+     */
+    public boolean isSelectionMode() {
+        return isSelectionMode;
+    }
+
+    /**
+     *  设置全选
+     *  @author wm
+     *  @createTime 2023/9/8 23:00
+     * @param isAllSelected: true-全选； false-取消全选
+     */
     public void selectAllItem(boolean isAllSelected){
         isSelectionAll = isAllSelected;
         if (isSelectionAll){
@@ -131,18 +179,78 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
             selectedItems.clear();
         }
         notifyDataSetChanged();
+        if (checkSelectedItem()){
+            mListener.onSelectedItem(isSelectSetEmpty);
+        }
     }
 
+    /**
+     *  获取当前是否是全选状态
+     *  @author wm
+     *  @createTime 2023/9/8 23:01
+     * @return : boolean：true-是全选； false-非全选
+     */
     public boolean isSelectionAll(){
         return isSelectionAll;
     }
 
+    /**
+     *  获取选中的集合set
+     *  @author wm
+     *  @createTime 2023/9/8 23:0
+     * @return : java.util.Set<java.lang.Integer>
+     */
     public Set<Integer> getSelectedItems() {
         return selectedItems;
     }
 
+    /**
+     *  获取当前展示列表的列表名
+     *  @author wm
+     *  @createTime 2023/9/8 23:02
+     * @return : java.lang.String
+     */
     public String getListName() {
         return listName;
+    }
+
+    /**
+     *  检测Set里面元素的数量是否在空与非空之间转化
+     *  @author wm
+     *  @createTime 2023/9/8 21:24
+     * @return : boolean: true-有更改，需要更新“添加到”的按钮状态； false-无更改
+     */
+    public boolean checkSelectedItem(){
+        boolean tempFlag = selectedItems.size() <= 0;
+        if (isSelectSetEmpty && tempFlag) {
+            return false;
+        } else if (!isSelectSetEmpty && !tempFlag) {
+            return false;
+        }
+        isSelectSetEmpty = tempFlag;
+        return true;
+    }
+
+    public interface MainListAdapterOnClickListener {
+
+        /**
+         *  长按更换为多选状态的回调方法
+         *  @author wm
+         *  @createTime 2023/9/8 20:55
+         */
+        void onLongClickToCheckBoxState();
+
+        /**
+         *  是否有选中，用来通知更新“添加到”按钮的状态
+         *  @author wm
+         *  @createTime 2023/9/8 21:56
+         * @param isSetEmpty: 选中列表是否为空
+         */
+        void onSelectedItem(boolean isSetEmpty);
+    }
+
+    public void setMainListAdapterOnClickListener(MainListAdapterOnClickListener listener){
+        mListener = listener;
     }
 
     /*
