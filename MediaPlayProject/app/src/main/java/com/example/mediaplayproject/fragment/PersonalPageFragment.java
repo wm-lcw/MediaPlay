@@ -5,18 +5,15 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Message;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,17 +22,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.adapter.AddToMusicListAdapter;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
-import com.example.mediaplayproject.adapter.ListViewPagerAdapter;
 import com.example.mediaplayproject.adapter.MainListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
@@ -44,8 +41,9 @@ import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Set;
 
 /**
  * @author wm
@@ -59,16 +57,21 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private List<MusicListBean> customerLists = new ArrayList<>();
     private ListView lvCustomer;
     private CustomerMusicListAdapter customerMusicListAdapter;
-    private ImageView ivAddList;
+    private ImageView ivAddList, ivAddToListBack;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
     private String itemClickListName;
 
     private LinearLayout llDefaultList,llFavoriteList;
-
     private MainListAdapter mainListAdapter;
     private RecyclerView rvMainList;
+    private ListView lvAddToList;
     private LinearLayout llSelectAll, llAddToList, llDeleteSelectMusic;
     private TextView tvSelectAll;
+    private RelativeLayout mFloatLayout, mAddToListFloatLayouts;
+    private WindowManager mWindowManager;
+    private WindowManager.LayoutParams wmParams, overlayParams;
+    boolean isShowList = false;
+    private AddToMusicListAdapter addToMusicListAdapter;
 
     private static PersonalPageFragment instance;
 
@@ -112,7 +115,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
         lvCustomer.setOnItemClickListener((parent, view, position, id) -> {
             List<MediaFileBean> list = customerLists.get(position).getMusicList();
-            showFloatView(list);
+            showFloatView(list, customerLists.get(position).getListName());
         });
 
         llDefaultList = myView.findViewById(R.id.ll_default_list);
@@ -141,6 +144,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     @Override
     public void onPause() {
         super.onPause();
+        if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
+            mWindowManager.removeView(mAddToListFloatLayouts);
+        }
         if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
             // 在MainActivity失去焦点时，悬浮窗关闭
             // 这里需要判断mFloatLayout正在显示才执行移除，否则会报错
@@ -164,35 +170,21 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         if (view == ivAddList) {
             showCreateListAliasDialog();
         } else if (view == llDefaultList){
-            showFloatView(defaultList);
+            showFloatView(defaultList, Constant.LIST_MODE_DEFAULT_NAME);
         } else if (view == llFavoriteList){
-            showFloatView(favoriteList);
+            showFloatView(favoriteList, Constant.LIST_MODE_FAVORITE_NAME);
         } else if (view == llSelectAll){
             boolean isSelectedAll = mainListAdapter.isSelectionAll();
             mainListAdapter.selectAllItem(!isSelectedAll);
             tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
 
         } else if(view == llAddToList){
-//            DebugLog.debug("-----");
-//            WindowManager.LayoutParams overlayParams = new WindowManager.LayoutParams(
-//                    WindowManager.LayoutParams.WRAP_CONTENT,
-//                    WindowManager.LayoutParams.WRAP_CONTENT,
-//                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-//                    // 不获取焦点，不影响后面的事件
-//                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-//                    // 设置为透明显示
-//                    PixelFormat.TRANSLUCENT);
-//            TextView overlayView = new TextView(mContext);
-//            overlayView.setText("Overlay Textsdfkjhskdjfhkjsfg");
-//            overlayView.setTextColor(Color.WHITE);
-//            overlayView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    DebugLog.debug("sjdhgfjhsd");
-//                }
-//            });
-//            WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-//            windowManager.addView(overlayView, overlayParams);
+            DebugLog.debug("-----");
+            mWindowManager.addView(mAddToListFloatLayouts, overlayParams);
+        } else if (view == ivAddToListBack){
+            if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
+                mWindowManager.removeView(mAddToListFloatLayouts);
+            }
         }
     };
 
@@ -336,10 +328,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         customerMusicListAdapter.setCurrentPlayingListName(musicListName);
     }
 
-    private RelativeLayout mFloatLayout;
-    private WindowManager mWindowManager;
-    private WindowManager.LayoutParams wmParams;
-    boolean isShowList = false;
+
 
     /**
      *  创建悬浮窗
@@ -347,6 +336,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      *  @createTime 2023/9/3 11:48
      */
     private void createFloatView() {
+        // 创建音乐列表悬浮窗视图
         wmParams = new WindowManager.LayoutParams();
         // 获取的是WindowManagerImpl.CompatModeWrapper
         mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
@@ -361,20 +351,32 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = 0;
         wmParams.y = 0;
-
         // 设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+
+        // 创建添加歌曲到列表的悬浮窗视图
+        overlayParams = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    // 不获取焦点，不影响后面的事件
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    // 设置为透明显示
+                    PixelFormat.TRANSLUCENT);
+
         initFloatView();
+        initAddToListFloatView();
     }
 
     /**
-     *  初始化悬浮窗中的视图、初始化Fragment等
+     *  初始化音乐列表悬浮窗中的视图、初始化Fragment等
      *  @author wm
      *  @createTime 2023/9/3 16:50
      */
     @SuppressLint("InflateParams")
     private void initFloatView() {
+
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
         mFloatLayout = (RelativeLayout) inflater.inflate(R.layout.layout_main_list_view, null);
@@ -395,6 +397,50 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
     }
 
+    /**
+     *  初始化添加歌曲到列表的悬浮窗视图
+     *  @author wm
+     *  @createTime 2023/9/8 17:19
+     */
+    @SuppressLint("InflateParams")
+    private void initAddToListFloatView() {
+
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        //获取浮动窗口视图所在布局
+        mAddToListFloatLayouts = (RelativeLayout) inflater.inflate(R.layout.layout_add_to_list_view, null);
+
+        addToMusicListAdapter = new AddToMusicListAdapter(mContext,customerLists);
+        lvAddToList = mAddToListFloatLayouts.findViewById(R.id.lv_add_musicList);
+        ivAddToListBack = mAddToListFloatLayouts.findViewById(R.id.iv_back);
+        ivAddToListBack.setOnClickListener(mListener);
+
+
+        lvAddToList.setAdapter(addToMusicListAdapter);
+        lvAddToList.setOnItemClickListener((parent, view, position, id) -> {
+            try {
+                Set<Integer> selectedItems = mainListAdapter.getSelectedItems();
+                String listName = mainListAdapter.getListName();
+                List<MediaFileBean> list = DataRefreshService.getMusicListByName(listName);
+                List<Long> insertList = new ArrayList<>();
+                Iterator<Integer> iterator = selectedItems.iterator();
+                while (iterator.hasNext()){
+                    int musicPosition = (int)iterator.next();
+                    insertList.add(list.get(musicPosition).getId());
+                }
+                DataRefreshService.insertCustomerMusic(customerLists.get(position).getListName(),insertList);
+                Toast.makeText(mContext,"添加成功！",Toast.LENGTH_SHORT).show();
+            } catch (Exception exception){
+                Toast.makeText(mContext,"添加失败！",Toast.LENGTH_SHORT).show();
+                DebugLog.debug("error " + exception.getMessage());
+            }
+            if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
+                mWindowManager.removeView(mAddToListFloatLayouts);
+            }
+
+        });
+
+    }
+
 
     /**
      * 显示悬浮窗
@@ -402,8 +448,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      * @createTime 2023/9/2 14:18
      */
     @SuppressLint("NotifyDataSetChanged")
-    private void showFloatView(List<MediaFileBean> musicList) {
-        mainListAdapter.changeList(musicList);
+    private void showFloatView(List<MediaFileBean> musicList, String listName) {
+        mainListAdapter.changeList(musicList,listName);
         mainListAdapter.setCheckoutState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();

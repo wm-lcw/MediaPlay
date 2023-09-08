@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.HashSet;
@@ -32,6 +33,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     private Context mContext;
     private Set<Integer> selectedItems = new HashSet<>();
     private boolean isSelectionMode = false, isSelectionAll = false;
+    private String listName = Constant.LIST_MODE_DEFAULT_NAME;
 
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
@@ -39,8 +41,9 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void changeList(List<MediaFileBean> newList){
+    public void changeList(List<MediaFileBean> newList, String listName){
         this.musicList = newList;
+        this.listName = listName;
         notifyDataSetChanged();
     }
 
@@ -132,6 +135,14 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     public boolean isSelectionAll(){
         return isSelectionAll;
+    }
+
+    public Set<Integer> getSelectedItems() {
+        return selectedItems;
+    }
+
+    public String getListName() {
+        return listName;
     }
 
     /*
