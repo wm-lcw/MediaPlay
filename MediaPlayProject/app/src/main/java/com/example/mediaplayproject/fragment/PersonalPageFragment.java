@@ -138,6 +138,16 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
+            // 在MainActivity失去焦点时，悬浮窗关闭
+            // 这里需要判断mFloatLayout正在显示才执行移除，否则会报错
+            mWindowManager.removeView(mFloatLayout);
+        }
+    }
+
     /**
      *  从DataRefreshService中获取音乐列表等信息
      *  @author wm
