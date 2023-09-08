@@ -31,7 +31,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     private List<MediaFileBean> musicList;
     private Context mContext;
     private Set<Integer> selectedItems = new HashSet<>();
-    private boolean isSelectionMode = false;
+    private boolean isSelectionMode = false, isSelectionAll = false;
 
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
@@ -116,6 +116,22 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     public void setCheckoutState(boolean state){
         isSelectionMode = state;
+    }
+
+    public void selectAllItem(boolean isAllSelected){
+        isSelectionAll = isAllSelected;
+        if (isSelectionAll){
+            for (int i = 0; i < musicList.size(); i++) {
+                selectedItems.add(i);
+            }
+        } else {
+            selectedItems.clear();
+        }
+        notifyDataSetChanged();
+    }
+
+    public boolean isSelectionAll(){
+        return isSelectionAll;
     }
 
     /*

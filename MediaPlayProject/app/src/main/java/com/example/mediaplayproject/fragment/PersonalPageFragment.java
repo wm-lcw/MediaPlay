@@ -5,15 +5,18 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Message;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
@@ -63,6 +67,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
     private MainListAdapter mainListAdapter;
     private RecyclerView rvMainList;
+    private LinearLayout llSelectAll, llAddToList, llDeleteSelectMusic;
+    private TextView tvSelectAll;
 
     private static PersonalPageFragment instance;
 
@@ -151,6 +157,32 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             showFloatView(defaultList);
         } else if (view == llFavoriteList){
             showFloatView(favoriteList);
+        } else if (view == llSelectAll){
+            boolean isSelectedAll = mainListAdapter.isSelectionAll();
+            mainListAdapter.selectAllItem(!isSelectedAll);
+            tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
+
+        } else if(view == llAddToList){
+//            DebugLog.debug("-----");
+//            WindowManager.LayoutParams overlayParams = new WindowManager.LayoutParams(
+//                    WindowManager.LayoutParams.WRAP_CONTENT,
+//                    WindowManager.LayoutParams.WRAP_CONTENT,
+//                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+//                    // 不获取焦点，不影响后面的事件
+//                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+//                    // 设置为透明显示
+//                    PixelFormat.TRANSLUCENT);
+//            TextView overlayView = new TextView(mContext);
+//            overlayView.setText("Overlay Textsdfkjhskdjfhkjsfg");
+//            overlayView.setTextColor(Color.WHITE);
+//            overlayView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    DebugLog.debug("sjdhgfjhsd");
+//                }
+//            });
+//            WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+//            windowManager.addView(overlayView, overlayParams);
         }
     };
 
@@ -339,11 +371,20 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         setWindowOutTouch();
         mainListAdapter = new MainListAdapter(mContext,defaultList);
         rvMainList = mFloatLayout.findViewById(R.id.rv_musicList);
+        llSelectAll = mFloatLayout.findViewById(R.id.ll_all_select);
+        llAddToList = mFloatLayout.findViewById(R.id.ll_add_to_list);
+        llDeleteSelectMusic = mFloatLayout.findViewById(R.id.ll_delete_select_music);
+        tvSelectAll = mFloatLayout.findViewById(R.id.tv_select_all);
+        llSelectAll.setOnClickListener(mListener);
+        llAddToList.setOnClickListener(mListener);
+        llDeleteSelectMusic.setOnClickListener(mListener);
+        
         rvMainList.setAdapter(mainListAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         rvMainList.setLayoutManager(linearLayoutManager);
 
     }
+
 
     /**
      * 显示悬浮窗
@@ -356,6 +397,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         mainListAdapter.setCheckoutState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
+        mainListAdapter.setCheckoutState(false);
+        tvSelectAll.setText("全选");
         isShowList = true;
     }
 
