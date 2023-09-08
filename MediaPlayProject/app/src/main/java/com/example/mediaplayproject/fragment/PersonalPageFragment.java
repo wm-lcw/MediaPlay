@@ -57,7 +57,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private List<MusicListBean> customerLists = new ArrayList<>();
     private ListView lvCustomer;
     private CustomerMusicListAdapter customerMusicListAdapter;
-    private ImageView ivAddList, ivAddToListBack;
+    private ImageView ivAddList, ivAddToListBack, ivSelectAll, ivDeleteSelectMusic;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
     private String itemClickListName;
 
@@ -387,6 +387,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         llAddToList = mFloatLayout.findViewById(R.id.ll_add_to_list);
         llDeleteSelectMusic = mFloatLayout.findViewById(R.id.ll_delete_select_music);
         tvSelectAll = mFloatLayout.findViewById(R.id.tv_select_all);
+        ivSelectAll = mFloatLayout.findViewById(R.id.iv_all_select);
+        ivDeleteSelectMusic = mFloatLayout.findViewById(R.id.iv_delete_select_music);
         llSelectAll.setOnClickListener(mListener);
         llAddToList.setOnClickListener(mListener);
         llDeleteSelectMusic.setOnClickListener(mListener);
@@ -453,9 +455,15 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         mainListAdapter.setCheckoutState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
-        mainListAdapter.setCheckoutState(false);
         tvSelectAll.setText("全选");
         isShowList = true;
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)){
+            llDeleteSelectMusic.setEnabled(false);
+            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
+        } else {
+            llDeleteSelectMusic.setEnabled(true);
+            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_pre);
+        }
     }
 
     /**

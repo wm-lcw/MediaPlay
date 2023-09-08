@@ -61,7 +61,7 @@
                     android:layout_gravity="center"
                     android:layout_width="@dimen/dp_40"
                     android:layout_height="@dimen/dp_40"
-                    android:background="@mipmap/media" />
+                    android:background="@mipmap/ic_checkbox_pre" />
                 <TextView
                     android:id="@+id/tv_select_all"
                     android:text="全选"
@@ -84,7 +84,7 @@
                     android:layout_gravity="center"
                     android:layout_width="@dimen/dp_40"
                     android:layout_height="@dimen/dp_40"
-                    android:background="@mipmap/media" />
+                    android:background="@mipmap/ic_add_to_list_pre" />
                 <TextView
                     android:text="添加到"
                     android:textColor="@color/white"
@@ -106,7 +106,7 @@
                     android:layout_gravity="center"
                     android:layout_width="@dimen/dp_40"
                     android:layout_height="@dimen/dp_40"
-                    android:background="@mipmap/media" />
+                    android:background="@mipmap/ic_delete_pre" />
                 <TextView
                     android:text="删除"
                     android:textColor="@color/white"
