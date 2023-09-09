@@ -267,23 +267,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             firstPlay = false;
         } else if (view == ivDiscovery) {
         } else if (view == ivPersonal) {
-            // insert music to musicList
-            List<Long> myListMusic = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                myListMusic.add(defaultList.get(i).getId());
-            }
-            DataRefreshService.insertCustomerMusic("myList3", myListMusic);
-
         } else if (view == ivTools) {
-            // delete musicList
-            List<Long> myListMusic = new ArrayList<>();
-            for (int i = 0; i < 2; i++) {
-                myListMusic.add(defaultList.get(i).getId());
-            }
-            DataRefreshService.deleteCustomerMusic("myList3", myListMusic);
         } else if (view == ivShow) {
-            List<MusicListBean> customerList = DataRefreshService.getCustomerList();
-            DebugLog.debug("" + customerList);
         } else if (view == ivMusicList) {
             // 主页展示播放列表
             Message msg = new Message();

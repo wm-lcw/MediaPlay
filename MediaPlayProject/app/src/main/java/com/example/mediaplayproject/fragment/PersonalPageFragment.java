@@ -5,6 +5,7 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +75,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private WindowManager.LayoutParams wmParams, overlayParams;
     boolean isShowList = false;
     private AddToMusicListAdapter addToMusicListAdapter;
+
+    private Set<Long> deleteMusicHelperSet = new HashSet<>();
 
     private static PersonalPageFragment instance;
 
@@ -488,10 +492,11 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private void showDeleteMusicDialog() {
         String listName = mainListAdapter.getListName();
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-
+        List<Long> deleteList = getSelectMusicIdList();
         builder.setTitle("是否删除'" + listName +"'列表中的选中歌曲?");
-        if (currentPlayingListName.equalsIgnoreCase(listName)){
-            // 这里需要判断删除的歌曲是否正在播放，是的话要先停止播放，然后刷新信息
+        long lastPlayId = DataRefreshService.getLastMusicId();
+        boolean includePlayingMusic = currentPlayingListName.equalsIgnoreCase(listName) && deleteMusicHelperSet.contains(lastPlayId);
+        if (includePlayingMusic){
             builder.setMessage("当前播放歌曲即将被删除，请确认？");
         } else {
             builder.setMessage("是否删除选中歌曲？");
@@ -504,8 +509,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         // 设置正面按钮
         builder.setPositiveButton("确定", (dialog, which) -> {
             try {
-                List<Long> insertList = getSelectMusicIdList();
-                DataRefreshService.deleteCustomerMusic(listName,insertList);
+                DataRefreshService.deleteCustomerMusic(listName,deleteList);
                 Toast.makeText(mContext,"删除成功！",Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
                 Toast.makeText(mContext,"删除失败！",Toast.LENGTH_SHORT).show();
@@ -539,6 +543,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      */
     private List<Long> getSelectMusicIdList(){
         try{
+            deleteMusicHelperSet.clear();
             String listName = mainListAdapter.getListName();
             Set<Integer> selectedItems = mainListAdapter.getSelectedItems();
             List<MediaFileBean> list = DataRefreshService.getMusicListByName(listName);
@@ -547,6 +552,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             while (iterator.hasNext()){
                 int musicPosition = (int)iterator.next();
                 insertList.add(list.get(musicPosition).getId());
+                deleteMusicHelperSet.add(list.get(musicPosition).getId());
             }
             return insertList;
         }  catch (Exception exception){

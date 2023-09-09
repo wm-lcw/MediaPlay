@@ -29,8 +29,13 @@ public class Constant {
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;
+    public final static int CUSTOMER_MUSIC_OPERATOR_INSERT = 3;
+    public final static int CUSTOMER_MUSIC_OPERATOR_DELETE = 4;
 
 
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     public static final String OPERATE_CUSTOMER_MUSIC_LIST_ACTION = "com.example.media.play.operate.customer.music.list.action";
+    public static final String OPERATE_CUSTOMER_MUSIC_ACTION = "com.example.media.play.operate.customer.music.action";
+    public static final String STOP_PLAY_CUSTOMER_MUSIC_ACTION = "com.example.media.play.stop.play.customer.music.action";
+
 }

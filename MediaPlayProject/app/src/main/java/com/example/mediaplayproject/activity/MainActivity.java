@@ -593,7 +593,46 @@ public class MainActivity extends BasicActivity {
                     // 更新列表Ui
                     refreshListStatus();
                 }
+                // 这个操作不能放进refreshFragmentStatus()中
                 mainViewFragment.refreshCustomerList();
+            } else if(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
+                // 停止播放歌曲的广播-删除的歌曲列表里含有当前播放歌曲
+                musicService.toStop();
+                mPosition = 0;
+                isPlaying = false;
+                firstPlay = true;
+                // 这里只需要停止播放，不需要更新UI，更新UI的操作在下面删除歌曲后发送的广播里面处理
+
+            } else if(Constant.OPERATE_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
+                // 自定义列表的歌曲增删广播
+                String listName = intent.getExtras().getString("listName");
+                boolean deletePlayingMusic = intent.getExtras().getBoolean("deletePlayingMusic");
+                if (musicListName.equalsIgnoreCase(listName)){
+                    musicInfo = DataRefreshService.getMusicListByName(musicListName);
+                    if (musicInfo.size() <= 0){
+                        // 列表已清空，停止播放并切换到默认列表
+                        stopPlayByDelete();
+                    } else {
+                        if (deletePlayingMusic){
+                            // 当前播放的歌曲被删除，直接播放刷新列表后的第一首音乐
+                            musicService.play(musicInfo.get(0),true,0);
+                        } else {
+                            // 当前播放歌曲未被删除，或者是插入歌曲的情况，需要更新position
+                            long lastMusicId = DataRefreshService.getLastMusicId();
+                            for (int i = 0; i < musicInfo.size() ;i++){
+                                if (lastMusicId == musicInfo.get(i).getId()){
+                                    mPosition = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 更新各个Fragment的数据
+                refreshFragmentStatus();
+                // 更新列表Ui
+                refreshListStatus();
             }
         }
     }
