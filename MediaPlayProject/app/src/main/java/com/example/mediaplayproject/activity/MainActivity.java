@@ -415,8 +415,7 @@ public class MainActivity extends BasicActivity {
     private void changeMusicPlayList(int position, String newMusicListName) {
         // 更新mPosition
         mPosition = position;
-        DebugLog.debug("newListName " + newMusicListName);
-
+        DebugLog.debug("newListName " + newMusicListName + "; position " + position);
         if (!musicListName.equalsIgnoreCase(newMusicListName)){
             // 有切换播放列表的操作才更新当前播放列表的信息
             List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
@@ -424,14 +423,19 @@ public class MainActivity extends BasicActivity {
                 // 更新播放列表等数据
                 musicInfo = tempList;
                 musicListName = newMusicListName;
-                // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
-                viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
+                DebugLog.debug("change list");
+                if (viewPagerLists.get(0).isInitSuccess()){
+                    // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
+                    // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+                    viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
+                }
             }
         }
 
         // 保存播放信息
         DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
-
+        DebugLog.debug("--------"+DataRefreshService.getLastPlayListName());
+        DebugLog.debug("-----------"+ DataRefreshService.getLastPosition());
         // 调用service播放
         if (musicService != null) {
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
@@ -485,8 +489,8 @@ public class MainActivity extends BasicActivity {
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME);
-        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME);
+        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, Constant.LIST_SHOW_MODE_CURRENT);
+        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, Constant.LIST_SHOW_MODE_FAVORITE);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
@@ -500,6 +504,11 @@ public class MainActivity extends BasicActivity {
      * @createTime 2023/9/2 14:18
      */
     private void showFloatView() {
+        // 每次打开悬浮窗列表时都先同步一次数据
+        if (viewPagerLists.get(0).isInitSuccess()){
+            // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+            viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
+        }
         mWindowManager.addView(mFloatLayout, wmParams);
         isShowList = true;
         refreshListStatus();

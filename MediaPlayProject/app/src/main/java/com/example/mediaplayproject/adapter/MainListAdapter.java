@@ -2,6 +2,8 @@ package com.example.mediaplayproject.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +85,12 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                 toggleSelection(position);
             } else {
                 // 非多选模式下，通知Activity播放音乐
+                Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
+                Bundle bundle = new Bundle();
+                bundle.putInt("position", position);
+                bundle.putString("musicListName", listName);
+                intent.putExtras(bundle);
+                mContext.sendBroadcast(intent);
             }
         });
 

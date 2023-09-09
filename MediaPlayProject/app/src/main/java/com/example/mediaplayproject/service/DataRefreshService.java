@@ -344,8 +344,14 @@ public class DataRefreshService extends Service {
         boolean isPositionChange = DataRefreshService.lastPosition == lastPosition;
         boolean isMusicIdChange = DataRefreshService.lastMusicId == lastMusicId;
         boolean isPlayModeChange = DataRefreshService.lastPlayMode == lastPlayMode;
-        if (isListNameChange || isPositionChange || isMusicIdChange || isPlayModeChange) {
+        if (isListNameChange && isPositionChange && isMusicIdChange && isPlayModeChange) {
             // 有数据更改时才更新，否则不处理
+            DebugLog.debug("no deal");
+        } else {
+            DataRefreshService.lastPlayListName = lastPlayListName;
+            DataRefreshService.lastPosition = lastPosition;
+            DataRefreshService.lastMusicId = lastMusicId;
+            DataRefreshService.lastPlayMode = lastPlayMode;
             updateLastInfo();
         }
     }
@@ -357,6 +363,7 @@ public class DataRefreshService extends Service {
      * @createTime 2023/9/3 18:31
      */
     private static void updateLastInfo() {
+
         ContentValues values = new ContentValues();
         values.put("lastPlayListName", lastPlayListName);
         values.put("lastPlayMode", lastPlayMode);

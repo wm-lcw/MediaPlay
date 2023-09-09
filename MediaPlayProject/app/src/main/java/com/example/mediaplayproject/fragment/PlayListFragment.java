@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.MusicListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
@@ -38,22 +39,27 @@ public class PlayListFragment extends Fragment {
     private MusicListAdapter musicListAdapter;
     private int mPosition;
     private String listName;
+    private boolean isInitSuccess = false;
+    private int listMode;
 
-    public PlayListFragment(Context context, List<MediaFileBean> list, String listName) {
+    public PlayListFragment(Context context, List<MediaFileBean> list, String listName, int listMode) {
+        DebugLog.debug("PlayListFragment");
         this.mContext = context;
         this.musicList = list;
         this.listName = listName;
+        this.listMode = listMode;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DebugLog.debug("PlayListFragment");
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_play_list, container, false);
+        DebugLog.debug("PlayListFragment");
         init();
         return fragmentView;
     }
@@ -61,6 +67,7 @@ public class PlayListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        DebugLog.debug("PlayListFragment");
         fragmentView.setFocusable(true);
         if (musicListAdapter != null) {
             if (musicList.size() > 0) {
@@ -70,7 +77,15 @@ public class PlayListFragment extends Fragment {
     }
 
     private void init() {
-        DebugLog.debug("");
+        DebugLog.debug("PlayListFragment");
+        if (listMode == Constant.LIST_SHOW_MODE_CURRENT){
+            listName = DataRefreshService.getLastPlayListName();
+            musicList = DataRefreshService.getMusicListByName(listName);
+            mPosition = DataRefreshService.getLastPosition();
+        } else if (listMode == Constant.LIST_SHOW_MODE_FAVORITE){
+            listName = Constant.LIST_MODE_FAVORITE_NAME;
+            musicList = DataRefreshService.getFavoriteList();
+        }
         musicListAdapter = new MusicListAdapter(mContext, listName, musicList);
         tvListTitle = fragmentView.findViewById(R.id.tv_list_title);
         refreshListTitle();
@@ -92,6 +107,7 @@ public class PlayListFragment extends Fragment {
             mContext.sendBroadcast(intent);
             musicListAdapter.setSelectPosition(position);
         });
+        isInitSuccess  = true;
         musicListAdapter.notifyDataSetChanged();
     }
 
@@ -174,6 +190,7 @@ public class PlayListFragment extends Fragment {
      * @createTime 2023/8/31 10:48
      */
     public void changePlayList(List<MediaFileBean> list, String listName, int position) {
+        DebugLog.debug("PlayListFragment");
         this.listName = listName;
         this.musicList = list;
         this.mPosition = position;
@@ -182,5 +199,9 @@ public class PlayListFragment extends Fragment {
         setSelection(mPosition);
         setSelectPosition(mPosition);
         refreshListView();
+    }
+
+    public boolean isInitSuccess() {
+        return isInitSuccess;
     }
 }

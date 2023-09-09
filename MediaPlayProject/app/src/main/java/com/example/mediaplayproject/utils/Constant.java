@@ -15,6 +15,10 @@ public class Constant {
     public static final String LIST_MODE_CUSTOMER_NAME = "自定义";
     public static final String LIST_MODE_HISTORY_NAME = "历史播放";
 
+    public static final int LIST_SHOW_MODE_CURRENT = 1;
+    public static final int LIST_SHOW_MODE_FAVORITE = 2;
+    public static final int LIST_SHOW_MODE_HISTORY = 3;
+
 
     public final static int RESULT_IS_CURRENT_POSITION = 0;
     public final static int RESULT_BEFORE_CURRENT_POSITION = 1;
