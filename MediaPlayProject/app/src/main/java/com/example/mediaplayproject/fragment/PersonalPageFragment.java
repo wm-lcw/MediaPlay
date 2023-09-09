@@ -616,10 +616,12 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
 
         } else if(view == llAddToList){
+            // 在打开添加页面之前，需要刷新一下自定义创建列表的数据
+            initMusicSource();
+            addToMusicListAdapter.changeCustomerList(customerLists);
             mWindowManager.addView(mAddToListFloatLayouts, overlayParams);
         } else if(view == llDeleteSelectMusic){
             showDeleteMusicDialog();
-
         } else if (view == ivAddToListBack){
             if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
                 mWindowManager.removeView(mAddToListFloatLayouts);

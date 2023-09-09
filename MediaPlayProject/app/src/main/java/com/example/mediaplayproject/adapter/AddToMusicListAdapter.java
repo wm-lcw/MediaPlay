@@ -29,6 +29,16 @@ public class AddToMusicListAdapter extends BaseAdapter {
         DebugLog.debug("--" + this.musicInfoList);
     }
 
+    /**
+     *  更新自定义列表数据源
+     *  @author wm
+     *  @createTime 2023/9/9 11:18
+     * @param musicList: 新的自定义列表
+     */
+    public void changeCustomerList(List<MusicListBean> musicList){
+        this.musicInfoList = musicList;
+        notifyDataSetChanged();
+    }
 
     @Override
     public int getCount() {
