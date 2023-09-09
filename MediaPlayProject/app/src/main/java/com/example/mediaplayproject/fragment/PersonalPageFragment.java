@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -232,21 +233,15 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         lvAddToList.setAdapter(addToMusicListAdapter);
         lvAddToList.setOnItemClickListener((parent, view, position, id) -> {
             try {
-                Set<Integer> selectedItems = mainListAdapter.getSelectedItems();
-                String listName = mainListAdapter.getListName();
-                List<MediaFileBean> list = DataRefreshService.getMusicListByName(listName);
-                List<Long> insertList = new ArrayList<>();
-                Iterator<Integer> iterator = selectedItems.iterator();
-                while (iterator.hasNext()){
-                    int musicPosition = (int)iterator.next();
-                    insertList.add(list.get(musicPosition).getId());
-                }
+                List<Long> insertList = getSelectMusicIdList();
                 DataRefreshService.insertCustomerMusic(customerLists.get(position).getListName(),insertList);
                 Toast.makeText(mContext,"添加成功！",Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
                 Toast.makeText(mContext,"添加失败！",Toast.LENGTH_SHORT).show();
                 DebugLog.debug("error " + exception.getMessage());
             }
+            // 刷新列表的歌曲数量
+            customerMusicListAdapter.notifyDataSetChanged();
             if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
                 mWindowManager.removeView(mAddToListFloatLayouts);
             }
@@ -451,15 +446,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     }
 
     /**
-     *  删除音乐列表
-     *  @author wm
-     *  @createTime 2023/9/4 17:54
-     */
-    private void toDeleteMusicList() {
-        DataRefreshService.deleteMusicList(itemClickListName);
-    }
-
-    /**
      *  显示删除列表的弹框
      *  @author wm
      *  @createTime 2023/9/4 15:57
@@ -479,7 +465,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
         // 设置正面按钮
         builder.setPositiveButton("确定", (dialog, which) -> {
-            toDeleteMusicList();
+            // 删除音乐列表
+            DataRefreshService.deleteMusicList(itemClickListName);
             dialog.dismiss();
         });
 
@@ -490,6 +477,82 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         AlertDialog dialog = builder.create();
         // 显示对话框
         dialog.show();
+    }
+
+
+    /**
+     *  显示删除音乐的弹框
+     *  @author wm
+     *  @createTime 2023/9/4 15:57
+     */
+    private void showDeleteMusicDialog() {
+        String listName = mainListAdapter.getListName();
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+
+        builder.setTitle("是否删除'" + listName +"'列表中的选中歌曲?");
+        if (currentPlayingListName.equalsIgnoreCase(listName)){
+            // 这里需要判断删除的歌曲是否正在播放，是的话要先停止播放，然后刷新信息
+            builder.setMessage("当前播放歌曲即将被删除，请确认？");
+        } else {
+            builder.setMessage("是否删除选中歌曲？");
+        }
+
+        builder.setIcon(R.mipmap.ic_launcher);
+        //点击对话框以外的区域是否让对话框消失
+        builder.setCancelable(true);
+
+        // 设置正面按钮
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            try {
+                List<Long> insertList = getSelectMusicIdList();
+                DataRefreshService.deleteCustomerMusic(listName,insertList);
+                Toast.makeText(mContext,"删除成功！",Toast.LENGTH_SHORT).show();
+            } catch (Exception exception){
+                Toast.makeText(mContext,"删除失败！",Toast.LENGTH_SHORT).show();
+                DebugLog.debug("error " + exception.getMessage());
+            }
+            // 需要刷新页面
+            customerMusicListAdapter.notifyDataSetChanged();
+            mainListAdapter.setSelectionState(false);
+            mainListAdapter.notifyDataSetChanged();
+            dialog.dismiss();
+        });
+
+        // 设置反面按钮
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+
+        // 创建AlertDialog对象
+        AlertDialog dialog = builder.create();
+
+        // 加上这个属性，让Dialog显示于悬浮窗页面之上
+        Window window = dialog.getWindow();
+        window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+        // 显示对话框
+        dialog.show();
+    }
+
+    /**
+     *  获取选中音乐的Id集合List<Long>
+     *  @author wm
+     *  @createTime 2023/9/9 10:26
+     * @return : java.util.List<java.lang.Long>
+     */
+    private List<Long> getSelectMusicIdList(){
+        try{
+            String listName = mainListAdapter.getListName();
+            Set<Integer> selectedItems = mainListAdapter.getSelectedItems();
+            List<MediaFileBean> list = DataRefreshService.getMusicListByName(listName);
+            List<Long> insertList = new ArrayList<>();
+            Iterator<Integer> iterator = selectedItems.iterator();
+            while (iterator.hasNext()){
+                int musicPosition = (int)iterator.next();
+                insertList.add(list.get(musicPosition).getId());
+            }
+            return insertList;
+        }  catch (Exception exception){
+            DebugLog.debug("error " + exception.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -523,23 +586,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             showFloatView(defaultList, Constant.LIST_MODE_DEFAULT_NAME);
         } else if (view == llFavoriteList){
             showFloatView(favoriteList, Constant.LIST_MODE_FAVORITE_NAME);
-        } else if (view == llSelectAll){
-            boolean isSelectedAll = mainListAdapter.isSelectionAll();
-            mainListAdapter.selectAllItem(!isSelectedAll);
-            tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
-
-        } else if(view == llAddToList){
-            DebugLog.debug("-----");
-            mWindowManager.addView(mAddToListFloatLayouts, overlayParams);
-        } else if (view == ivAddToListBack){
-            if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
-                mWindowManager.removeView(mAddToListFloatLayouts);
-            }
-        }  else if (view == ivIntoSelectMode){
-            // 进入多选模式
-            mainListAdapter.setSelectionState(true);
-            llSelectAll.setEnabled(true);
-            ivSelectAll.setImageResource(R.mipmap.ic_checkbox_pre);
         } else if (view == ivMainListViewBack){
             boolean isSelectMode = mainListAdapter.isSelectionMode();
             if (isSelectMode){
@@ -558,6 +604,25 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
                 if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
                     mWindowManager.removeView(mFloatLayout);
                 }
+            }
+        } else if (view == ivIntoSelectMode){
+            // 进入多选模式
+            mainListAdapter.setSelectionState(true);
+            llSelectAll.setEnabled(true);
+            ivSelectAll.setImageResource(R.mipmap.ic_checkbox_pre);
+        }  else if (view == llSelectAll){
+            boolean isSelectedAll = mainListAdapter.isSelectionAll();
+            mainListAdapter.selectAllItem(!isSelectedAll);
+            tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
+
+        } else if(view == llAddToList){
+            mWindowManager.addView(mAddToListFloatLayouts, overlayParams);
+        } else if(view == llDeleteSelectMusic){
+            showDeleteMusicDialog();
+
+        } else if (view == ivAddToListBack){
+            if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
+                mWindowManager.removeView(mAddToListFloatLayouts);
             }
         }
     };
