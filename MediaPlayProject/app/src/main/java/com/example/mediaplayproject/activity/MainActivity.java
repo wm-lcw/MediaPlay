@@ -398,11 +398,6 @@ public class MainActivity extends BasicActivity {
                 if (musicPlayFragment.isVisible()) {
                     musicPlayFragment.refreshCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
                 }
-            } else if (msg.what == Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT) {
-                // 音乐列表Fragment发送的消息，用于通知切换播放歌曲/播放列表
-                int newPosition = msg.getData().getInt("position");
-                String newMusicListName = msg.getData().getString("musicListName");
-                changeMusicPlayList(newPosition, newMusicListName);
             } else if (msg.what == Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT) {
                 // 显示音乐列表悬浮窗
                 showFloatView();
@@ -490,8 +485,8 @@ public class MainActivity extends BasicActivity {
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, handler);
-        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, handler);
+        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME);
+        PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
@@ -566,6 +561,7 @@ public class MainActivity extends BasicActivity {
         }
         if (mainViewFragment.isVisible()) {
             mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
+            mainViewFragment.refreshCustomerList();
         }
     }
 
@@ -582,19 +578,25 @@ public class MainActivity extends BasicActivity {
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
+            } else if(Constant.CHANGE_MUSIC_ACTION.equals(intent.getAction())){
+                DebugLog.debug("---CHANGE_MUSIC_ACTION");
+                // 音乐列表Fragment发送的消息，用于通知切换播放歌曲/播放列表
+                int newPosition = intent.getExtras().getInt("position");
+                String newMusicListName = intent.getExtras().getString("musicListName");
+                changeMusicPlayList(newPosition, newMusicListName);
             } else if(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION.equals(intent.getAction())){
                 int operation = intent.getExtras().getInt("listOperation");
                 String listName = intent.getExtras().getString("listName");
                 if (operation == Constant.CUSTOMER_LIST_OPERATOR_DELETE && musicListName.equalsIgnoreCase(listName)){
                     // 删除列表的操作，且是当前正在播放的列表，需要做停止播放的操作
                     stopPlayByDelete();
-                    // 更新各个Fragment的数据
-                    refreshFragmentStatus();
-                    // 更新列表Ui
-                    refreshListStatus();
+
                 }
-                // 这个操作不能放进refreshFragmentStatus()中
-                mainViewFragment.refreshCustomerList();
+                // 更新各个Fragment的数据
+                refreshFragmentStatus();
+                // 更新列表Ui
+                refreshListStatus();
+
             } else if(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
                 // 停止播放歌曲的广播-删除的歌曲列表里含有当前播放歌曲
                 musicService.toStop();
@@ -707,7 +709,10 @@ public class MainActivity extends BasicActivity {
         mainMusicBroadcastReceiver = new MainMusicBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constant.DELETE_MUSIC_ACTION);
+        filter.addAction(Constant.CHANGE_MUSIC_ACTION);
         filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
+        filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_ACTION);
+        filter.addAction(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
     }

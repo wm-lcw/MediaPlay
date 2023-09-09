@@ -1,6 +1,7 @@
 package com.example.mediaplayproject.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 
@@ -35,15 +36,13 @@ public class PlayListFragment extends Fragment {
     private Context mContext;
     private View fragmentView;
     private MusicListAdapter musicListAdapter;
-    private Handler mHandler;
     private int mPosition;
     private String listName;
 
-    public PlayListFragment(Context context, List<MediaFileBean> list, String listName, Handler handler) {
+    public PlayListFragment(Context context, List<MediaFileBean> list, String listName) {
         this.mContext = context;
         this.musicList = list;
         this.listName = listName;
-        this.mHandler = handler;
     }
 
     @Override
@@ -85,13 +84,12 @@ public class PlayListFragment extends Fragment {
         musicListView.setAdapter(musicListAdapter);
         musicListView.setOnItemClickListener((parent, view, position, id) -> {
             mPosition = position;
-            Message msg = new Message();
-            msg.what = Constant.HANDLER_MESSAGE_FROM_LIST_FRAGMENT;
+            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
             Bundle bundle = new Bundle();
+            bundle.putInt("position", mPosition);
             bundle.putString("musicListName", listName);
-            bundle.putInt("position", position);
-            msg.setData(bundle);
-            mHandler.sendMessage(msg);
+            intent.putExtras(bundle);
+            mContext.sendBroadcast(intent);
             musicListAdapter.setSelectPosition(position);
         });
         musicListAdapter.notifyDataSetChanged();

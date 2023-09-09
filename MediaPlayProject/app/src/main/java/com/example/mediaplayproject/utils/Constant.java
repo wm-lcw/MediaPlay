@@ -32,7 +32,7 @@ public class Constant {
     public final static int CUSTOMER_MUSIC_OPERATOR_INSERT = 3;
     public final static int CUSTOMER_MUSIC_OPERATOR_DELETE = 4;
 
-
+    public static final String CHANGE_MUSIC_ACTION = "com.example.media.play.change.music.action";
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     public static final String OPERATE_CUSTOMER_MUSIC_LIST_ACTION = "com.example.media.play.operate.customer.music.list.action";
     public static final String OPERATE_CUSTOMER_MUSIC_ACTION = "com.example.media.play.operate.customer.music.action";
