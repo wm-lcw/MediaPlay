@@ -166,6 +166,8 @@ public class MainActivity extends BasicActivity {
             unbindService(connection);
         }
         unregisterReceiver();
+        // 需要添加下面的强制退出逻辑；否则在主页点返回退出app时，关闭不彻底，导致某些资源未能释放，重启app会闪退报错
+        System.exit(0);
     }
 
     /**

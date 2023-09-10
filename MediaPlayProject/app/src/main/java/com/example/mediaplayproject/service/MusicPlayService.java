@@ -260,7 +260,12 @@ public class MusicPlayService extends Service {
      * @description 返回当前是否正在播放
      */
     public boolean isPlaying() {
-        return helper.isPlaying();
+        if (helper != null){
+            return helper.isPlaying();
+        } else {
+            return false;
+        }
+
     }
 
     /**
