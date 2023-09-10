@@ -249,6 +249,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             if (mWindowManager != null && mAddToListFloatLayouts.isAttachedToWindow()) {
                 mWindowManager.removeView(mAddToListFloatLayouts);
             }
+            setMainListSelectionState(false);
         });
 
     }
@@ -261,23 +262,12 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     @SuppressLint("NotifyDataSetChanged")
     private void showFloatView(List<MediaFileBean> musicList, String listName) {
         mainListAdapter.changeList(musicList,listName);
-        mainListAdapter.setSelectionState(false);
+        setMainListSelectionState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
         tvMainViewListName.setText(listName);
         tvSelectAll.setText("全选");
         isShowList = true;
-
-        // 进入页面时，非多选状态，多选按钮不可用
-        llSelectAll.setEnabled(false);
-        ivSelectAll.setImageResource(R.mipmap.ic_checkbox_nor);
-
-        llAddToList.setEnabled(false);
-        ivAddToList.setImageResource(R.mipmap.ic_add_to_list_nor);
-
-        llDeleteSelectMusic.setEnabled(false);
-        ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
-
     }
 
     /**
@@ -517,8 +507,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             }
             // 需要刷新页面
             customerMusicListAdapter.notifyDataSetChanged();
-            mainListAdapter.setSelectionState(false);
-            mainListAdapter.notifyDataSetChanged();
+            setMainListSelectionState(false);
             mWindowManager.removeView(mFloatLayout);
             dialog.dismiss();
         });
@@ -576,6 +565,30 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
     }
 
+    /**
+     *  切换多选状态时的UI处理
+     *  @author wm
+     *  @createTime 2023/9/10 15:42
+     * @param state: true-多选模式； false-退出多选模式
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    private void setMainListSelectionState(boolean state){
+        if (state){
+            mainListAdapter.setSelectionState(true);
+            llSelectAll.setEnabled(true);
+            ivSelectAll.setImageResource(R.mipmap.ic_checkbox_pre);
+        } else {
+            mainListAdapter.setSelectionState(false);
+            llSelectAll.setEnabled(false);
+            llAddToList.setEnabled(false);
+            llDeleteSelectMusic.setEnabled(false);
+            ivSelectAll.setImageResource(R.mipmap.ic_checkbox_nor);
+            ivAddToList.setImageResource(R.mipmap.ic_add_to_list_nor);
+            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
+            mainListAdapter.notifyDataSetChanged();
+        }
+    }
+
     private final View.OnClickListener mListener = view -> {
         if (view == ivAddList) {
             showCreateListAliasDialog();
@@ -588,13 +601,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             if (isSelectMode){
                 // 退出多选状态
                 if (mainListAdapter != null){
-                    mainListAdapter.setSelectionState(false);
-                    llSelectAll.setEnabled(false);
-                    llAddToList.setEnabled(false);
-                    llDeleteSelectMusic.setEnabled(false);
-                    ivSelectAll.setImageResource(R.mipmap.ic_checkbox_nor);
-                    ivAddToList.setImageResource(R.mipmap.ic_add_to_list_nor);
-                    ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
+                    setMainListSelectionState(false);
                 }
             } else {
                 // 关闭悬浮窗
@@ -604,9 +611,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             }
         } else if (view == ivIntoSelectMode){
             // 进入多选模式
-            mainListAdapter.setSelectionState(true);
-            llSelectAll.setEnabled(true);
-            ivSelectAll.setImageResource(R.mipmap.ic_checkbox_pre);
+            setMainListSelectionState(true);
         }  else if (view == llSelectAll){
             boolean isSelectedAll = mainListAdapter.isSelectionAll();
             mainListAdapter.selectAllItem(!isSelectedAll);
