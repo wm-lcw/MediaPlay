@@ -25,6 +25,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="默认列表"/>
+
+        <ImageView
+            android:id="@+id/iv_default_list_playing"
+            android:layout_marginStart="@dimen/dp_120"
+            android:layout_marginVertical="@dimen/dp_7"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:background="@mipmap/ic_is_playing"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <LinearLayout
@@ -48,6 +57,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="收藏列表"/>
+
+        <ImageView
+            android:id="@+id/iv_favorite_list_playing"
+            android:layout_marginStart="@dimen/dp_120"
+            android:layout_marginVertical="@dimen/dp_7"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:background="@mipmap/ic_is_playing"
+            android:visibility="gone"/>
     </LinearLayout>
     <View
         android:layout_width="match_parent"

@@ -5,7 +5,6 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -60,7 +59,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private List<MusicListBean> customerLists = new ArrayList<>();
     private ListView lvCustomer;
     private CustomerMusicListAdapter customerMusicListAdapter;
-    private ImageView ivAddList, ivMainListViewBack, ivIntoSelectMode, ivAddToListBack, ivSelectAll, ivAddToList, ivDeleteSelectMusic;
+    private ImageView ivDefaultPlaying, ivFavoritePlaying, ivAddList, ivMainListViewBack, ivIntoSelectMode, ivAddToListBack, ivSelectAll, ivAddToList, ivDeleteSelectMusic;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
     private String itemClickListName;
 
@@ -75,8 +74,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private WindowManager.LayoutParams wmParams, overlayParams;
     boolean isShowList = false;
     private AddToMusicListAdapter addToMusicListAdapter;
-
     private Set<Long> deleteMusicHelperSet = new HashSet<>();
+    private int mPosition = 0;
 
     private static PersonalPageFragment instance;
 
@@ -109,10 +108,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     @Override
     public void onResume() {
         super.onResume();
-        initMusicSource();
-        if (lvCustomer!= null && customerMusicListAdapter!=null){
-            DebugLog.debug("");
-        }
+        // 每次恢复页面都需要初始化，因为在MainActivity中是Fragment显示时才修改，若在后台则无法刷新
+        refreshCustomerList();
     }
 
     @Override
@@ -134,6 +131,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      *  @createTime 2023/8/24 19:27
      */
     private void initMusicSource() {
+        mPosition = DataRefreshService.getLastPosition();
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         customerLists = DataRefreshService.getCustomerList();
@@ -261,7 +259,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      */
     @SuppressLint("NotifyDataSetChanged")
     private void showFloatView(List<MediaFileBean> musicList, String listName) {
-        mainListAdapter.changeList(musicList,listName);
+        mainListAdapter.changeList(musicList,listName,currentPlayingListName);
+        mainListAdapter.setSelectPosition(mPosition);
         setMainListSelectionState(false);
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
@@ -332,6 +331,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
     private void initData() {
         lvCustomer = myView.findViewById(R.id.lv_customer_list);
+        ivDefaultPlaying = myView.findViewById(R.id.iv_default_list_playing);
+        ivFavoritePlaying = myView.findViewById(R.id.iv_favorite_list_playing);
+
         customerMusicListAdapter = new CustomerMusicListAdapter(mContext,customerLists,currentPlayingListName);
         customerMusicListAdapter.setOnImageViewClickListener(this);
         lvCustomer.setAdapter(customerMusicListAdapter);
@@ -562,6 +564,14 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         if (customerMusicListAdapter != null){
             customerMusicListAdapter.setCurrentPlayingListName(currentPlayingListName);
             customerMusicListAdapter.changeCustomerList(customerLists);
+        }
+        // 刷新默认列表和收藏列表的播放状态图标
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(currentPlayingListName)){
+            ivDefaultPlaying.setVisibility(View.VISIBLE);
+            ivFavoritePlaying.setVisibility(View.GONE);
+        } else if(Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(currentPlayingListName)){
+            ivDefaultPlaying.setVisibility(View.GONE);
+            ivFavoritePlaying.setVisibility(View.VISIBLE);
         }
     }
 

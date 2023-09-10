@@ -582,8 +582,9 @@ public class MainActivity extends BasicActivity {
         }
         if (mainViewFragment.isVisible()) {
             mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
-            mainViewFragment.refreshCustomerList();
         }
+        // 在mainViewFragment不可见的情况下也需要刷新PersonalPageFragment，所以不能放到上面的isVisible()中
+        mainViewFragment.refreshCustomerList();
     }
 
     /**

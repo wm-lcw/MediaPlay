@@ -3,6 +3,8 @@ package com.example.mediaplayproject.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 
 import java.util.HashSet;
@@ -35,10 +38,20 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     private boolean isSelectionMode = false, isSelectionAll = false, isSelectSetEmpty = true;
     private String listName = Constant.LIST_MODE_DEFAULT_NAME;
     private MainListAdapterOnClickListener mListener;
+    private int defaultSelection = -1;
+    private int text_selected_color;
+    private ColorStateList colors;
+    private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
 
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
         this.musicList = musicList;
+        Resources resources = mContext.getResources();
+        // 文字选中的颜色
+        text_selected_color = resources.getColor(R.color.text_pressed);
+        // 文字未选中状态的selector
+        colors = mContext.getResources().getColorStateList(R.color.listview_text_color_selector);
+        resources = null;
     }
 
     /**
@@ -49,9 +62,10 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
      * @param listName: 新列表的列表名
      */
     @SuppressLint("NotifyDataSetChanged")
-    public void changeList(List<MediaFileBean> newList, String listName){
+    public void changeList(List<MediaFileBean> newList, String listName, String currentPlayingListName){
         this.musicList = newList;
         this.listName = listName;
+        this.currentPlayingListName = currentPlayingListName;
         notifyDataSetChanged();
     }
 
@@ -91,6 +105,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                 bundle.putString("musicListName", listName);
                 intent.putExtras(bundle);
                 mContext.sendBroadcast(intent);
+                holder.musicName.setTextColor(text_selected_color);
             }
         });
 
@@ -109,6 +124,12 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
         holder.musicCheckBox.setChecked(selectedItems.contains(position));
         holder.musicCheckBox.setVisibility(isSelectionMode ? View.VISIBLE : View.GONE);
+        // 是当前播放列表、单选模式，且是当前播放歌曲，符合这三个条件才高亮
+        if (currentPlayingListName.equalsIgnoreCase(listName) && !isSelectionMode && position == defaultSelection){
+            holder.musicName.setTextColor(text_selected_color);
+        } else {
+            holder.musicName.setTextColor(colors);
+        }
     }
 
     /**
@@ -259,6 +280,23 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     public void setMainListAdapterOnClickListener(MainListAdapterOnClickListener listener){
         mListener = listener;
+    }
+
+    /**
+     *  选中高亮效果
+     *  @author wm
+     *  @createTime 2023/9/3 18:06
+     * @param position: 需要高亮的歌曲下标
+     */
+    public void setSelectPosition(int position) {
+        if (position == -1) {
+            //若传进来的值是-1，则代表要取消播放歌曲高亮效果
+            defaultSelection = position;
+        }
+        if (!(position < 0 || position > musicList.size())) {
+            defaultSelection = position;
+        }
+        notifyDataSetChanged();
     }
 
     /*
