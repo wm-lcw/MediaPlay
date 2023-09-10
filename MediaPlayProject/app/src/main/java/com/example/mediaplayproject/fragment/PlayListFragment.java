@@ -86,7 +86,7 @@ public class PlayListFragment extends Fragment {
             listName = Constant.LIST_MODE_FAVORITE_NAME;
             musicList = DataRefreshService.getFavoriteList();
         }
-        musicListAdapter = new MusicListAdapter(mContext, listName, musicList);
+        musicListAdapter = new MusicListAdapter(mContext, listName, musicList, mPosition);
         tvListTitle = fragmentView.findViewById(R.id.tv_list_title);
         refreshListTitle();
 

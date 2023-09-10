@@ -34,6 +34,7 @@ public class MusicListAdapter extends BaseAdapter {
     private int bg_selected_color;
     private ColorStateList colors;
     private String listName;
+    private int mPosition;
 
     public String getListName() {
         return listName;
@@ -51,10 +52,12 @@ public class MusicListAdapter extends BaseAdapter {
     }
 
     @SuppressLint("UseCompatLoadingForColorStateLists")
-    public MusicListAdapter(Context mContext, String listName, List<MediaFileBean> musicList) {
+    public MusicListAdapter(Context mContext, String listName, List<MediaFileBean> musicList, int position) {
         this.mContext = mContext;
         this.listName = listName;
         this.musicInfoList = musicList;
+        this.mPosition = position;
+        defaultSelection = mPosition;
         Resources resources = mContext.getResources();
         // 文字选中的颜色
         text_selected_color = resources.getColor(R.color.text_pressed);

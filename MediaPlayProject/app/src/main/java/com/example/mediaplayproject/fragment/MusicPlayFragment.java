@@ -447,14 +447,4 @@ public class MusicPlayFragment extends Fragment {
         }
     }
 
-//    返回按钮事件
-//    Button btnBack = (Button) view.findViewById(R.id.btnBack);
-//        btnBack.setOnClickListener(new View.OnClickListener() {
-//        @Override
-//        public void onClick(View view) {
-//            getFragmentManager().popBackStack();
-//        }
-//    });
-
-
 }
