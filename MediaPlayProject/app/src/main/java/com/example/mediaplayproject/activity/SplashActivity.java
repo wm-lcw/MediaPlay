@@ -47,8 +47,6 @@ public class SplashActivity extends BasicActivity {
                 public void onAnimationEnd(Animation animation) {
                     //动画结束时跳转到主页面
                     Intent intent =  new Intent(SplashActivity.this,MainActivity.class);
-                    // MainActivity以SingleTask方式启动，且进入MainActivity之后清除SplashActivity记录
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }
 
