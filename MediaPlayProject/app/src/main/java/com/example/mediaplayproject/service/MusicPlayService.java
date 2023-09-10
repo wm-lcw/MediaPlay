@@ -480,9 +480,14 @@ public class MusicPlayService extends Service {
         }
         //封面专辑
 //        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
+        if (position == -1) {
+            remoteViews.setTextViewText(R.id.tv_song_title, "");
+            remoteViews.setTextViewText(R.id.tv_song_artist, "");
+        } else {
+            remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
+            remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
+        }
 
-        remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
-        remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
 
         //发送通知
         notificationManager.notify(NOTIFICATION_ID, notification);

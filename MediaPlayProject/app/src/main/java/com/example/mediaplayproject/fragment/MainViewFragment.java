@@ -335,7 +335,4 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         personalPageFragment.refreshCustomerList();
     }
 
-    public void refreshCurrentPlayingList(String musicListName) {
-        personalPageFragment.refreshCurrentPlayingList(musicListName);
-    }
 }

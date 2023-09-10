@@ -459,11 +459,6 @@ public class MainActivity extends BasicActivity {
             musicService.play(musicInfo.get(mPosition), true, mPosition);
         }
 
-        if (mainViewFragment.isVisible()){
-            // 更新PersonalPageFragment中的当前播放列表，用于刷新列表的显示状态
-            mainViewFragment.refreshCurrentPlayingList(newMusicListName);
-        }
-
         // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
     }
 
@@ -721,9 +716,11 @@ public class MainActivity extends BasicActivity {
         mPosition = 0;
         isPlaying = false;
         firstPlay = true;
+        musicInfo = defaultList;
+        musicListName = Constant.LIST_MODE_DEFAULT_NAME;
 
         // 直接保存默认列表的第一首歌作为最后的播放，避免此时关闭应用，导致下次打开时无法获取上次播放的信息
-        DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_DEFAULT_NAME,mPosition,defaultList.get(mPosition).getId(),playMode);
+        DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
     }
 
     /**

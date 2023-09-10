@@ -519,6 +519,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             customerMusicListAdapter.notifyDataSetChanged();
             mainListAdapter.setSelectionState(false);
             mainListAdapter.notifyDataSetChanged();
+            mWindowManager.removeView(mFloatLayout);
             dialog.dismiss();
         });
 
@@ -570,19 +571,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         DebugLog.debug("");
         initMusicSource();
         if (customerMusicListAdapter != null){
+            customerMusicListAdapter.setCurrentPlayingListName(currentPlayingListName);
             customerMusicListAdapter.changeCustomerList(customerLists);
         }
-    }
-
-    /**
-     *  更新当前播放列表
-     *  @author wm
-     *  @createTime 2023/9/4 16:46
-     * @param musicListName: 当前播放列表名称
-     */
-    public void refreshCurrentPlayingList(String musicListName) {
-        this.currentPlayingListName = musicListName;
-        customerMusicListAdapter.setCurrentPlayingListName(musicListName);
     }
 
     private final View.OnClickListener mListener = view -> {
