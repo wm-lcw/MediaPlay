@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -51,8 +52,13 @@ import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -166,7 +172,7 @@ public class MainActivity extends BasicActivity {
             unbindService(connection);
         }
         unregisterReceiver();
-        // 需要添加下面的强制退出逻辑；否则在主页点返回退出app时，关闭不彻底，导致某些资源未能释放，重启app会闪退报错
+        // 需要添加下面的强制退出逻辑；否则在主页点返回退出app时，关闭不彻底，导致某些资源（ViewPager、MediaPlayer等）未能释放，重启app会闪退报错
         System.exit(0);
     }
 
@@ -316,39 +322,48 @@ public class MainActivity extends BasicActivity {
         return R.layout.activity_main;
     }
 
-//    /**
-//     * 菜单、返回键响应
-//     */
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            //调用双击退出函数
-//            exitBy2Click();
-//        }
-//        return false;
-//    }
-//
-//    private static Boolean isExit = false;
-//    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(
-//            1, new BasicThreadFactory.Builder().namingPattern("scheduled-pool-%d").daemon(true).build());
-//
-//    /**
-//     * 双击退出函数
-//     */
-//    private void exitBy2Click() {
-//        if (!isExit) {
-//            // 准备退出
-//            isExit = true;
-//            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-//            // 第一个参数为执行体，第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间。
-//            scheduledExecutorService.scheduleAtFixedRate(() -> {
-//                // 取消退出
-//                isExit = false;
-//            }, 2, 10, TimeUnit.SECONDS);
-//        } else {
-//            BasicApplication.getActivityManager().finishAll();
-//        }
-//    }
+    /**
+     * 菜单、返回键响应
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        DebugLog.debug("keyEvent " + keyCode);
+        DebugLog.debug("mainView ");
+        if (mainViewFragment.isVisible()){
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                //调用双击退出函数
+                exitBy2Click();
+            }
+        } else if (musicPlayFragment.isVisible()){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.fl_main_view, mainViewFragment);
+            transaction.commit();
+        }
+        return false;
+    }
+
+    private static Boolean isExit = false;
+    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(
+            1, new BasicThreadFactory.Builder().namingPattern("scheduled-pool-%d").daemon(true).build());
+
+    /**
+     * 双击退出函数
+     */
+    private void exitBy2Click() {
+        if (!isExit) {
+            // 准备退出
+            isExit = true;
+            Toast.makeText(this, "再按一次回到主页", Toast.LENGTH_SHORT).show();
+            // 第一个参数为执行体，第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间。
+            scheduledExecutorService.scheduleAtFixedRate(() -> {
+                // 取消退出
+                isExit = false;
+            }, 2, 10, TimeUnit.SECONDS);
+        } else {
+            moveTaskToBack(false);
+        }
+    }
 
     public interface FragmentCallBack {
         /**
