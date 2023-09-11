@@ -337,11 +337,12 @@ public class DataRefreshService extends Service {
      * @createTime 2023/9/3 18:31
      */
     public static void setLastPlayInfo(String lastPlayListName, int lastPosition, long lastMusicId, int lastPlayMode) {
-        boolean isListNameChange = DataRefreshService.lastPlayListName.equalsIgnoreCase(lastPlayListName);
-        boolean isPositionChange = DataRefreshService.lastPosition == lastPosition;
-        boolean isMusicIdChange = DataRefreshService.lastMusicId == lastMusicId;
-        boolean isPlayModeChange = DataRefreshService.lastPlayMode == lastPlayMode;
-        if (isListNameChange && isPositionChange && isMusicIdChange && isPlayModeChange) {
+        DebugLog.debug("thisId " + DataRefreshService.lastMusicId + "; input id "+ lastMusicId);
+        boolean isListNameSame = DataRefreshService.lastPlayListName.equalsIgnoreCase(lastPlayListName);
+        boolean isPositionSame = DataRefreshService.lastPosition == lastPosition;
+        boolean isMusicIdSame = DataRefreshService.lastMusicId == lastMusicId;
+        boolean isPlayModeSame = DataRefreshService.lastPlayMode == lastPlayMode;
+        if (isListNameSame && isPositionSame && isMusicIdSame && isPlayModeSame) {
             // 有数据更改时才更新，否则不处理
             DebugLog.debug("no deal");
         } else {
@@ -351,7 +352,8 @@ public class DataRefreshService extends Service {
             DataRefreshService.lastPlayMode = lastPlayMode;
             updateLastInfo();
         }
-        if (isMusicIdChange && defaultListMap.containsKey(lastMusicId)){
+        DebugLog.debug("refresh music idChange ? " + isMusicIdSame);
+        if (!isMusicIdSame && defaultListMap.containsKey(lastMusicId)){
             // 只根据id去判定历史播放记录，id更改才刷新播放记录
             addHistoryMusic(defaultListMap.get(lastMusicId));
         }
