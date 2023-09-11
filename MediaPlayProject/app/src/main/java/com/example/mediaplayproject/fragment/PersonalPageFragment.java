@@ -345,7 +345,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         lvCustomer = myView.findViewById(R.id.lv_customer_list);
         ivDefaultPlaying = myView.findViewById(R.id.iv_default_list_playing);
         ivFavoritePlaying = myView.findViewById(R.id.iv_favorite_list_playing);
-
+        ivHistoryPlaying = myView.findViewById(R.id.iv_history_list_playing);
         customerMusicListAdapter = new CustomerMusicListAdapter(mContext,customerLists,currentPlayingListName);
         customerMusicListAdapter.setOnImageViewClickListener(this);
         lvCustomer.setAdapter(customerMusicListAdapter);
@@ -582,9 +582,15 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(currentPlayingListName)){
             ivDefaultPlaying.setVisibility(View.VISIBLE);
             ivFavoritePlaying.setVisibility(View.GONE);
+            ivHistoryPlaying.setVisibility(View.GONE);
         } else if(Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(currentPlayingListName)){
             ivDefaultPlaying.setVisibility(View.GONE);
             ivFavoritePlaying.setVisibility(View.VISIBLE);
+            ivHistoryPlaying.setVisibility(View.GONE);
+        } else if(Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(currentPlayingListName)){
+            ivDefaultPlaying.setVisibility(View.GONE);
+            ivFavoritePlaying.setVisibility(View.GONE);
+            ivHistoryPlaying.setVisibility(View.VISIBLE);
         }
     }
 
