@@ -14,4 +14,5 @@
     <color name="text_choose">#D6F2E9</color><!-- 浅蓝色 -->
 
     <color name="bg_list_view">#73222932</color><!-- 列表背景 -->
+    <color name="bg_transparent">#00000000</color><!-- 透明背景 -->
 </resources>

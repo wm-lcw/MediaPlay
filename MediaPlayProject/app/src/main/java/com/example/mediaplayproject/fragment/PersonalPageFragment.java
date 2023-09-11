@@ -40,6 +40,7 @@ import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -95,6 +96,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -102,6 +104,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         initMusicSource();
         createFloatView();
         initData();
+        myView.setOnTouchListener((v, event) -> {
+            ToolsUtils.getInstance().hideKeyboard(myView);
+            return false;
+        });
         return myView;
     }
 
@@ -262,6 +268,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         mainListAdapter.changeList(musicList,listName,currentPlayingListName);
         mainListAdapter.setSelectPosition(mPosition);
         setMainListSelectionState(false);
+        if (mFloatLayout.isAttachedToWindow()){
+            mWindowManager.removeView(mFloatLayout);
+        }
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
         tvMainViewListName.setText(listName);
@@ -559,7 +568,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      *  @createTime 2023/9/3 23:02
      */
     public void refreshCustomerList() {
-        DebugLog.debug("");
         initMusicSource();
         if (customerMusicListAdapter != null){
             customerMusicListAdapter.setCurrentPlayingListName(currentPlayingListName);

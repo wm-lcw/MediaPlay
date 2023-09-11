@@ -1,5 +1,7 @@
 package com.example.mediaplayproject.fragment;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +9,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 
 /**
@@ -16,6 +20,7 @@ import com.example.mediaplayproject.R;
  */
 public class DiscoveryFragment extends Fragment {
 
+    private View myView;
     private static DiscoveryFragment instance;
     public static DiscoveryFragment getInstance() {
         if (instance == null) {
@@ -29,9 +34,16 @@ public class DiscoveryFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_discovery, container, false);
+        myView = inflater.inflate(R.layout.fragment_discovery, container, false);
+        myView.setOnTouchListener((v, event) -> {
+            ToolsUtils.getInstance().hideKeyboard(myView);
+            return false;
+        });
+        return myView;
     }
+
 }

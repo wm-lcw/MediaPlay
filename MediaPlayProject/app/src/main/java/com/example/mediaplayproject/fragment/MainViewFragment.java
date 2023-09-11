@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.ToolsUtils;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -63,7 +65,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private PersonalPageFragment personalPageFragment;
     private ToolsFragment toolsFragment;
 
-    private ImageView ivSettings, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow;
+    private EditText etSearch;
+    private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow;
     private TextView tvCurrentMusicInfo;
 
     private MainActivity.MyFragmentCallBack myFragmentCallBack;
@@ -104,6 +107,13 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 绑定布局资源,只能执行一次，不能放到start或者之后的方法里；
         // 否则会重复创建MusicViewPagerAdapter等操作，引发异常
         initData();
+        mainView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ToolsUtils.getInstance().hideKeyboard(mainView);
+                return false;
+            }
+        });
         return mainView;
     }
 
@@ -130,7 +140,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      */
     @SuppressLint("ClickableViewAccessibility")
     public void setDataFromMainActivity(MusicPlayService service, Handler handler, MainActivity.MyFragmentCallBack fragmentCallBack) {
-        DebugLog.debug("");
         musicService = service;
         this.mActivityHandle = handler;
         myFragmentCallBack = fragmentCallBack;
@@ -165,6 +174,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
         ivSettings = mainView.findViewById(R.id.iv_setting);
+        etSearch = mainView.findViewById(R.id.et_search);
+        ivSearch = mainView.findViewById(R.id.iv_search);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
         ivMusicList = mainView.findViewById(R.id.iv_current_list);
         ivDiscovery = mainView.findViewById(R.id.iv_discovery);
@@ -172,12 +183,15 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivTools = mainView.findViewById(R.id.iv_tools);
         ivShow = mainView.findViewById(R.id.iv_show_list);
         ivSettings.setOnClickListener(mListener);
+        etSearch.setOnClickListener(mListener);
+        ivSearch.setOnClickListener(mListener);
         ivPlayMusic.setOnClickListener(mListener);
         ivMusicList.setOnClickListener(mListener);
         ivDiscovery.setOnClickListener(mListener);
         ivPersonal.setOnClickListener(mListener);
         ivTools.setOnClickListener(mListener);
         ivShow.setOnClickListener(mListener);
+
         LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
 
@@ -193,16 +207,58 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         musicListViewPager.setAdapter(mainViewPagerAdapter);
         musicListViewPager.setCurrentItem(1);
 
-        // 侧滑栏的监听设定
-        mGestureDetector = new GestureDetector(mContext, myGestureListener);
-        drawerLayout.setOnTouchListener((v, event) -> {
-            // 处理DrawerLayout的onTouch事件
-            // 这里直接调用GestureDetector.SimpleOnGestureListener的onTouchEvent方法来处理
-            return mGestureDetector.onTouchEvent(event);
+        musicListViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                ToolsUtils.getInstance().hideKeyboard(mainView);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                ToolsUtils.getInstance().hideKeyboard(mainView);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+            }
         });
-        // 必须设置setLongClickable为true 否则监听不到手势
-        drawerLayout.setLongClickable(true);
+
+        // 侧滑栏的滑动唤出效果可以不需要了，点击按钮能唤出来，点击空白能收回去即可，代码先保留
+
+//        // 侧滑栏的监听设定
+//        mGestureDetector = new GestureDetector(mContext, myGestureListener);
+//        drawerLayout.setOnTouchListener((v, event) -> {
+//            // 处理DrawerLayout的onTouch事件
+//            // 这里直接调用GestureDetector.SimpleOnGestureListener的onTouchEvent方法来处理
+//            return mGestureDetector.onTouchEvent(event);
+//        });
+//        // 必须设置setLongClickable为true 否则监听不到手势
+//        drawerLayout.setLongClickable(true);
     }
+
+    /**
+     * 创建一个GestureDetector.SimpleOnGestureListener对象，用来识别各种手势动作
+     * 源码中SimpleOnGestureListener实现的是OnGestureListener, OnDoubleTapListener这两个接口，
+     * 如果只是做检测左右滑动可以去只实现OnGestureListener，
+     * 然后覆盖public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)方法即可
+     */
+    GestureDetector.SimpleOnGestureListener myGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            float x = e1.getX() - e2.getX();
+            float x2 = e2.getX() - e1.getX();
+            DebugLog.debug("x " + x + "; x2 " + x2);
+            if (x > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else if (x2 > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+            return false;
+        }
+    };
 
     /**
      * 从service中获取音量信息和当前音乐列表
@@ -258,8 +314,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     private final View.OnClickListener mListener = view -> {
         if (view == ivSettings) {
+            ToolsUtils.getInstance().hideKeyboard(mainView);
             // 打开侧滑栏
             drawerLayout.openDrawer(GravityCompat.START);
+        } else if (view == ivSearch) {
+            ToolsUtils.getInstance().hideKeyboard(mainView);
         } else if (view == ivPlayMusic) {
             // 需要用firstPlay来判断当前是否是首次播放
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
@@ -291,28 +350,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         return false;
     }
-
-
-    /**
-     * 创建一个GestureDetector.SimpleOnGestureListener对象，用来识别各种手势动作
-     * 源码中SimpleOnGestureListener实现的是OnGestureListener, OnDoubleTapListener这两个接口，
-     * 如果只是做检测左右滑动可以去只实现OnGestureListener，
-     * 然后覆盖public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)方法即可
-     */
-    GestureDetector.SimpleOnGestureListener myGestureListener = new GestureDetector.SimpleOnGestureListener() {
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            float x = e1.getX() - e2.getX();
-            float x2 = e2.getX() - e1.getX();
-            if (x > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-
-            } else if (x2 > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-            return false;
-        }
-    };
 
     /**
      * 更改播放状态和信息，Activity接收到service发出的更新通知后调用
