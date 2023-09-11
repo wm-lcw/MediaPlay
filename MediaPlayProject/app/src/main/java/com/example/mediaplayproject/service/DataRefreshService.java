@@ -724,18 +724,23 @@ public class DataRefreshService extends Service {
      * @param mediaFileBean: 新增加的歌曲信息
      */
     public static void addHistoryMusic(MediaFileBean mediaFileBean) {
-        long musicId = mediaFileBean.getId();
-        if (historyListMap.containsKey(musicId)) {
-            // 历史列表里面已存在该歌曲记录，需要先删除记录，然后将其添加到列表最后
-            // 删除数据库里的内容
-            db.execSQL("DELETE FROM " + HISTORY_LIST_TABLE_NAME + " WHERE musicId = ?",
-                    new Long[]{musicId});
+        try{
+            long musicId = mediaFileBean.getId();
+            DebugLog.debug(" id " + musicId);
+            if (historyListMap.containsKey(musicId)) {
+                // 删除数据库里的内容
+                db.execSQL("DELETE FROM " + HISTORY_LIST_TABLE_NAME + " WHERE musicId = ?",
+                        new Long[]{musicId});
+            }
             // 数据库写入历史播放记录
             ContentValues values = new ContentValues();
             values.put("musicId", musicId);
             db.insert(HISTORY_LIST_TABLE_NAME, null, values);
+            initHistoryList();
+        } catch (Exception exception){
+            DebugLog.debug("error "+ exception.getMessage());
         }
-        initHistoryList();
+
     }
 
     /**

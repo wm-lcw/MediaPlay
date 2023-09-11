@@ -57,14 +57,16 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private View myView;
     private List<MediaFileBean> defaultList = new ArrayList<>();
     private List<MediaFileBean> favoriteList = new ArrayList<>();
+    private List<MediaFileBean> historyList = new ArrayList<>();
     private List<MusicListBean> customerLists = new ArrayList<>();
     private ListView lvCustomer;
     private CustomerMusicListAdapter customerMusicListAdapter;
-    private ImageView ivDefaultPlaying, ivFavoritePlaying, ivAddList, ivMainListViewBack, ivIntoSelectMode, ivAddToListBack, ivSelectAll, ivAddToList, ivDeleteSelectMusic;
+    private ImageView ivDefaultPlaying, ivFavoritePlaying, ivHistoryPlaying, ivAddList, ivMainListViewBack,
+            ivIntoSelectMode, ivAddToListBack, ivSelectAll, ivAddToList, ivDeleteSelectMusic;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
     private String itemClickListName;
 
-    private LinearLayout llDefaultList,llFavoriteList;
+    private LinearLayout llDefaultList,llFavoriteList, llHistoryList;
     private MainListAdapter mainListAdapter;
     private RecyclerView rvMainList;
     private ListView lvAddToList;
@@ -140,6 +142,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         mPosition = DataRefreshService.getLastPosition();
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
+        historyList = DataRefreshService.getHistoryList();
         customerLists = DataRefreshService.getCustomerList();
         currentPlayingListName = DataRefreshService.getLastPlayListName();
     }
@@ -358,8 +361,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
 
         llDefaultList = myView.findViewById(R.id.ll_default_list);
         llFavoriteList = myView.findViewById(R.id.ll_favorite_list);
+        llHistoryList = myView.findViewById(R.id.ll_history_list);
         llDefaultList.setOnClickListener(mListener);
         llFavoriteList.setOnClickListener(mListener);
+        llHistoryList.setOnClickListener(mListener);
     }
 
 
@@ -614,6 +619,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             showFloatView(defaultList, Constant.LIST_MODE_DEFAULT_NAME);
         } else if (view == llFavoriteList){
             showFloatView(favoriteList, Constant.LIST_MODE_FAVORITE_NAME);
+        }  else if (view == llHistoryList){
+            showFloatView(historyList, Constant.LIST_MODE_HISTORY_NAME);
         } else if (view == ivMainListViewBack){
             boolean isSelectMode = mainListAdapter.isSelectionMode();
             if (isSelectMode){

@@ -81,6 +81,7 @@ public class MainActivity extends BasicActivity {
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private List<MediaFileBean> defaultList = new ArrayList<>();
     private List<MediaFileBean> favoriteList = new ArrayList<>();
+    private List<MediaFileBean> historyList = new ArrayList<>();
 
     private LinearLayout mFloatLayout;
     private WindowManager mWindowManager;
@@ -116,13 +117,12 @@ public class MainActivity extends BasicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        DebugLog.debug("");
+        mContext = this;
         // 让状态栏保持可见
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        DebugLog.debug("");
-        mContext = this;
 
         // 申请权限的结果回调处理
         intentActivityResultLauncher = registerForActivityResult(
@@ -285,6 +285,7 @@ public class MainActivity extends BasicActivity {
         musicInfo = DataRefreshService.getMusicListByName(musicListName);
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
+        historyList = DataRefreshService.getHistoryList();
 
         // 创建悬浮窗视图
         createFloatView();
@@ -327,8 +328,6 @@ public class MainActivity extends BasicActivity {
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        DebugLog.debug("keyEvent " + keyCode);
-        DebugLog.debug("mainView ");
         if (mainViewFragment.isVisible()){
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 //调用双击退出函数
@@ -440,7 +439,6 @@ public class MainActivity extends BasicActivity {
                 // 更新播放列表等数据
                 musicInfo = tempList;
                 musicListName = newMusicListName;
-                DebugLog.debug("change list");
                 if (viewPagerLists.get(0).isInitSuccess()){
                     // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
                     // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
@@ -451,8 +449,6 @@ public class MainActivity extends BasicActivity {
 
         // 保存播放信息
         DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
-        DebugLog.debug("--------"+DataRefreshService.getLastPlayListName());
-        DebugLog.debug("-----------"+ DataRefreshService.getLastPosition());
         // 调用service播放
         if (musicService != null) {
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
@@ -503,9 +499,11 @@ public class MainActivity extends BasicActivity {
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
         PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, Constant.LIST_SHOW_MODE_CURRENT);
         PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, Constant.LIST_SHOW_MODE_FAVORITE);
+        PlayListFragment historyListFragment = new PlayListFragment(mContext, historyList, Constant.LIST_MODE_HISTORY_NAME, Constant.LIST_SHOW_MODE_HISTORY);
         viewPagerLists = new ArrayList<>();
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
+        viewPagerLists.add(historyListFragment);
         listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
         musicListViewPager.setAdapter(listViewPagerAdapter);
     }
@@ -540,7 +538,6 @@ public class MainActivity extends BasicActivity {
         final View popupWindowView = mFloatLayout.findViewById(R.id.ll_popup_window);
         final View listWindow = mFloatLayout.findViewById(R.id.ll_listWindow);
         popupWindowView.setOnTouchListener((v, event) -> {
-            DebugLog.debug("---");
             int x = (int) event.getX();
             int y = (int) event.getY();
             Rect rect = new Rect();
@@ -562,7 +559,6 @@ public class MainActivity extends BasicActivity {
         for (PlayListFragment fragment : viewPagerLists) {
             DebugLog.debug("listName " + musicListName);
             if (musicListName.equalsIgnoreCase(fragment.getListName())) {
-                DebugLog.debug("highLight " + mPosition);
                 fragment.setSelectPosition(mPosition);
                 fragment.setSelection(mPosition);
             } else {
@@ -601,7 +597,6 @@ public class MainActivity extends BasicActivity {
                 String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
             } else if(Constant.CHANGE_MUSIC_ACTION.equals(intent.getAction())){
-                DebugLog.debug("---CHANGE_MUSIC_ACTION");
                 // 音乐列表Fragment发送的消息，用于通知切换播放歌曲/播放列表
                 int newPosition = intent.getExtras().getInt("position");
                 String newMusicListName = intent.getExtras().getString("musicListName");
