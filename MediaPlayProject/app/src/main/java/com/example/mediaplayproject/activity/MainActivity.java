@@ -519,6 +519,8 @@ public class MainActivity extends BasicActivity {
             // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
             viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
         }
+        // 每次打开默认选中第一个列表，即当前播放列表
+        musicListViewPager.setCurrentItem(0);
         mWindowManager.addView(mFloatLayout, wmParams);
         isShowList = true;
         refreshListStatus();
