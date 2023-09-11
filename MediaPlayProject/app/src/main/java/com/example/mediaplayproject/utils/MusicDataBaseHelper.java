@@ -23,14 +23,21 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
     /**
      * 创建收藏列表数据表的指令
      * */
-    public static final String CREATE_MUSIC_LIST_TABLE = "create table musiclistrecord(" +
+    public static final String CREATE_FAVORITE_MUSIC_LIST_TABLE = "create table favoriteList(" +
             "musicRecordId integer primary key autoincrement," +
             "musicId long(20),isLike integer)";
 
     /**
+     * 创建历史播放列表的指令
+     * */
+    public static final String CREATE_HISTORY_LIST_TABLE = "create table historyList(" +
+            "musicRecordId integer primary key autoincrement," +
+            "musicId long(20))";
+
+    /**
      * 创建上次播放信息数据表的指令
      * */
-    public static final String CREATE_LAST_PLAY_INFO_TABLE = "create table lastplayinforecord(" +
+    public static final String CREATE_LAST_PLAY_INFO_TABLE = "create table lastPlayInfoRecord(" +
             "musicInfoId integer primary key autoincrement," +
             "infoRecord TEXT," +
             "lastPlayListName TEXT," +
@@ -61,8 +68,9 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_MUSIC_LIST_TABLE);
+        db.execSQL(CREATE_FAVORITE_MUSIC_LIST_TABLE);
         db.execSQL(CREATE_LAST_PLAY_INFO_TABLE);
+        db.execSQL(CREATE_HISTORY_LIST_TABLE);
 
         db.execSQL(CREATE_LIST_TABLE);
         db.execSQL(CREATE_MUSIC_TABLE);

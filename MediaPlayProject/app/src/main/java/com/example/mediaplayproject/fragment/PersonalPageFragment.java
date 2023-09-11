@@ -383,7 +383,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         builder.setPositiveButton("确定", (dialog, which) -> {
             String inputListName = inputText.getText().toString().trim();
             if (!"".equals(inputListName)){
-                DataRefreshService.createNewMusicList(inputListName);
+                DataRefreshService.createNewCustomerMusicList(inputListName);
             }
             dialog.dismiss();
         });
@@ -471,7 +471,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         // 设置正面按钮
         builder.setPositiveButton("确定", (dialog, which) -> {
             // 删除音乐列表
-            DataRefreshService.deleteMusicList(itemClickListName);
+            DataRefreshService.deleteCustomerMusicList(itemClickListName);
             dialog.dismiss();
         });
 
