@@ -202,7 +202,18 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        play(musicInfo.get(mPosition), true, mPosition);
+        if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(musicListName)){
+            // 若是最近播放列表的上下曲，需要特殊处理，由MainActivity统一处理
+            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", mPosition);
+            bundle.putString("musicListName", musicListName);
+            intent.putExtras(bundle);
+            mContext.sendBroadcast(intent);
+        } else {
+            play(musicInfo.get(mPosition), true, mPosition);
+        }
+
     }
 
     /**
@@ -221,7 +232,17 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        play(musicInfo.get(mPosition), true, mPosition);
+        if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(musicListName)){
+            // 若是最近播放列表的上下曲，需要特殊处理，由MainActivity统一处理
+            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", mPosition);
+            bundle.putString("musicListName", musicListName);
+            intent.putExtras(bundle);
+            mContext.sendBroadcast(intent);
+        } else {
+            play(musicInfo.get(mPosition), true, mPosition);
+        }
     }
 
     /**
