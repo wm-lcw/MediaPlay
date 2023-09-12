@@ -143,6 +143,9 @@ public class MusicListAdapter extends BaseAdapter {
         }
         if (!(position < 0 || position > musicInfoList.size())) {
             defaultSelection = position;
+            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
+                defaultSelection = 0;
+            }
         }
         notifyDataSetChanged();
     }

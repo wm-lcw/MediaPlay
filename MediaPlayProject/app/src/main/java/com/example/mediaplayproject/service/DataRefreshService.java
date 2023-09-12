@@ -347,7 +347,13 @@ public class DataRefreshService extends Service {
             DebugLog.debug("no deal");
         } else {
             DataRefreshService.lastPlayListName = lastPlayListName;
-            DataRefreshService.lastPosition = lastPosition;
+            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(lastPlayListName)){
+                // 最近播放列表保存的永远是最后一条记录
+                DataRefreshService.lastPosition = 0;
+            } else {
+                DataRefreshService.lastPosition = lastPosition;
+            }
+
             DataRefreshService.lastMusicId = lastMusicId;
             DataRefreshService.lastPlayMode = lastPlayMode;
             updateLastInfo();

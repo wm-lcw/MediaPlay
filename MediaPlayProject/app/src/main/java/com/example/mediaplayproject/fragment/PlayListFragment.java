@@ -190,7 +190,6 @@ public class PlayListFragment extends Fragment {
      * @createTime 2023/8/31 10:48
      */
     public void changePlayList(List<MediaFileBean> list, String listName, int position) {
-        DebugLog.debug("PlayListFragment");
         this.listName = listName;
         this.musicList = list;
         this.mPosition = position;

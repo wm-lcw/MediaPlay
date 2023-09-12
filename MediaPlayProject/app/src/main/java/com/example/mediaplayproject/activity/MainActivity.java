@@ -429,30 +429,57 @@ public class MainActivity extends BasicActivity {
      *  @param newMusicListName: 音乐列表名
      */
     private void changeMusicPlayList(int position, String newMusicListName) {
-        // 更新mPosition
-        mPosition = position;
-        DebugLog.debug("newListName " + newMusicListName + "; position " + position);
-        if (!musicListName.equalsIgnoreCase(newMusicListName)){
-            // 有切换播放列表的操作才更新当前播放列表的信息
-            List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
-            if (tempList != null && tempList.size() > 0) {
-                // 更新播放列表等数据
-                musicInfo = tempList;
-                musicListName = newMusicListName;
-                if (viewPagerLists.get(0).isInitSuccess()){
-                    // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
-                    // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
-                    viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
-                }
-            }
-        }
+        try {
+            mPosition = position;
+            DebugLog.debug("newListName " + newMusicListName + "; position " + position);
 
-        // 保存播放信息
-        DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
-        // 调用service播放
-        if (musicService != null) {
-            musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
-            musicService.play(musicInfo.get(mPosition), true, mPosition);
+            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(newMusicListName)) {
+                // 如果是最近播放列表，需要保存播放信息，然后等待刷新列表的数据，拿到最新的列表再去播放和刷新UI高亮
+                DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_HISTORY_NAME, mPosition, historyList.get(mPosition).getId(), playMode);
+
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // 获取音乐列表，上次播放的信息等
+                playMode = DataRefreshService.getLastPlayMode();
+                mPosition = DataRefreshService.getLastPosition();
+                historyList = DataRefreshService.getHistoryList();
+                musicListName = Constant.LIST_MODE_HISTORY_NAME;
+                musicInfo = historyList;
+                if (viewPagerLists.get(0).isInitSuccess()) {
+                    viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
+                }
+            } else {
+                if (!musicListName.equalsIgnoreCase(newMusicListName)) {
+                    // 有切换播放列表的操作才更新当前播放列表的信息
+                    List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
+                    if (tempList != null && tempList.size() > 0) {
+                        // 更新播放列表等数据
+                        musicInfo = tempList;
+                        musicListName = newMusicListName;
+                        if (viewPagerLists.get(0).isInitSuccess()) {
+                            // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
+                            // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+                            viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
+                        }
+                    }
+                }
+
+                // 保存播放信息
+                DataRefreshService.setLastPlayInfo(musicListName, mPosition, musicInfo.get(mPosition).getId(), playMode);
+            }
+
+            // 调用service播放
+            if (musicService != null) {
+                musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
+                musicService.play(musicInfo.get(mPosition), true, mPosition);
+            }
+
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
         }
 
         // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
