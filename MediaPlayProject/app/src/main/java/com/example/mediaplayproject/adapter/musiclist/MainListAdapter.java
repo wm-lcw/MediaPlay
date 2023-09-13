@@ -104,7 +104,8 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                 bundle.putString("musicListName", listName);
                 intent.putExtras(bundle);
                 mContext.sendBroadcast(intent);
-                holder.musicName.setTextColor(text_selected_color);
+                defaultSelection = holder.getAdapterPosition();
+                setSelectPosition(position);
             }
         });
 
@@ -297,11 +298,4 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
         }
         notifyDataSetChanged();
     }
-
-    /*
-    * 首次加载时，哪部分展示出来了，就执行以下逻辑- 执行顺序：onCreateViewHolder--> new ViewHolder --> onBindViewHolder
-    *
-    * 全部加载完之后，哪部分展示，就只加载onBindViewHolder，因为已经创建过了，直接复用
-    *
-    * */
 }
