@@ -647,16 +647,18 @@ public class DataRefreshService extends Service {
             threadPool.execute(() -> {
                 DebugLog.debug("listName " + listName + "; position " + position);
                 boolean needToSendBroadcast = true;
+                if (customerListsMap.containsKey(listName)){
+                    // 自定义列表单独处理
+                    List<Long> list = new ArrayList<>();
+                    list.add(customerListsMap.get(listName).getMusicList().get(position).getId());
+                    deleteCustomerMusic(listName, list);
+                }
                 switch (listName) {
                     case Constant.LIST_MODE_FAVORITE_NAME:
                         deleteMusicFromFavoriteList(favoriteList.get(position));
                         break;
-                    case Constant.LIST_MODE_CUSTOMER_NAME:
-                        List<Long> list = new ArrayList<>();
-                        list.add(customerListsMap.get(listName).getMusicList().get(position).getId());
-                        deleteCustomerMusic(listName, list);
-                        break;
                     case Constant.LIST_MODE_HISTORY_NAME:
+//                        deleteHistoryMusic(historyList.get(position));
                         break;
                     default:
                         needToSendBroadcast = false;
