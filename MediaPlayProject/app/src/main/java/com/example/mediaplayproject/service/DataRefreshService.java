@@ -110,7 +110,6 @@ public class DataRefreshService extends Service {
         initCustomerListData();
 
         initLastPlayInfo();
-
         initHistoryList();
 
     }

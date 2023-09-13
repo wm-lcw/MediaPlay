@@ -1,4 +1,4 @@
-package com.example.mediaplayproject.fragment;
+package com.example.mediaplayproject.fragment.main;
 
 import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
@@ -34,7 +34,7 @@ import android.widget.Toast;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.AddToMusicListAdapter;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
-import com.example.mediaplayproject.adapter.MainListAdapter;
+import com.example.mediaplayproject.adapter.musiclist.MainListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.service.DataRefreshService;

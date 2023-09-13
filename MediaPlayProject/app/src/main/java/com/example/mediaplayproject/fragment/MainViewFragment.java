@@ -27,8 +27,11 @@ import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
-import com.example.mediaplayproject.adapter.MainViewPagerAdapter;
+import com.example.mediaplayproject.adapter.viewpager.MainViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.fragment.main.DiscoveryFragment;
+import com.example.mediaplayproject.fragment.main.PersonalPageFragment;
+import com.example.mediaplayproject.fragment.main.ToolsFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;

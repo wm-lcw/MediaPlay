@@ -1,4 +1,4 @@
-package com.example.mediaplayproject.adapter;
+package com.example.mediaplayproject.adapter.musiclist;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MediaFileBean;
-import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 
 import java.util.HashSet;

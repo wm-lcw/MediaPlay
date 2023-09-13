@@ -7,11 +7,8 @@ import android.view.inputmethod.InputMethodManager;
 
 /**
  * @author wm
- * @Classname ToolsUtils
- * @Description TODO
- * @Version 1.0.0
+ * @Description TODO:工具类
  * @Date 2023/9/11 17:41
- * @Created by wm
  */
 public class ToolsUtils {
 

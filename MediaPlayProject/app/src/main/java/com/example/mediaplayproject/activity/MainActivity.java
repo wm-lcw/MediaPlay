@@ -40,7 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.adapter.ListViewPagerAdapter;
+import com.example.mediaplayproject.adapter.viewpager.ListViewPagerAdapter;
 import com.example.mediaplayproject.base.BasicActivity;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
@@ -123,7 +123,6 @@ public class MainActivity extends BasicActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-
         // 申请权限的结果回调处理
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -157,8 +156,7 @@ public class MainActivity extends BasicActivity {
         super.onPause();
         DebugLog.debug("");
         if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
-            // 在MainActivity失去焦点时，悬浮窗关闭
-            // 这里需要判断mFloatLayout正在显示才执行移除，否则会报错
+            // 在MainActivity失去焦点时，悬浮窗关闭, 需要判断mFloatLayout正在显示才执行移除，否则会报错
             mWindowManager.removeView(mFloatLayout);
         }
     }
@@ -167,7 +165,7 @@ public class MainActivity extends BasicActivity {
     protected void onDestroy() {
         super.onDestroy();
         DebugLog.debug("");
-        // 解绑服务：注意bindService后 必须要解绑服务，否则会报-连接资源异常
+        // 解绑服务
         if (null != connection) {
             unbindService(connection);
         }
@@ -278,7 +276,7 @@ public class MainActivity extends BasicActivity {
         // 初始化音乐列表资源
         DataRefreshService.initResource();
 
-        // 从BasicApplication中获取音乐列表，上次播放的信息等
+        // 从DataRefreshService中获取音乐列表，上次播放的信息等
         playMode = DataRefreshService.getLastPlayMode();
         musicListName = DataRefreshService.getLastPlayListName();
         mPosition = DataRefreshService.getLastPosition();
@@ -520,7 +518,7 @@ public class MainActivity extends BasicActivity {
     @SuppressLint("InflateParams")
     private void initFloatView() {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
-        //获取浮动窗口视图所在布局
+        // 获取浮动窗口视图所在布局
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
@@ -621,7 +619,7 @@ public class MainActivity extends BasicActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Constant.DELETE_MUSIC_ACTION.equals(intent.getAction())) {
-                // 删除收藏歌曲（删除的下标小于当前播放的下标）的时候，需要刷新收藏列表的高亮下标
+                // DataRefreshService发送的执行了删除操作的广播，删除歌曲时，需要刷新收藏列表的高亮下标
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 String listSource = intent.getExtras().getString("musicListSource");
                 dealDeleteMusic(listSource, deletePosition);
@@ -676,7 +674,6 @@ public class MainActivity extends BasicActivity {
                         }
                     }
                 }
-
                 // 更新各个Fragment的数据
                 refreshFragmentStatus();
                 // 更新列表Ui

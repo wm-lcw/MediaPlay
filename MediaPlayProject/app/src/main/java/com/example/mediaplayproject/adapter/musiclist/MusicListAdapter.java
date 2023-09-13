@@ -1,4 +1,4 @@
-package com.example.mediaplayproject.adapter;
+package com.example.mediaplayproject.adapter.musiclist;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

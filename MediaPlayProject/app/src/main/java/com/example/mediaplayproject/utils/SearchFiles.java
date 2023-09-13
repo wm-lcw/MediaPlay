@@ -4,13 +4,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import com.example.mediaplayproject.bean.MediaFileBean;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +81,7 @@ public class SearchFiles {
             }
             cursor.close();
         }
-        DebugLog.debug("size " + musicInfos.size());
+        DebugLog.debug("local musicList size " + musicInfos.size());
         return musicInfos;
     }
 
