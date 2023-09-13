@@ -272,8 +272,8 @@ public class MusicPlayFragment extends Fragment {
                     // 加入收藏
                     DataRefreshService.addMusicToFavoriteList(musicInfo.get(mPosition));
                 } else {
-                    // 取消收藏
-                    DataRefreshService.removeFavoriteMusic(musicInfo.get(mPosition));
+                    // 取消收藏，需要传递当前的列表名去判断是否要刷新播放状态
+                    DataRefreshService.removeFavoriteMusic(musicListName, musicInfo.get(mPosition));
                 }
                 // 发送消息给Activity更新列表状态
                 Message msg = new Message();
@@ -392,7 +392,6 @@ public class MusicPlayFragment extends Fragment {
      * @param firstPlay :标识是否是首次播放
      */
     public void refreshPlayState(boolean state, int newPosition, String musicListName, List<MediaFileBean> musicInfo, boolean firstPlay) {
-        DebugLog.debug("refresh play state ");
         // 更新播放状态和收藏状态
         isPlaying = state;
         mPosition = newPosition;

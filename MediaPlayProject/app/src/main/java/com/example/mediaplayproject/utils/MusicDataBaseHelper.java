@@ -25,7 +25,7 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
      * */
     public static final String CREATE_FAVORITE_MUSIC_LIST_TABLE = "create table favoriteList(" +
             "musicRecordId integer primary key autoincrement," +
-            "musicId long(20),isLike integer)";
+            "musicId long(20))";
 
     /**
      * 创建历史播放列表的指令

@@ -38,7 +38,7 @@ public class DataRefreshService extends Service {
 
     private static HashMap<String, MusicListBean> customerListsMap = new HashMap<>();
     private static HashMap<Long, MediaFileBean> defaultListMap = new HashMap<>();
-    private static HashMap<Long, Integer> favoriteListMap = new HashMap<>();
+    private static HashMap<Long, MediaFileBean> favoriteListMap = new HashMap<>();
     private static HashMap<Long, MediaFileBean> historyListMap = new HashMap<>();
     private static List<MediaFileBean> defaultList = new ArrayList<>();
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
@@ -137,30 +137,6 @@ public class DataRefreshService extends Service {
         SearchFiles mSearcherFiles = SearchFiles.getInstance(context);
         // 搜索设备里的所有音乐媒体文件，存储到默认列表中（默认列表就是设备里的所有音乐文件）
         defaultList = mSearcherFiles.getMusicInfo();
-
-        Cursor cursor = db.query(FAVORITE_LIST_TABLE_NAME, null, null, null, null, null, null);
-        //存在数据才返回true
-        if (cursor.moveToFirst()) {
-            do {
-                long musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
-                int isLike = cursor.getInt(cursor.getColumnIndex("isLike"));
-                favoriteListMap.put(musicId, isLike);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-
-        // favoriteListMap与默认列表对比，找出存在且收藏的歌，将其添加到收藏列表中
-        long id;
-        for (int i = 0; i < defaultList.size(); i++) {
-            id = defaultList.get(i).getId();
-            if (favoriteListMap.containsKey(id) && favoriteListMap.get(id) != null) {
-                defaultList.get(i).setLike(1 == favoriteListMap.get(id));
-                if (!favoriteList.contains(defaultList.get(i))) {
-                    favoriteList.add(defaultList.get(i));
-                }
-            }
-        }
-
         // 将默认列表中的音乐放到HashMap中，主要是为了后面筛选自定义列表中的歌曲
         if (defaultList.size() > 0) {
             Iterator<MediaFileBean> iterator = defaultList.iterator();
@@ -170,6 +146,19 @@ public class DataRefreshService extends Service {
             }
         }
 
+        Cursor cursor = db.query(FAVORITE_LIST_TABLE_NAME, null, null, null, null, null, null);
+        //存在数据才返回true
+        if (cursor.moveToFirst()) {
+            do {
+                long musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
+                if (defaultListMap.containsKey(musicId)){
+                    favoriteListMap.put(musicId, defaultListMap.get(musicId));
+                    favoriteList.add(defaultListMap.get(musicId));
+                    defaultListMap.get(musicId).setLike(true);
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
         DebugLog.debug("-- favoriteListSize " + favoriteList.size());
     }
 
@@ -408,58 +397,29 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     * 将歌曲加入收藏列表
+     * 通过列表名获取列表
      *
-     * @param mediaFileBean: 添加收藏的音乐对象
+     * @param listName: 列表名
+     * @return : java.util.List<com.example.mediaplayproject.bean.MediaFileBean>
      * @author wm
-     * @createTime 2023/9/3 16:57
+     * @createTime 2023/9/3 17:02
      */
-    public static void addMusicToFavoriteList(MediaFileBean mediaFileBean) {
-        DebugLog.debug("mediaFileBean " + mediaFileBean);
-        if (!favoriteList.contains(mediaFileBean)) {
-            favoriteList.add(mediaFileBean);
-            //添加信息到数据库中
-            ContentValues values = new ContentValues();
-            values.put("musicId", mediaFileBean.getId());
-            values.put("isLike", mediaFileBean.isLike());
-            //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
-            db.insert(FAVORITE_LIST_TABLE_NAME, null, values);
+    public static List<MediaFileBean> getMusicListByName(String listName) {
+        List<MediaFileBean> musicInfo;
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)) {
+            musicInfo = defaultList;
+        } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)) {
+            musicInfo = favoriteList;
+        } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)) {
+            musicInfo = historyList;
+        } else if (customerListsMap.containsKey(listName)) {
+            musicInfo = customerListsMap.get(listName).getMusicList();
+        } else {
+            musicInfo = null;
+            DebugLog.debug("名称为”" + listName + "“的列表不存在");
         }
-    }
+        return musicInfo;
 
-    /**
-     * 取消收藏音乐
-     *
-     * @param mediaFileBean: 取消收藏的音乐对象
-     * @author wm
-     * @createTime 2023/9/3 16:57
-     */
-    public static void removeFavoriteMusic(MediaFileBean mediaFileBean) {
-        DebugLog.debug("mediaFileBean " + mediaFileBean);
-        boolean deletePlayingMusic = false;
-        if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(lastPlayListName) && mediaFileBean.getId() == lastMusicId){
-            // 删除的歌曲里面包含当前正在播放的歌曲，则需要让MainActivity停止播放，再进行删除操作
-            Intent intent = new Intent(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
-            context.sendBroadcast(intent);
-            deletePlayingMusic = true;
-            try {
-                Thread.sleep(800);
-            } catch (InterruptedException e) {
-                DebugLog.debug("error " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        if (favoriteList.contains(mediaFileBean) ) {
-            favoriteList.remove(mediaFileBean);
-            //从数据库中删除信息
-            db.execSQL("DELETE FROM favoriteList WHERE musicId = ?",
-                    new Long[]{mediaFileBean.getId()});
-            if (defaultList.contains(mediaFileBean)) {
-                // 需要删除默认列表中的收藏状态,直接操作对象
-                mediaFileBean.setLike(false);
-            }
-        }
-        sendMusicChangeBroadcast(Constant.LIST_MODE_FAVORITE_NAME, Constant.CUSTOMER_MUSIC_OPERATOR_DELETE, deletePlayingMusic, lastMusicId);
     }
 
     /**
@@ -607,95 +567,95 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     * 通过列表名获取列表
+     * 将歌曲加入收藏列表
      *
-     * @param listName: 列表名
-     * @return : java.util.List<com.example.mediaplayproject.bean.MediaFileBean>
+     * @param mediaFileBean: 添加收藏的音乐对象
      * @author wm
-     * @createTime 2023/9/3 17:02
+     * @createTime 2023/9/3 16:57
      */
-    public static List<MediaFileBean> getMusicListByName(String listName) {
-        List<MediaFileBean> musicInfo;
-        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)) {
-            musicInfo = defaultList;
-        } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)) {
-            musicInfo = favoriteList;
-        } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)) {
-            musicInfo = historyList;
-        } else if (customerListsMap.containsKey(listName)) {
-            musicInfo = customerListsMap.get(listName).getMusicList();
-        } else {
-            musicInfo = null;
-            DebugLog.debug("名称为”" + listName + "“的列表不存在");
+    public static void addMusicToFavoriteList(MediaFileBean mediaFileBean) {
+        DebugLog.debug("mediaFileBean " + mediaFileBean);
+        if (!favoriteList.contains(mediaFileBean)) {
+            favoriteList.add(mediaFileBean);
+            favoriteListMap.put(mediaFileBean.getId(), mediaFileBean);
+            //添加信息到数据库中
+            ContentValues values = new ContentValues();
+            values.put("musicId", mediaFileBean.getId());
+            //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
+            db.insert(FAVORITE_LIST_TABLE_NAME, null, values);
+            sendMusicChangeBroadcast(Constant.LIST_MODE_FAVORITE_NAME, Constant.CUSTOMER_MUSIC_OPERATOR_INSERT, false, lastMusicId);
         }
-        return musicInfo;
-
     }
 
     /**
-     * 删除单首音乐,默认列表不能执行删除操作
-     *
-     * @param listName: 列表名
-     * @param position: 要删除音乐的下标
+     * 取消收藏音乐,这个方法仅在播放页点击取消收藏时调用
+     * 此时的列表不一定就是收藏列表,所以需要列表名来判断，当前取消收藏的列表是否是收藏列表
+     * @param listName: 取消收藏的列表
+     * @param mediaFileBean: 取消收藏的音乐对象
      * @author wm
-     * @createTime 2023/9/3 17:03
+     * @createTime 2023/9/3 16:57
      */
-    public static void deleteMusic(String listName, int position) {
+    public static void removeFavoriteMusic(String listName, MediaFileBean mediaFileBean) {
+        if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
+            // 如果当前播放的是收藏列表，可以直接调用deleteFavoriteMusic来处理
+            List<Long> list = new ArrayList<>();
+            list.add(mediaFileBean.getId());
+            deleteFavoriteMusic(listName,list);
+        } else {
+            // 否则直接删除收藏列表中的歌曲，然后刷新UI即可
+            if (favoriteList.contains(mediaFileBean)) {
+                int position = favoriteList.indexOf(mediaFileBean);
+                favoriteList.get(position).setLike(false);
+                favoriteList.remove(mediaFileBean);
+                favoriteListMap.remove(mediaFileBean.getId());
+                //从数据库中删除信息
+                db.execSQL("DELETE FROM favoriteList WHERE musicId = ?",
+                        new Long[]{mediaFileBean.getId()});
+            }
+            sendMusicChangeBroadcast(listName, Constant.CUSTOMER_MUSIC_OPERATOR_DELETE, false, lastMusicId);
+        }
+    }
+
+    /**
+     *  删除收藏列表的歌曲
+     *  @author wm
+     *  @createTime 2023/9/13 22:49
+     * @param listName:
+     * @param musicList:
+     */
+    public static void deleteFavoriteMusic(String listName, List<Long> musicList) {
         try {
             threadPool.execute(() -> {
-                DebugLog.debug("listName " + listName + "; position " + position);
-                if (customerListsMap.containsKey(listName)){
-                    // 自定义列表单独处理
-                    List<Long> list = new ArrayList<>();
-                    list.add(customerListsMap.get(listName).getMusicList().get(position).getId());
-                    // 增删自定义列表的操作里面有发广播通知MainActivity更新UI和处理逻辑
-                    deleteCustomerMusic(listName, list);
-                } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
-                    removeFavoriteMusic(favoriteList.get(position));
-                } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
-                    // deleteHistoryMusic(historyList.get(position));
+                DebugLog.debug("list contains id " + musicList.contains(lastMusicId));
+                boolean deleteMusic = false;
+                if (lastPlayListName.equalsIgnoreCase(listName) && musicList.contains(lastMusicId)) {
+                    // 删除的歌曲里面包含当前正在播放的歌曲，则需要让MainActivity停止播放，再进行删除操作
+                    Intent intent = new Intent(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
+                    context.sendBroadcast(intent);
+                    deleteMusic = true;
+                    try {
+                        Thread.sleep(800);
+                    } catch (InterruptedException e) {
+                        DebugLog.debug("error " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
+                for (long musicId : musicList) {
+                    if (favoriteListMap.containsKey(musicId)) {
+                        // 验证修改favoriteList中的MusicBean对象是否可以通用
+                        favoriteListMap.get(musicId).setLike(false);
+                        favoriteList.remove(favoriteListMap.get(musicId));
+                        favoriteListMap.remove(musicId);
+                        //从数据库中删除信息
+                        db.execSQL("DELETE FROM favoriteList WHERE musicId = ?",
+                                new Long[]{musicId});
+                    }
+                }
+                sendMusicChangeBroadcast(listName, Constant.CUSTOMER_MUSIC_OPERATOR_DELETE, deleteMusic, lastMusicId);
             });
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
         }
-    }
-
-
-    /**
-     * 发送自定义列表更新的广播
-     *
-     * @param operation: 列表操作类型
-     * @author wm
-     * @createTime 2023/9/4 18:30
-     */
-    private static void sendCustomerListsChangeBroadcast(String listName, int operation) {
-        Intent intent = new Intent(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
-        Bundle bundle = new Bundle();
-        bundle.putInt("listOperation", operation);
-        bundle.putString("listName", listName);
-        intent.putExtras(bundle);
-        context.sendBroadcast(intent);
-    }
-
-    /**
-     *  发送列表歌曲数量变化的广播,使用于收藏列表、自定义列表，后续验证是否适用于最近播放列表
-     *  @author wm
-     *  @createTime 2023/9/11 20:34
-     * @param listName:列表名
-     * @param operation: 变化的操作--3：插入； 4：删除；
-     * @param deletePlayingMusic: 删除的歌曲是否当前播放的歌曲；
-     * @param musicId: 删除音乐的ID
-     */
-    private static void sendMusicChangeBroadcast(String listName, int operation, boolean deletePlayingMusic, long musicId) {
-        Intent intent = new Intent(Constant.OPERATE_MUSIC_ACTION);
-        Bundle bundle = new Bundle();
-        bundle.putInt("listOperation", operation);
-        bundle.putBoolean("deletePlayingMusic", deletePlayingMusic);
-        bundle.putLong("musicId", musicId);
-        bundle.putString("listName", listName);
-        intent.putExtras(bundle);
-        context.sendBroadcast(intent);
     }
 
     /**
@@ -760,7 +720,7 @@ public class DataRefreshService extends Service {
                     context.sendBroadcast(intent);
                     deleteMusic = true;
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(800);
                     } catch (InterruptedException e) {
                         DebugLog.debug("error " + e.getMessage());
                         e.printStackTrace();
@@ -780,6 +740,95 @@ public class DataRefreshService extends Service {
             DebugLog.debug("error " + exception.getMessage());
         }
     }
+
+    /**
+     * 删除单首音乐,默认列表不能执行删除操作
+     *
+     * @param listName: 列表名
+     * @param position: 要删除音乐的下标
+     * @author wm
+     * @createTime 2023/9/3 17:03
+     */
+    public static void deleteMusic(String listName, int position) {
+        try {
+            threadPool.execute(() -> {
+                DebugLog.debug("listName " + listName + "; position " + position);
+                if (customerListsMap.containsKey(listName)){
+                    // 自定义列表单独处理
+                    List<Long> list = new ArrayList<>();
+                    list.add(customerListsMap.get(listName).getMusicList().get(position).getId());
+                    // 增删自定义列表的操作里面有发广播通知MainActivity更新UI和处理逻辑
+                    deleteMultipleMusic(listName, list);
+                } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
+                    List<Long> list = new ArrayList<>();
+                    list.add(favoriteList.get(position).getId());
+                    deleteMultipleMusic(listName, list);
+                } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
+                }
+            });
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+        }
+    }
+
+    /**
+     * 删除多音乐,默认列表不能执行删除操作
+     *
+     * @param listName: 列表名
+     * @param musicList: 要删除音乐的id集合
+     * @author wm
+     * @createTime 2023/9/3 17:03
+     */
+    public static void deleteMultipleMusic(String listName, List<Long> musicList) {
+        try {
+            if (customerListsMap.containsKey(listName)){
+                deleteCustomerMusic(listName, musicList);
+            } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
+                deleteFavoriteMusic(listName, musicList);
+            } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)) {
+                deleteMultipleHistoryMusic(musicList);
+            }
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+        }
+    }
+
+    /**
+     * 发送自定义列表更新的广播
+     *
+     * @param operation: 列表操作类型
+     * @author wm
+     * @createTime 2023/9/4 18:30
+     */
+    private static void sendCustomerListsChangeBroadcast(String listName, int operation) {
+        Intent intent = new Intent(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putInt("listOperation", operation);
+        bundle.putString("listName", listName);
+        intent.putExtras(bundle);
+        context.sendBroadcast(intent);
+    }
+
+    /**
+     *  发送列表歌曲数量变化的广播,使用于收藏列表、自定义列表，后续验证是否适用于最近播放列表
+     *  @author wm
+     *  @createTime 2023/9/11 20:34
+     * @param listName:列表名
+     * @param operation: 变化的操作--3：插入； 4：删除；
+     * @param deletePlayingMusic: 删除的歌曲是否当前播放的歌曲；
+     * @param musicId: 删除音乐的ID
+     */
+    private static void sendMusicChangeBroadcast(String listName, int operation, boolean deletePlayingMusic, long musicId) {
+        Intent intent = new Intent(Constant.OPERATE_MUSIC_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putInt("listOperation", operation);
+        bundle.putBoolean("deletePlayingMusic", deletePlayingMusic);
+        bundle.putLong("musicId", musicId);
+        bundle.putString("listName", listName);
+        intent.putExtras(bundle);
+        context.sendBroadcast(intent);
+    }
+
 
     /*
     * 列表里单点的删除操作

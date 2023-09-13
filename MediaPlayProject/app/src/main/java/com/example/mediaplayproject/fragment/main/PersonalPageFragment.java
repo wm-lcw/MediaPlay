@@ -519,7 +519,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         // 设置正面按钮
         builder.setPositiveButton("确定", (dialog, which) -> {
             try {
-                DataRefreshService.deleteCustomerMusic(listName,deleteList);
+                DataRefreshService.deleteMultipleMusic(listName,deleteList);
                 Toast.makeText(mContext,"删除成功！",Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
                 Toast.makeText(mContext,"删除失败！",Toast.LENGTH_SHORT).show();
@@ -654,7 +654,6 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             boolean isSelectedAll = mainListAdapter.isSelectionAll();
             mainListAdapter.selectAllItem(!isSelectedAll);
             tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
-
         } else if(view == llAddToList){
             // 在打开添加页面之前，需要刷新一下自定义创建列表的数据
             initMusicSource();

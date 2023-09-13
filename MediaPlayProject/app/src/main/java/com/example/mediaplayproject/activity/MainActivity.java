@@ -523,7 +523,6 @@ public class MainActivity extends BasicActivity {
      */
     private void refreshListStatus() {
         for (PlayListFragment fragment : viewPagerLists) {
-            DebugLog.debug("listName " + musicListName);
             if (musicListName.equalsIgnoreCase(fragment.getListName())) {
                 fragment.setSelectPosition(mPosition);
                 fragment.setSelection(mPosition);
