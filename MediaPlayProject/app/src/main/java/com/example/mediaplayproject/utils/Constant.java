@@ -13,7 +13,7 @@ public class Constant {
     public static final String LIST_MODE_DEFAULT_NAME = "默认列表";
     public static final String LIST_MODE_FAVORITE_NAME = "收藏列表";
     public static final String LIST_MODE_CUSTOMER_NAME = "自定义";
-    public static final String LIST_MODE_HISTORY_NAME = "历史播放";
+    public static final String LIST_MODE_HISTORY_NAME = "最近播放";
 
     public static final int LIST_SHOW_MODE_CURRENT = 1;
     public static final int LIST_SHOW_MODE_FAVORITE = 2;
@@ -39,7 +39,7 @@ public class Constant {
     public static final String CHANGE_MUSIC_ACTION = "com.example.media.play.change.music.action";
     public static final String DELETE_MUSIC_ACTION = "com.example.media.play.delete.music.action";
     public static final String OPERATE_CUSTOMER_MUSIC_LIST_ACTION = "com.example.media.play.operate.customer.music.list.action";
-    public static final String OPERATE_CUSTOMER_MUSIC_ACTION = "com.example.media.play.operate.customer.music.action";
+    public static final String OPERATE_MUSIC_ACTION = "com.example.media.play.operate.music.action";
     public static final String STOP_PLAY_CUSTOMER_MUSIC_ACTION = "com.example.media.play.stop.play.customer.music.action";
 
 }

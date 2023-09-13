@@ -557,14 +557,7 @@ public class MainActivity extends BasicActivity {
     private class MainMusicBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Constant.DELETE_MUSIC_ACTION.equals(intent.getAction())) {
-                // DataRefreshService发送的执行了删除操作的广播，删除歌曲时，需要刷新收藏列表的高亮下标
-                int deletePosition = intent.getExtras().getInt("musicPosition");
-                String listSource = intent.getExtras().getString("musicListSource");
-                // DataRefreshService在发广播之前已经删除音乐了，所以这里应该是需要先更新资源，再执行下面的dealDeleteMusic
-                dealDeleteMusic(listSource, deletePosition);
-                // 这里处理最近播放列表的删除操作时，可以加一个标志位来判断，使用另一套操作逻辑来处理
-            } else if(Constant.CHANGE_MUSIC_ACTION.equals(intent.getAction())){
+            if(Constant.CHANGE_MUSIC_ACTION.equals(intent.getAction())){
                 // 列表Fragment或service发送的消息，用于通知切换播放歌曲/播放列表
                 int newPosition = intent.getExtras().getInt("position");
                 String newMusicListName = intent.getExtras().getString("musicListName");
@@ -583,16 +576,18 @@ public class MainActivity extends BasicActivity {
                 refreshListStatus();
             } else if(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
                 // DataRefreshService发送的广播，删除的歌曲列表里含有当前播放歌曲的情况下发送的停止播放歌曲广播
+                // 这个广播发送时一定会跟着发送OPERATE_MUSIC_ACTION
+                // 所以这里只需要停止播放，不需要更新UI，更新UI的操作在OPERATE_MUSIC_ACTION广播里面处理
                 musicService.toStop();
                 mPosition = 0;
                 isPlaying = false;
                 firstPlay = true;
-                // 这里只需要停止播放，不需要更新UI，更新UI的操作在下面删除歌曲后发送的广播里面处理
-            } else if(Constant.OPERATE_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
-                // DataRefreshService发送的广播，自定义列表的歌曲增删广播，紧接着STOP_PLAY_CUSTOMER_MUSIC_ACTION广播
+            } else if(Constant.OPERATE_MUSIC_ACTION.equals(intent.getAction())){
+                // DataRefreshService发送的歌曲增删操作的广播
                 String listName = intent.getExtras().getString("listName");
                 boolean deletePlayingMusic = intent.getExtras().getBoolean("deletePlayingMusic");
                 if (musicListName.equalsIgnoreCase(listName)){
+                    // 刷新列表
                     musicInfo = DataRefreshService.getMusicListByName(musicListName);
                     if (musicInfo.size() <= 0){
                         // 列表已清空，停止播放并切换到默认列表
@@ -600,6 +595,7 @@ public class MainActivity extends BasicActivity {
                     } else {
                         if (deletePlayingMusic){
                             // 当前播放的歌曲被删除，直接播放刷新列表后的第一首音乐
+                            mPosition = 0;
                             musicService.play(musicInfo.get(0),true,0);
                         } else {
                             // 当前播放歌曲未被删除，或者是插入歌曲的情况，需要更新position
@@ -611,58 +607,27 @@ public class MainActivity extends BasicActivity {
                                 }
                             }
                         }
+
                     }
                 }
+                // 刷新service的播放列表信息
+                musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
+
+                // 刷新播放列表的高亮状态
+                for (PlayListFragment fragment : viewPagerLists) {
+                    if (musicListName.equalsIgnoreCase(fragment.getListName())) {
+                        fragment.setSelectPosition(mPosition);
+                        fragment.setSelection(mPosition);
+                    } else {
+                        fragment.setSelectPosition(-1);
+                    }
+                }
+
                 // 更新各个Fragment的数据
                 refreshFragmentStatus();
                 // 更新列表Ui
                 refreshListStatus();
             }
-        }
-    }
-
-    /**
-     *  删除音乐的处理
-     *  @author wm
-     *  @createTime 2023/9/3 15:38
-     *  @param listSource: 音乐列表类型
-     *  @param deletePosition: 删除音乐所在列表的下标
-     */
-    private void dealDeleteMusic(String listSource, int deletePosition) {
-        // 删除的音乐列表是当前正在播放的列表才需要处理
-        if (musicListName.equalsIgnoreCase(listSource)) {
-            if (musicInfo.size() <= 0) {
-                // 如果列表为空，证明删除的是最后一首歌，列表为空，需要停止播放
-                stopPlayByDelete();
-            } else {
-                // 删除的是当前列表，且剩余列表不为空
-                for (PlayListFragment fragment : viewPagerLists) {
-                    if (musicListName.equalsIgnoreCase(fragment.getListName())) {
-                        int result = fragment.checkRefreshPosition(deletePosition);
-                        if (result == Constant.RESULT_BEFORE_CURRENT_POSITION) {
-                            // 删除的是小于当前播放下标的歌曲，只刷新service中的position即可，UI操作在Fragment已完成
-                            mPosition--;
-                            musicService.setPosition(mPosition);
-                        } else if (result == Constant.RESULT_IS_CURRENT_POSITION) {
-                            // 删除的是当前的歌曲，需要重新设置高亮
-                            // 删除歌曲后，列表整体上移，position指向的是下首歌了，所以需要减一再播放下一曲（直接播放可能会出现越界问题）
-                            mPosition--;
-                            musicService.setPosition(mPosition);
-                            musicService.playNext();
-                            mPosition = musicService.getPosition();
-                            fragment.setSelectPosition(mPosition);
-                            fragment.setSelection(mPosition);
-                        }
-                    } else {
-                        fragment.setSelectPosition(-1);
-                    }
-                }
-            }
-
-            // 更新各个Fragment的数据
-            refreshFragmentStatus();
-            // 更新列表Ui
-            refreshListStatus();
         }
     }
 
@@ -756,10 +721,9 @@ public class MainActivity extends BasicActivity {
     public void registerReceiver() {
         mainMusicBroadcastReceiver = new MainMusicBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Constant.DELETE_MUSIC_ACTION);
         filter.addAction(Constant.CHANGE_MUSIC_ACTION);
         filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
-        filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_ACTION);
+        filter.addAction(Constant.OPERATE_MUSIC_ACTION);
         filter.addAction(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
