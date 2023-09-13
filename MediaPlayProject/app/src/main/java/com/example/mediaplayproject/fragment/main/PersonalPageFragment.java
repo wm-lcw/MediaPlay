@@ -270,6 +270,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private void showFloatView(List<MediaFileBean> musicList, String listName) {
         mainListAdapter.changeList(musicList,listName,currentPlayingListName);
         mainListAdapter.setSelectPosition(mPosition);
+        // 瞬间定位到子项
+        rvMainList.scrollToPosition(mPosition);
+        // 平滑地定位到子项
+//        rvMainList.smoothScrollToPosition(mPosition);
         setMainListSelectionState(false);
         if (mFloatLayout.isAttachedToWindow()){
             mWindowManager.removeView(mFloatLayout);
@@ -592,6 +596,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             ivFavoritePlaying.setVisibility(View.GONE);
             ivHistoryPlaying.setVisibility(View.VISIBLE);
         }
+        // 刷新展开列表的高亮状态，并定位
+        mainListAdapter.setSelectPosition(mPosition);
+        rvMainList.scrollToPosition(mPosition);
     }
 
     /**
