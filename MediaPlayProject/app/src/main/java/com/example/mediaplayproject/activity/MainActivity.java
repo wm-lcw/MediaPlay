@@ -402,6 +402,7 @@ public class MainActivity extends BasicActivity {
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE) {
                 // MusicPlayFragment发送的消息，播放页面收藏/取消收藏时刷新列表
+                refreshFragmentStatus();
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
                 // playHelper发送的消息，用于更新播放进度，目前只用于MusicPlayFragment
@@ -419,69 +420,7 @@ public class MainActivity extends BasicActivity {
         }
     };
 
-    /**
-     *  切换播放列表
-     *  @author wm
-     *  @createTime 2023/9/3 15:45
-     *  @param position: 播放的音乐下标
-     *  @param newMusicListName: 音乐列表名
-     */
-    private void changeMusicPlayList(int position, String newMusicListName) {
-        try {
-            mPosition = position;
-            DebugLog.debug("newListName " + newMusicListName + "; position " + position);
 
-            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(newMusicListName)) {
-                // 如果是最近播放列表，需要保存播放信息，然后等待刷新列表的数据，拿到最新的列表再去播放和刷新UI高亮
-                DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_HISTORY_NAME, mPosition, historyList.get(mPosition).getId(), playMode);
-
-                try {
-                    Thread.sleep(800);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // 获取音乐列表，上次播放的信息等
-                playMode = DataRefreshService.getLastPlayMode();
-                mPosition = DataRefreshService.getLastPosition();
-                historyList = DataRefreshService.getHistoryList();
-                musicListName = Constant.LIST_MODE_HISTORY_NAME;
-                musicInfo = historyList;
-                if (viewPagerLists.get(0).isInitSuccess()) {
-                    viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
-                }
-            } else {
-                if (!musicListName.equalsIgnoreCase(newMusicListName)) {
-                    // 有切换播放列表的操作才更新当前播放列表的信息
-                    List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
-                    if (tempList != null && tempList.size() > 0) {
-                        // 更新播放列表等数据
-                        musicInfo = tempList;
-                        musicListName = newMusicListName;
-                        if (viewPagerLists.get(0).isInitSuccess()) {
-                            // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
-                            // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
-                            viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
-                        }
-                    }
-                }
-
-                // 保存播放信息
-                DataRefreshService.setLastPlayInfo(musicListName, mPosition, musicInfo.get(mPosition).getId(), playMode);
-            }
-
-            // 调用service播放
-            if (musicService != null) {
-                musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
-                musicService.play(musicInfo.get(mPosition), true, mPosition);
-            }
-
-        } catch (Exception exception) {
-            DebugLog.debug("error " + exception.getMessage());
-        }
-
-        // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
-    }
 
     /**
      *  创建悬浮窗
@@ -622,35 +561,35 @@ public class MainActivity extends BasicActivity {
                 // DataRefreshService发送的执行了删除操作的广播，删除歌曲时，需要刷新收藏列表的高亮下标
                 int deletePosition = intent.getExtras().getInt("musicPosition");
                 String listSource = intent.getExtras().getString("musicListSource");
+                // DataRefreshService在发广播之前已经删除音乐了，所以这里应该是需要先更新资源，再执行下面的dealDeleteMusic
                 dealDeleteMusic(listSource, deletePosition);
+                // 这里处理最近播放列表的删除操作时，可以加一个标志位来判断，使用另一套操作逻辑来处理
             } else if(Constant.CHANGE_MUSIC_ACTION.equals(intent.getAction())){
-                // 音乐列表Fragment发送的消息，用于通知切换播放歌曲/播放列表
+                // 列表Fragment或service发送的消息，用于通知切换播放歌曲/播放列表
                 int newPosition = intent.getExtras().getInt("position");
                 String newMusicListName = intent.getExtras().getString("musicListName");
-                changeMusicPlayList(newPosition, newMusicListName);
+                changeMusicOrList(newPosition, newMusicListName);
             } else if(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION.equals(intent.getAction())){
+                // DataRefreshService发送的广播，用于通知自定义列表中有新加列表或删除列表的操作
                 int operation = intent.getExtras().getInt("listOperation");
                 String listName = intent.getExtras().getString("listName");
                 if (operation == Constant.CUSTOMER_LIST_OPERATOR_DELETE && musicListName.equalsIgnoreCase(listName)){
                     // 删除列表的操作，且是当前正在播放的列表，需要做停止播放的操作
                     stopPlayByDelete();
-
                 }
                 // 更新各个Fragment的数据
                 refreshFragmentStatus();
                 // 更新列表Ui
                 refreshListStatus();
-
             } else if(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
-                // 停止播放歌曲的广播-删除的歌曲列表里含有当前播放歌曲
+                // DataRefreshService发送的广播，删除的歌曲列表里含有当前播放歌曲的情况下发送的停止播放歌曲广播
                 musicService.toStop();
                 mPosition = 0;
                 isPlaying = false;
                 firstPlay = true;
                 // 这里只需要停止播放，不需要更新UI，更新UI的操作在下面删除歌曲后发送的广播里面处理
-
             } else if(Constant.OPERATE_CUSTOMER_MUSIC_ACTION.equals(intent.getAction())){
-                // 自定义列表的歌曲增删广播
+                // DataRefreshService发送的广播，自定义列表的歌曲增删广播，紧接着STOP_PLAY_CUSTOMER_MUSIC_ACTION广播
                 String listName = intent.getExtras().getString("listName");
                 boolean deletePlayingMusic = intent.getExtras().getBoolean("deletePlayingMusic");
                 if (musicListName.equalsIgnoreCase(listName)){
@@ -725,6 +664,70 @@ public class MainActivity extends BasicActivity {
             // 更新列表Ui
             refreshListStatus();
         }
+    }
+
+    /**
+     *  切换歌曲或播放列表
+     *  @author wm
+     *  @createTime 2023/9/3 15:45
+     *  @param position: 音乐下标
+     *  @param newMusicListName: 音乐列表名
+     */
+    private void changeMusicOrList(int position, String newMusicListName) {
+        try {
+            mPosition = position;
+            DebugLog.debug("newListName " + newMusicListName + "; position " + position);
+
+            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(newMusicListName)) {
+                // 如果是最近播放列表，需要保存播放信息，然后等待刷新列表的数据，拿到最新的列表再去播放和刷新UI高亮
+                DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_HISTORY_NAME, mPosition, historyList.get(mPosition).getId(), playMode);
+
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // 获取音乐列表，上次播放的信息等
+                playMode = DataRefreshService.getLastPlayMode();
+                mPosition = DataRefreshService.getLastPosition();
+                historyList = DataRefreshService.getHistoryList();
+                musicListName = Constant.LIST_MODE_HISTORY_NAME;
+                musicInfo = historyList;
+                if (viewPagerLists.get(0).isInitSuccess()) {
+                    viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
+                }
+            } else {
+                if (!musicListName.equalsIgnoreCase(newMusicListName)) {
+                    // 有切换播放列表的操作才更新当前播放列表的信息
+                    List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(newMusicListName);
+                    if (tempList != null && tempList.size() > 0) {
+                        // 更新播放列表等数据
+                        musicInfo = tempList;
+                        musicListName = newMusicListName;
+                        if (viewPagerLists.get(0).isInitSuccess()) {
+                            // 这里要判断PlayListFragment是否已经初始化，否则打开app后首次点击主页的列表播放会报错
+                            // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+                            viewPagerLists.get(0).changePlayList(musicInfo, musicListName, mPosition);
+                        }
+                    }
+                }
+
+                // 保存播放信息
+                DataRefreshService.setLastPlayInfo(musicListName, mPosition, musicInfo.get(mPosition).getId(), playMode);
+            }
+
+            // 调用service播放
+            if (musicService != null) {
+                musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
+                musicService.play(musicInfo.get(mPosition), true, mPosition);
+            }
+
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+        }
+
+        // 这里不需要手动去更新Fragment和列表的状态，service的play方法里面有发送Handler给Activity更新播放状态
     }
 
     /**
