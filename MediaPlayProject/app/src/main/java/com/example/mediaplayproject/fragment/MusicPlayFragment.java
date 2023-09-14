@@ -41,7 +41,7 @@ public class MusicPlayFragment extends Fragment {
 
     private final Context mContext;
     private View playView;
-    private ImageView ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
+    private ImageView ivBack, ivMore, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
     private String currentTime = "00:00";
@@ -142,6 +142,8 @@ public class MusicPlayFragment extends Fragment {
     }
 
     private void bindView() {
+        ivBack = playView.findViewById(R.id.iv_play_view_back);
+        ivMore = playView.findViewById(R.id.iv_play_view_back);
         ivMediaLoop = playView.findViewById(R.id.iv_loop);
         ivMediaPre = playView.findViewById(R.id.iv_pre);
         ivMediaPlay = playView.findViewById(R.id.iv_play);
@@ -154,6 +156,8 @@ public class MusicPlayFragment extends Fragment {
         tvCurrentPlayTime = playView.findViewById(R.id.tv_music_current_time);
         tvMediaTime = playView.findViewById(R.id.tv_music_time);
 
+        ivBack.setOnClickListener(mListener);
+        ivMore.setOnClickListener(mListener);
         ivMediaLoop.setOnClickListener(mListener);
         ivMediaPre.setOnClickListener(mListener);
         ivMediaPlay.setOnClickListener(mListener);
@@ -248,7 +252,14 @@ public class MusicPlayFragment extends Fragment {
         @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists"})
         @Override
         public void onClick(View view) {
-            if (view == ivMediaLoop) {
+            if (view == ivBack) {
+                // 发送消息给Activity更新列表状态
+                Message msg = new Message();
+                msg.what = Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW;
+                mActivityHandle.sendMessage(msg);
+            } else if (view == ivMore) {
+                DebugLog.debug("more");
+            } else if (view == ivMediaLoop) {
                 changePlayMode();
             } else if (view == ivMediaPre) {
                 initServicePlayHelper();

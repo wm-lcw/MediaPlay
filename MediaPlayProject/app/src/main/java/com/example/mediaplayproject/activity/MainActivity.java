@@ -421,6 +421,9 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT) {
                 // 显示音乐列表悬浮窗
                 showFloatView();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW) {
+                // 回退到主页Fragment，之前切换到PlayFragment时需要加上transaction.addToBackStack(null);
+                getSupportFragmentManager().popBackStack();
             }
         }
     };

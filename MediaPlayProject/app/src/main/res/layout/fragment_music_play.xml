@@ -11,20 +11,45 @@
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/tv_music_info"
-            android:layout_marginTop="50dp"
-            android:layout_marginLeft="15dp"
-            android:gravity="center"
-            android:textSize="18sp"
-            android:text="music"
-            android:ellipsize="marquee"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:textColor="@color/white"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:singleLine="true" />
+        <RelativeLayout
+            android:layout_marginTop="@dimen/dp_40"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50">
+            <ImageView
+                android:id="@+id/iv_play_view_back"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="@dimen/dp_20"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_back_white"/>
+            <TextView
+                android:id="@+id/tv_music_info"
+                android:gravity="center"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/iv_play_view_more"
+                android:layout_toEndOf="@+id/iv_play_view_back"
+                android:layout_marginStart="@dimen/dp_15"
+                android:layout_marginEnd="@dimen/dp_15"
+                android:textSize="18sp"
+                android:text="music"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:textColor="@color/white"
+                android:singleLine="true" />
+            <ImageView
+                android:id="@+id/iv_play_view_more"
+                android:layout_width="@dimen/dp_35"
+                android:layout_height="@dimen/dp_35"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/dp_20"
+                android:src="@mipmap/ic_more_white"/>
+        </RelativeLayout>
+
+
         <SeekBar
             android:layout_gravity="center"
             android:layout_marginTop="25dp"
