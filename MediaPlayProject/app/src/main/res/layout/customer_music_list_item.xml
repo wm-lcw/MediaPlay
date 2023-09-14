@@ -9,15 +9,16 @@
     <ImageView
         android:id="@+id/head_left"
         android:layout_marginStart="@dimen/dp_5"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@mipmap/ic_music_bottom" />
 
     <RelativeLayout
         android:id="@+id/rl_list_info"
-        android:layout_width="250dp"
-        android:layout_height="@dimen/dp_50"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
         android:layout_toEndOf="@+id/head_left"
+        android:layout_toStartOf="@+id/iv_is_playing"
         android:layout_marginStart="@dimen/dp_20">
 
         <TextView
@@ -25,14 +26,16 @@
             android:layout_marginStart="@dimen/dp_5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_18"
             android:text="name"/>
 
         <TextView
             android:id="@+id/tv_list_size"
-            android:layout_marginStart="@dimen/dp_5"
-            android:layout_marginTop="@dimen/dp_30"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/dp_40"
+            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -46,23 +49,22 @@
     <ImageView
         android:id="@+id/iv_is_playing"
         android:layout_toStartOf="@+id/rl_list_settings"
-        android:layout_marginRight="@dimen/dp_35"
-        android:layout_marginTop="@dimen/dp_7"
+        android:layout_marginRight="@dimen/dp_30"
         android:layout_width="@dimen/dp_35"
         android:layout_height="@dimen/dp_35"
         android:background="@mipmap/ic_is_playing"/>
     <RelativeLayout
         android:id="@+id/rl_list_settings"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/dp_50"
+        android:layout_height="@dimen/dp_40"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dp_20">
 
         <ImageView
-            android:layout_marginTop="@dimen/dp_7"
             android:id="@+id/iv_customer_list_settings"
             android:layout_width="@dimen/dp_35"
             android:layout_height="@dimen/dp_35"
+            android:layout_centerVertical="true"
             android:background="@mipmap/ic_more_nor" />
     </RelativeLayout>
 
