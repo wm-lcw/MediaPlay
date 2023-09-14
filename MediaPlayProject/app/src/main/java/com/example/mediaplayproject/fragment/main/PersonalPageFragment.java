@@ -594,6 +594,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             ivDefaultPlaying.setVisibility(View.GONE);
             ivFavoritePlaying.setVisibility(View.GONE);
             ivHistoryPlaying.setVisibility(View.VISIBLE);
+        } else {
+            ivDefaultPlaying.setVisibility(View.GONE);
+            ivFavoritePlaying.setVisibility(View.GONE);
+            ivHistoryPlaying.setVisibility(View.GONE);
         }
         // 刷新展开列表的高亮状态，并定位
         mainListAdapter.setSelectPosition(mPosition);
