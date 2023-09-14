@@ -649,11 +649,9 @@ public class MainActivity extends BasicActivity {
         try {
             mPosition = position;
             DebugLog.debug("newListName " + newMusicListName + "; position " + position);
-
             if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(newMusicListName)) {
                 // 如果是最近播放列表，需要保存播放信息，然后等待刷新列表的数据，拿到最新的列表再去播放和刷新UI高亮
                 DataRefreshService.setLastPlayInfo(Constant.LIST_MODE_HISTORY_NAME, mPosition, historyList.get(mPosition).getId(), playMode);
-
                 try {
                     Thread.sleep(800);
                 } catch (InterruptedException e) {

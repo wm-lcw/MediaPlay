@@ -111,6 +111,8 @@ public class MusicListAdapter extends BaseAdapter {
             holder.ivDeleteMusic.setEnabled(false);
             holder.ivDeleteMusic.setVisibility(View.GONE);
         } else {
+            holder.ivDeleteMusic.setEnabled(true);
+            holder.ivDeleteMusic.setVisibility(View.VISIBLE);
             // 监听item里面的删除按钮事件，需要在自定义Adapter的getView方法首个参数前添加final关键字(final int position...)
             convertView.findViewById(R.id.iv_delete_music).setOnClickListener(v -> {
                 // 删除歌曲需要传递列表的具体信息
