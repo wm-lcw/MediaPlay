@@ -764,6 +764,9 @@ public class DataRefreshService extends Service {
                     list.add(favoriteList.get(position).getId());
                     deleteMultipleMusic(listName, list);
                 } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
+                    List<Long> list = new ArrayList<>();
+                    list.add(historyList.get(position).getId());
+                    deleteMultipleMusic(listName, list);
                 }
             });
         } catch (Exception exception) {
@@ -772,7 +775,7 @@ public class DataRefreshService extends Service {
     }
 
     /**
-     * 删除多音乐,默认列表不能执行删除操作
+     * 删除多首音乐,默认列表不能执行删除操作
      *
      * @param listName: 列表名
      * @param musicList: 要删除音乐的id集合
