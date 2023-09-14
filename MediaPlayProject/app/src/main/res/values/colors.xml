@@ -15,4 +15,9 @@
 
     <color name="bg_list_view">#73222932</color><!-- 列表背景 -->
     <color name="bg_transparent">#00000000</color><!-- 透明背景 -->
+
+    <!--透明-->
+    <color name="transparent">#00000000</color>
+    <!--半透明-->
+    <color name="translucent">#22050505</color>
 </resources>

@@ -51,6 +51,7 @@ import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.StatusBar;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -122,6 +123,10 @@ public class MainActivity extends BasicActivity {
         // 让状态栏保持可见
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //设置颜色为透明
+        StatusBar statusBar = new StatusBar(MainActivity.this);
+        statusBar.setColor(R.color.transparent);
 
         // 申请权限的结果回调处理
         intentActivityResultLauncher = registerForActivityResult(
