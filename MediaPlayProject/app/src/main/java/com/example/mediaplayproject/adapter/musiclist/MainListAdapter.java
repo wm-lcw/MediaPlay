@@ -104,6 +104,8 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
                 bundle.putString("musicListName", listName);
                 intent.putExtras(bundle);
                 mContext.sendBroadcast(intent);
+                // 这里需要判断是否有更换列表,否则切换列表播放时不会高亮显示当前歌曲
+                currentPlayingListName = listName;
                 defaultSelection = holder.getAdapterPosition();
                 setSelectPosition(position);
             }

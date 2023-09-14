@@ -272,8 +272,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         mainListAdapter.setSelectPosition(mPosition);
         // 瞬间定位到子项
         rvMainList.scrollToPosition(mPosition);
-        // 平滑地定位到子项
-//        rvMainList.smoothScrollToPosition(mPosition);
+        // 平滑地定位到子项 rvMainList.smoothScrollToPosition(mPosition);
         setMainListSelectionState(false);
         if (mFloatLayout.isAttachedToWindow()){
             mWindowManager.removeView(mFloatLayout);
