@@ -20,6 +20,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,7 +72,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private ToolsFragment toolsFragment;
 
     private EditText etSearch;
-    private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow;
+    private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow, ivPlayRevolve;
     private TextView tvCurrentMusicInfo;
 
     private MainActivity.MyFragmentCallBack myFragmentCallBack;
@@ -83,6 +86,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private MusicPlayService musicService;
 
     private Handler mActivityHandle;
+    private Animation animation;
 
     public MainViewFragment(Context context) {
         mContext = context;
@@ -185,6 +189,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivPersonal = mainView.findViewById(R.id.iv_personal);
         ivTools = mainView.findViewById(R.id.iv_tools);
         ivShow = mainView.findViewById(R.id.iv_show_list);
+        ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
         ivSettings.setOnClickListener(mListener);
         etSearch.setOnClickListener(mListener);
         ivSearch.setOnClickListener(mListener);
@@ -228,6 +233,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 super.onPageScrollStateChanged(state);
             }
         });
+
+        // 设置图标旋转的动画
+        animation = AnimationUtils.loadAnimation(mContext, R.anim.ic_playing_animation);
+        //设置动画匀速运动
+        LinearInterpolator lin = new LinearInterpolator();
+        animation.setInterpolator(lin);
 
         // 侧滑栏的滑动唤出效果可以不需要了，点击按钮能唤出来，点击空白能收回去即可，代码先保留
 
@@ -298,6 +309,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
 
         ivPlayMusic.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+        // 设置旋转图标的状态
+        if (isPlaying){
+            ivPlayRevolve.startAnimation(animation);
+        } else {
+            ivPlayRevolve.clearAnimation();
+        }
     }
 
     /**
