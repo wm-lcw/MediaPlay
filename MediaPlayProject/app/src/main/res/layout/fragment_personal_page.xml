@@ -87,7 +87,7 @@
             android:layout_height="@dimen/dp_30"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/dp_15"
-            android:background="@mipmap/ic_list_like_choose" />
+            android:background="@mipmap/ic_recently_green" />
 
         <TextView
             android:id="@+id/tv_history_list"
@@ -122,24 +122,24 @@
             android:layout_height="wrap_content">
             <ImageView
                 android:id="@+id/iv_customer_icon"
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
+                android:layout_width="@dimen/dp_35"
+                android:layout_height="@dimen/dp_35"
                 android:layout_centerVertical="true"
-                android:layout_gravity="center"
                 android:layout_marginStart="@dimen/dp_15"
-                android:background="@mipmap/medialist" />
+                android:background="@mipmap/ic_customer_pre"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/tv_customer_list"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_20"
-                android:layout_toEndOf="@id/iv_customer_icon"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_toStartOf="@+id/iv_add_list"
                 android:text="自定义歌单"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_17" />
+                android:textSize="@dimen/sp_18" />
 
             <ImageView
                 android:id="@+id/iv_add_list"
@@ -148,7 +148,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="@dimen/dp_5"
                 android:layout_marginEnd="@dimen/dp_20"
-                android:background="@mipmap/ic_add_nor" />
+                android:background="@mipmap/ic_add_white" />
 
 
         </RelativeLayout>
