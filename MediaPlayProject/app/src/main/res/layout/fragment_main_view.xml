@@ -72,17 +72,6 @@
         </LinearLayout>
 
 
-        <ImageView
-            android:id="@+id/iv_show_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/dp_10"
-            android:src="@mipmap/music"
-            android:visibility="gone" />
-
-
-
         <!--底部播放状态栏-->
         <LinearLayout
             android:id="@+id/ll_simple_play_view"
@@ -141,6 +130,7 @@
             android:layout_marginTop="@dimen/dp_20"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="@dimen/dp_30"
+            android:background="@drawable/bg_music_list_view"
             android:orientation="horizontal">
 
             <ImageView

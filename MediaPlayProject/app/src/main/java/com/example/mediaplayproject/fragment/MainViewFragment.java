@@ -72,7 +72,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private ToolsFragment toolsFragment;
 
     private EditText etSearch;
-    private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivShow, ivPlayRevolve;
+    private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivPlayRevolve;
     private TextView tvCurrentMusicInfo;
 
     private MainActivity.MyFragmentCallBack myFragmentCallBack;
@@ -188,7 +188,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivDiscovery = mainView.findViewById(R.id.iv_discovery);
         ivPersonal = mainView.findViewById(R.id.iv_personal);
         ivTools = mainView.findViewById(R.id.iv_tools);
-        ivShow = mainView.findViewById(R.id.iv_show_list);
         ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
         ivSettings.setOnClickListener(mListener);
         etSearch.setOnClickListener(mListener);
@@ -198,7 +197,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivDiscovery.setOnClickListener(mListener);
         ivPersonal.setOnClickListener(mListener);
         ivTools.setOnClickListener(mListener);
-        ivShow.setOnClickListener(mListener);
 
         LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
@@ -220,12 +218,19 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 ToolsUtils.getInstance().hideKeyboard(mainView);
+
+                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_personal_pre : R.mipmap.ic_personal_white);
+                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
             }
 
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 ToolsUtils.getInstance().hideKeyboard(mainView);
+                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_personal_pre : R.mipmap.ic_personal_white);
+                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
             }
 
             @Override
@@ -237,6 +242,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 设置图标旋转的动画
         animation = AnimationUtils.loadAnimation(mContext, R.anim.ic_playing_animation);
         //设置动画匀速运动
+        // setInterpolator表示设置旋转速率。
+        // LinearInterpolator为匀速效果，AccelerateInterpolator为加速效果，DecelerateInterpolator为减速效果
         LinearInterpolator lin = new LinearInterpolator();
         animation.setInterpolator(lin);
 
@@ -344,9 +351,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
             firstPlay = false;
         } else if (view == ivDiscovery) {
+            musicListViewPager.setCurrentItem(0);
         } else if (view == ivPersonal) {
+            musicListViewPager.setCurrentItem(1);
         } else if (view == ivTools) {
-        } else if (view == ivShow) {
+            musicListViewPager.setCurrentItem(2);
         } else if (view == ivMusicList) {
             // 主页展示播放列表
             Message msg = new Message();
