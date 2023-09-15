@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_menu_call"
-            android:icon="@mipmap/ic_list_like"
-            android:title="Call" />
-        <item
             android:id="@+id/nav_menu_friends"
-            android:icon="@mipmap/ic_list_like_choose"
-            android:title="Friends"/>
+            android:icon="@mipmap/ic_friend_white"
+            android:title="Friends" />
         <item
-            android:id="@+id/nav_menu_loaction"
-            android:title="Loaction"/>
+            android:id="@+id/nav_menu_location"
+            android:icon="@mipmap/ic_local_white"
+            android:title="Location"/>
         <item
             android:id="@+id/nav_menu_mail"
+            android:icon="@mipmap/ic_email_white"
             android:title="Mail"/>
         <item
-            android:id="@+id/nav_menu_cloud"
-            android:title="Cloud"/>
+            android:id="@+id/nav_menu_setting"
+            android:icon="@mipmap/ic_setting_white"
+            android:title="setting"/>
+        <item
+            android:id="@+id/nav_menu_exit"
+            android:icon="@mipmap/ic_exit_white"
+            android:title="Exit"/>
     </group>
 
 </menu>

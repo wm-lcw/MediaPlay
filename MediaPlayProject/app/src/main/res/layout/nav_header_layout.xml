@@ -4,22 +4,32 @@
     android:layout_height="180dp"
     android:background="@drawable/ic_music_start1">
 
-    <TextView
-        android:id="@+id/nav_tv_mail"
+    <ImageView
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="xxx"
-        android:layout_alignParentBottom="true"
-        android:textColor="@color/white"
-        android:textSize="@dimen/sp_14"/>
+        android:src="@mipmap/ic_picture_white"/>
 
     <TextView
         android:id="@+id/nav_tv_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:text="LiangLiang"
         android:layout_above="@id/nav_tv_mail"
         android:textColor="@color/white"
         android:textSize="@dimen/sp_14"/>
 
+
+    <TextView
+        android:id="@+id/nav_tv_mail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="xxx"
+        android:layout_marginBottom="@dimen/dp_5"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_14"/>
 </RelativeLayout>
