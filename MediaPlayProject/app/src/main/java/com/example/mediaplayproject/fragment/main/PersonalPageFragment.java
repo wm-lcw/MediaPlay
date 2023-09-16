@@ -393,8 +393,15 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         //设置正面按钮
         builder.setPositiveButton("确定", (dialog, which) -> {
             String inputListName = inputText.getText().toString().trim();
-            if (!"".equals(inputListName)){
-                DataRefreshService.createNewCustomerMusicList(inputListName);
+            if (!"".equals(inputListName)) {
+                if (DataRefreshService.getMusicListByName(inputListName) != null) {
+                    Toast.makeText(mContext, "不能重复创建已存在的列表！", Toast.LENGTH_LONG).show();
+                } else if (inputListName.length() > Constant.MAX_LENGTH_OF_LIST_NAME) {
+                    Toast.makeText(mContext, "列表名超过支持的最大长度("+
+                            Constant.MAX_LENGTH_OF_LIST_NAME +")！", Toast.LENGTH_LONG).show();
+                } else {
+                    DataRefreshService.createNewCustomerMusicList(inputListName);
+                }
             }
             dialog.dismiss();
         });

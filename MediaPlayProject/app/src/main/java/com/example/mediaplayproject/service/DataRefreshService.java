@@ -44,7 +44,7 @@ public class DataRefreshService extends Service {
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
     private static List<MediaFileBean> historyList = new ArrayList<>();
     private static List<MediaFileBean> historyListOut = new ArrayList<>();
-    private static final int HISTORY_LIST_MAX_SIZE = 50;
+
 
     private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
     private static int lastPlayMode = 0;
@@ -284,7 +284,7 @@ public class DataRefreshService extends Service {
             if (cursor.moveToFirst()) {
                 do {
                     musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
-                    if (defaultListMap.containsKey(musicId) && historyList.size() < HISTORY_LIST_MAX_SIZE){
+                    if (defaultListMap.containsKey(musicId) && historyList.size() < Constant.HISTORY_LIST_MAX_SIZE){
                         // 默认列表中存在该音乐，且历史列表不超过50，才添加进入历史播放列表里
                         historyListMap.put(musicId, defaultListMap.get(musicId));
                         historyList.add(defaultListMap.get(musicId));
