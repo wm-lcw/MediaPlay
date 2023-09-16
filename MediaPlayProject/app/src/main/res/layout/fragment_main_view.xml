@@ -26,36 +26,28 @@
                 android:layout_width="@dimen/dp_35"
                 android:layout_height="@dimen/dp_35"
                 android:layout_gravity="start|center"
-                android:layout_marginLeft="@dimen/dp_15"
+                android:layout_marginStart="@dimen/dp_15"
                 android:src="@mipmap/ic_sidebar_menu_nor" />
 
-            <LinearLayout
-                android:layout_width="@dimen/dp_150"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/dp_50">
-
-                <EditText
-                    android:id="@+id/et_search"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:hint="abcd" />
-
-
-            </LinearLayout>
-            <ImageView
-                android:id="@+id/iv_delete_input"
-                android:layout_width="@dimen/dp_25"
-                android:layout_height="@dimen/dp_25"
-                android:layout_marginLeft="@dimen/dp_5"
+            <!--这里的id只能设为ed_work_id，设为其他会报错，后续需要排查原因-->
+            <com.example.mediaplayproject.view.CustomizeEditText
+                android:id="@+id/ed_work_id"
+                android:layout_width="@dimen/dp_200"
+                android:layout_height="@dimen/dp_55"
+                android:layout_marginStart="@dimen/dp_30"
                 android:layout_gravity="center"
-                android:src="@mipmap/ic_delete_nor" />
-
+                android:background="@null"
+                android:hint="music"
+                android:maxLength="5"
+                android:maxLines="1"
+                android:padding="10dp"
+                android:textColor="@color/black" />
             <ImageView
                 android:id="@+id/iv_search"
                 android:layout_width="@dimen/dp_35"
                 android:layout_height="@dimen/dp_45"
-                android:layout_marginLeft="@dimen/dp_20"
+                android:layout_marginStart="@dimen/dp_20"
+                android:layout_gravity="center"
                 android:src="@mipmap/ic_search_nor" />
 
         </LinearLayout>
@@ -69,6 +61,7 @@
             android:layout_below="@+id/ll_top_title"
             android:layout_marginTop="@dimen/dp_15"
             android:orientation="vertical">
+
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/main_view_pager"
                 android:layout_width="wrap_content"
@@ -82,8 +75,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:orientation="vertical"
-            android:background="@drawable/bg_music_list_view">
+            android:background="@drawable/bg_music_list_view"
+            android:orientation="vertical">
             <!--底部播放状态栏-->
             <LinearLayout
                 android:id="@+id/ll_simple_play_view"
@@ -107,11 +100,11 @@
 
                     <TextView
                         android:id="@+id/tv_current_music_info"
-                        android:textColor="@color/white"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="@dimen/sp_17"/>
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_17" />
                 </LinearLayout>
 
                 <ImageView
@@ -172,11 +165,11 @@
                     android:src="@mipmap/ic_tools_white" />
 
             </LinearLayout>
+
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_20"/>
+                android:layout_height="@dimen/dp_20" />
         </LinearLayout>
-
 
 
     </RelativeLayout>

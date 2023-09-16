@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_customer_edit_text">
+        <EditText
+            android:id="@+id/et_view"
+            android:background="@null"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_marginStart="10dp"
+            android:layout_weight="4"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:textColor="#0e0e0e"
+            android:hint="music"
+            android:textColorHint="@color/white"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/bt_clear"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_margin="10dp"
+            android:padding="5dp"
+            android:background="@mipmap/ic_delete_nor"
+            tools:ignore="RtlHardcoded" />
+    </LinearLayout>
+
+</LinearLayout>

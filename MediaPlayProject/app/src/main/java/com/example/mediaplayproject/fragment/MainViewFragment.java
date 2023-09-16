@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
@@ -40,6 +41,7 @@ import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
+import com.example.mediaplayproject.view.CustomizeEditText;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ import java.util.List;
  */
 public class MainViewFragment extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
-    private final Context mContext;
+    private Context mContext;
     private View mainView;
 
     /**
@@ -71,7 +73,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private PersonalPageFragment personalPageFragment;
     private ToolsFragment toolsFragment;
 
-    private EditText etSearch;
+    private CustomizeEditText customizeEditText;
     private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivPlayRevolve;
     private TextView tvCurrentMusicInfo;
 
@@ -180,8 +182,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         musicListViewPager = mainView.findViewById(R.id.main_view_pager);
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
+        customizeEditText = mainView.findViewById(R.id.ed_work_id);
         ivSettings = mainView.findViewById(R.id.iv_setting);
-        etSearch = mainView.findViewById(R.id.et_search);
         ivSearch = mainView.findViewById(R.id.iv_search);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
         ivMusicList = mainView.findViewById(R.id.iv_current_list);
@@ -190,7 +192,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivTools = mainView.findViewById(R.id.iv_tools);
         ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
         ivSettings.setOnClickListener(mListener);
-        etSearch.setOnClickListener(mListener);
         ivSearch.setOnClickListener(mListener);
         ivPlayMusic.setOnClickListener(mListener);
         ivMusicList.setOnClickListener(mListener);
@@ -220,7 +221,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 ToolsUtils.getInstance().hideKeyboard(mainView);
 
                 ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
-                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_personal_pre : R.mipmap.ic_personal_white);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_white);
                 ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
             }
 
@@ -229,7 +230,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 super.onPageSelected(position);
                 ToolsUtils.getInstance().hideKeyboard(mainView);
                 ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
-                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_personal_pre : R.mipmap.ic_personal_white);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_white);
                 ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
             }
 
@@ -246,6 +247,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // LinearInterpolator为匀速效果，AccelerateInterpolator为加速效果，DecelerateInterpolator为减速效果
         LinearInterpolator lin = new LinearInterpolator();
         animation.setInterpolator(lin);
+
+
+
 
         // 侧滑栏的滑动唤出效果可以不需要了，点击按钮能唤出来，点击空白能收回去即可，代码先保留
 
@@ -322,6 +326,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         } else {
             ivPlayRevolve.clearAnimation();
         }
+
+        // 搜索框默认显示第一首音乐名称
+        if (defaultList.size() > 0) {
+            DebugLog.debug("search");
+            customizeEditText.setEditTextHint(defaultList.get(0).getTitle());
+        }
     }
 
     /**
@@ -346,6 +356,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             drawerLayout.openDrawer(GravityCompat.START);
         } else if (view == ivSearch) {
             ToolsUtils.getInstance().hideKeyboard(mainView);
+            if (customizeEditText != null){
+                String inputText = customizeEditText.getText().trim();
+                if (!"".equals(inputText)){
+                    Toast.makeText(mContext,"input " + inputText, Toast.LENGTH_SHORT).show();
+                }
+            }
         } else if (view == ivPlayMusic) {
             // 需要用firstPlay来判断当前是否是首次播放
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
