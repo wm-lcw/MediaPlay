@@ -338,12 +338,12 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         llAddToList.setEnabled(!isSetEmpty);
         llDeleteSelectMusic.setEnabled(!isSetEmpty);
         ivAddToList.setImageResource(isSetEmpty ? R.mipmap.ic_add_to_list_nor : R.mipmap.ic_add_to_list_pre);
-        ivDeleteSelectMusic.setImageResource(isSetEmpty ? R.mipmap.ic_delete_nor : R.mipmap.ic_delete_pre);
+        ivDeleteSelectMusic.setImageResource(isSetEmpty ? R.mipmap.ic_delete_select_nor : R.mipmap.ic_delete_select_pre);
         String listName = mainListAdapter.getListName();
         if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)){
             // 默认列表不支持删除操作
             llDeleteSelectMusic.setEnabled(false);
-            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
+            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_select_nor);
         }
     }
 
@@ -626,7 +626,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             llDeleteSelectMusic.setEnabled(false);
             ivSelectAll.setImageResource(R.mipmap.ic_checkbox_nor);
             ivAddToList.setImageResource(R.mipmap.ic_add_to_list_nor);
-            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_nor);
+            ivDeleteSelectMusic.setImageResource(R.mipmap.ic_delete_select_nor);
             mainListAdapter.notifyDataSetChanged();
         }
     }

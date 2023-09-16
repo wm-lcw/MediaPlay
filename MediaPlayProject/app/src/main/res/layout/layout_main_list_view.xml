@@ -124,7 +124,7 @@
                     android:layout_gravity="center"
                     android:layout_width="@dimen/dp_40"
                     android:layout_height="@dimen/dp_40"
-                    android:background="@mipmap/ic_delete_pre" />
+                    android:background="@mipmap/ic_delete_select_pre" />
                 <TextView
                     android:text="删除"
                     android:textColor="@color/white"

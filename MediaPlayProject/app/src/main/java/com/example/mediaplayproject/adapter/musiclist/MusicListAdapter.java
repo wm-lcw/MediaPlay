@@ -99,7 +99,7 @@ public class MusicListAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.tvMusicName.setText(musicInfoList.get(position).getTitle());
-        holder.ivDeleteMusic.setImageResource(R.mipmap.ic_delete);
+        holder.ivDeleteMusic.setImageResource(R.mipmap.ic_delete_music);
         if (position == defaultSelection) {
             // 设置已选择选项的颜色
             holder.tvMusicName.setTextColor(text_selected_color);

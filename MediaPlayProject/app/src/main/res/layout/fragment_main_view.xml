@@ -24,10 +24,10 @@
             <ImageView
                 android:id="@+id/iv_setting"
                 android:layout_width="@dimen/dp_35"
-                android:layout_height="@dimen/dp_45"
-                android:layout_gravity="start"
-                android:layout_marginLeft="@dimen/dp_10"
-                android:src="@mipmap/ic_settings" />
+                android:layout_height="@dimen/dp_35"
+                android:layout_gravity="start|center"
+                android:layout_marginLeft="@dimen/dp_15"
+                android:src="@mipmap/ic_sidebar_menu_nor" />
 
             <LinearLayout
                 android:layout_width="@dimen/dp_150"
@@ -43,13 +43,20 @@
 
 
             </LinearLayout>
+            <ImageView
+                android:id="@+id/iv_delete_input"
+                android:layout_width="@dimen/dp_25"
+                android:layout_height="@dimen/dp_25"
+                android:layout_marginLeft="@dimen/dp_5"
+                android:layout_gravity="center"
+                android:src="@mipmap/ic_delete_nor" />
 
             <ImageView
                 android:id="@+id/iv_search"
                 android:layout_width="@dimen/dp_35"
                 android:layout_height="@dimen/dp_45"
-                android:layout_marginLeft="@dimen/dp_50"
-                android:src="@mipmap/ic_search" />
+                android:layout_marginLeft="@dimen/dp_20"
+                android:src="@mipmap/ic_search_nor" />
 
         </LinearLayout>
 
@@ -58,11 +65,10 @@
             android:id="@+id/ll_main_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/ll_simple_play_view"
+            android:layout_above="@+id/ll_bottom_view"
             android:layout_below="@+id/ll_top_title"
             android:layout_marginTop="@dimen/dp_15"
             android:orientation="vertical">
-
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/main_view_pager"
                 android:layout_width="wrap_content"
@@ -71,92 +77,107 @@
 
         </LinearLayout>
 
-
-        <!--底部播放状态栏-->
         <LinearLayout
-            android:id="@+id/ll_simple_play_view"
-            android:layout_above="@+id/ll_function_view"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_75"
-            android:layout_marginTop="@dimen/dp_20"
-            android:background="@drawable/bg_music_list_view"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/iv_play_revolve"
-                android:layout_width="33dp"
-                android:layout_height="38dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_15"
-                android:src="@mipmap/ic_customer_list" />
-
-            <LinearLayout
-                android:layout_width="@dimen/dp_170"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/dp_30">
-
-                <TextView
-                    android:id="@+id/tv_current_music_info"
-                    android:textColor="@color/white"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/iv_play_music"
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_30"
-                android:src="@mipmap/media_play" />
-
-            <ImageView
-                android:id="@+id/iv_current_list"
-                android:layout_width="25dp"
-                android:layout_height="27dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_25"
-                android:src="@mipmap/medialist" />
-
-        </LinearLayout>
-
-        <!--功能状态栏-->
-        <LinearLayout
-            android:id="@+id/ll_function_view"
+            android:id="@+id/ll_bottom_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_20"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/dp_30"
-            android:background="@drawable/bg_music_list_view"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:background="@drawable/bg_music_list_view">
+            <!--底部播放状态栏-->
+            <LinearLayout
+                android:id="@+id/ll_simple_play_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_75"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/iv_discovery"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/dp_55"
-                android:layout_weight="1"
-                android:src="@mipmap/ic_discovery_white" />
+                <ImageView
+                    android:id="@+id/iv_play_revolve"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:src="@mipmap/ic_customer_list" />
 
-            <ImageView
-                android:id="@+id/iv_personal"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/dp_45"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@mipmap/ic_picture_white" />
+                <LinearLayout
+                    android:layout_width="@dimen/dp_170"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="@dimen/dp_30">
 
-            <ImageView
-                android:id="@+id/iv_tools"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/dp_45"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@mipmap/ic_tools_white" />
+                    <TextView
+                        android:id="@+id/tv_current_music_info"
+                        android:textColor="@color/white"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="@dimen/sp_17"/>
+                </LinearLayout>
 
+                <ImageView
+                    android:id="@+id/iv_play_music"
+                    android:layout_width="@dimen/dp_30"
+                    android:layout_height="@dimen/dp_30"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_30"
+                    android:src="@mipmap/media_play" />
+
+                <ImageView
+                    android:id="@+id/iv_current_list"
+                    android:layout_width="25dp"
+                    android:layout_height="27dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_25"
+                    android:src="@mipmap/medialist" />
+
+            </LinearLayout>
+
+
+            <!--分割线-->
+            <View
+                android:id="@+id/view_line"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_1"
+                android:background="@color/bg_line" />
+
+            <!--功能状态栏-->
+            <LinearLayout
+                android:id="@+id/ll_function_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_discovery"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dp_55"
+                    android:layout_weight="1"
+                    android:src="@mipmap/ic_discovery_white" />
+
+                <ImageView
+                    android:id="@+id/iv_personal"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dp_55"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:src="@mipmap/ic_customer_white" />
+
+                <ImageView
+                    android:id="@+id/iv_tools"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dp_40"
+                    android:layout_marginTop="@dimen/dp_2"
+                    android:layout_weight="1"
+                    android:src="@mipmap/ic_tools_white" />
+
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_20"/>
         </LinearLayout>
+
+
 
     </RelativeLayout>
 
