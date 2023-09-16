@@ -182,7 +182,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         musicListViewPager = mainView.findViewById(R.id.main_view_pager);
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
-        customizeEditText = mainView.findViewById(R.id.ed_work_id);
+        customizeEditText = mainView.findViewById(R.id.custom_edit_text);
         ivSettings = mainView.findViewById(R.id.iv_setting);
         ivSearch = mainView.findViewById(R.id.iv_search);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);

@@ -65,7 +65,7 @@
             android:layout_width="@dimen/dp_35"
             android:layout_height="@dimen/dp_35"
             android:layout_centerVertical="true"
-            android:background="@mipmap/ic_more_white" />
+            android:background="@drawable/more_view_style" />
     </RelativeLayout>
 
 </RelativeLayout>
