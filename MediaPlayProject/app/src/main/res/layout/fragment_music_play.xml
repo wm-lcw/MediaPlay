@@ -51,12 +51,19 @@
 
 
         <SeekBar
+            android:id="@+id/sb_volume"
             android:layout_gravity="center"
             android:layout_marginTop="25dp"
-            android:id="@+id/sb_volume"
-            android:layout_width="350dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
+            android:maxHeight="30dip"
+            android:minHeight="30dip"
+            android:paddingStart="@dimen/dp_5"
+            android:paddingEnd="@dimen/dp_5"
+            android:thumbOffset="5dp"
             android:max="150"
+            android:progressDrawable="@drawable/volume_seekbar_progress_style"
+            android:thumb="@drawable/volume_seekbar_thumb_style"
             android:splitTrack="false"/>
         <ImageView
             android:src="@drawable/play_icon"

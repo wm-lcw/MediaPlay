@@ -17,6 +17,9 @@
     <color name="bg_transparent">#00000000</color><!-- 透明背景 -->
     <color name="bg_line">#7313242B</color><!-- 分割线背景 -->
     <color name="bg_customer_edit_text" tools:ignore="MissingDefaultResource">#2B91A2B7</color><!-- 自定义输入框背景 -->
+    <color name="bg_volume_seekbar">#D6F2E9</color><!-- 音量条已覆盖的背景色 -->
+    <color name="bg_volume_background">#4D91A2B7</color><!-- 音量条背景色 -->
+    <color name="bg_volume_thumb">#00000000</color><!-- 音量条滑块背景色 -->
     <!--透明-->
     <color name="transparent">#00000000</color>
     <!--半透明-->
