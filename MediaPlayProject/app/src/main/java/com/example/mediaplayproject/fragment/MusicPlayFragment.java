@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 
@@ -41,7 +42,7 @@ public class MusicPlayFragment extends Fragment {
 
     private final Context mContext;
     private View playView;
-    private ImageView ivBack, ivMore, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
+    private ImageView ivBack, ivMore, ivMute, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
     private int maxVolume = 150;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
@@ -139,6 +140,7 @@ public class MusicPlayFragment extends Fragment {
     private void bindView() {
         ivBack = playView.findViewById(R.id.iv_play_view_back);
         ivMore = playView.findViewById(R.id.iv_play_view_more);
+        ivMute = playView.findViewById(R.id.iv_mute);
         ivMediaLoop = playView.findViewById(R.id.iv_loop);
         ivMediaPre = playView.findViewById(R.id.iv_pre);
         ivMediaPlay = playView.findViewById(R.id.iv_play);
@@ -153,6 +155,7 @@ public class MusicPlayFragment extends Fragment {
 
         ivBack.setOnClickListener(mListener);
         ivMore.setOnClickListener(mListener);
+        ivMute.setOnClickListener(mListener);
         ivMediaLoop.setOnClickListener(mListener);
         ivMediaPre.setOnClickListener(mListener);
         ivMediaPlay.setOnClickListener(mListener);
@@ -261,7 +264,7 @@ public class MusicPlayFragment extends Fragment {
     }
 
     private final View.OnClickListener mListener = new View.OnClickListener() {
-        @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists"})
+        @SuppressLint({"ResourceType", "UseCompatLoadingForColorStateLists", "UseCompatLoadingForDrawables"})
         @Override
         public void onClick(View view) {
             if (view == ivBack) {
@@ -271,6 +274,17 @@ public class MusicPlayFragment extends Fragment {
                 mActivityHandle.sendMessage(msg);
             } else if (view == ivMore) {
                 DebugLog.debug("more");
+            } else if (view == ivMute) {
+                int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                if (currentVolume > 0){
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC,0,AudioManager.FLAG_PLAY_SOUND);
+                     Drawable volumeDrawable = mContext.getResources().getDrawable(R.drawable.volume_mute2_style, null);
+                    ivMute.setBackground(volumeDrawable);
+                } else {
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC,20,AudioManager.FLAG_PLAY_SOUND);
+                    Drawable volumeDrawable = mContext.getResources().getDrawable(R.drawable.volume_mute1_style, null);
+                    ivMute.setBackground(volumeDrawable);
+                }
             } else if (view == ivMediaLoop) {
                 changePlayMode();
             } else if (view == ivMediaPre) {

@@ -49,29 +49,40 @@
                 android:src="@drawable/more_view_style"/>
         </RelativeLayout>
 
-
-        <SeekBar
-            android:id="@+id/sb_volume"
-            android:layout_gravity="center"
-            android:layout_marginTop="25dp"
-            android:layout_width="250dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="30dip"
-            android:minHeight="30dip"
-            android:paddingStart="@dimen/dp_5"
-            android:paddingEnd="@dimen/dp_5"
-            android:thumbOffset="5dp"
-            android:max="150"
-            android:progressDrawable="@drawable/volume_seekbar_progress_style"
-            android:thumb="@drawable/volume_seekbar_thumb_style"
-            android:splitTrack="false"/>
-        <ImageView
-            android:src="@drawable/play_icon"
-            android:layout_gravity="center"
-            android:layout_marginTop="50dp"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:visibility="gone"/>
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal">
+            <SeekBar
+                android:id="@+id/sb_volume"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/dp_40"
+                android:maxHeight="30dip"
+                android:minHeight="30dip"
+                android:paddingStart="@dimen/dp_5"
+                android:paddingEnd="@dimen/dp_5"
+                android:thumbOffset="5dp"
+                android:max="150"
+                android:progressDrawable="@drawable/volume_seekbar_progress_style"
+                android:thumb="@drawable/volume_seekbar_thumb_style"
+                android:splitTrack="false"/>
+
+            <ImageView
+                android:id="@+id/iv_mute"
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/dp_30"
+                android:background="@drawable/volume_mute1_style"/>
+        </RelativeLayout>
+
+
+
     </LinearLayout>
 
 
