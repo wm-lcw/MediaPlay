@@ -331,16 +331,16 @@ public class MainActivity extends BasicActivity {
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mainViewFragment.isVisible()){
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mainViewFragment.isVisible()) {
                 //调用双击退出函数
                 exitBy2Click();
+            } else if (musicPlayFragment.isVisible()) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.fl_main_view, mainViewFragment);
+                transaction.commit();
             }
-        } else if (musicPlayFragment.isVisible()){
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.replace(R.id.fl_main_view, mainViewFragment);
-            transaction.commit();
         }
         return false;
     }
