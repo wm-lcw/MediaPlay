@@ -55,7 +55,9 @@
             android:layout_marginTop="25dp"
             android:id="@+id/sb_volume"
             android:layout_width="350dp"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:max="150"
+            android:splitTrack="false"/>
         <ImageView
             android:src="@drawable/play_icon"
             android:layout_gravity="center"

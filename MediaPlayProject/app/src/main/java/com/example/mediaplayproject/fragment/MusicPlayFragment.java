@@ -43,6 +43,7 @@ public class MusicPlayFragment extends Fragment {
     private View playView;
     private ImageView ivBack, ivMore, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
     private SeekBar sbVolume, sbProgress;
+    private int maxVolume = 150;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
     private String currentTime = "00:00";
     private boolean mRegistered = false, firstPlay = true, isPlaying = false;
@@ -233,10 +234,11 @@ public class MusicPlayFragment extends Fragment {
 
     private void initVolume() {
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        sbVolume.setMax(maxVolume);
         //当前设备的
-        if (currentVolume >= 0 && currentVolume <= 150) {
-            int afterVolume = (int) (currentVolume / 1.5);
-            sbVolume.setProgress(afterVolume);
+        if (currentVolume >= 0 && currentVolume <= maxVolume) {
+            sbVolume.setProgress(currentVolume);
         }
     }
 
@@ -298,10 +300,9 @@ public class MusicPlayFragment extends Fragment {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == sbVolume) {
-                int afterVolume = (int) (progress * 1.5);
                 if (fromUser) {
                     //手动拖动seekbar时才设置音量（排除外部改变音量的影响）
-                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, afterVolume, AudioManager.FLAG_PLAY_SOUND);
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, AudioManager.FLAG_PLAY_SOUND);
                 }
             }
         }
@@ -384,9 +385,8 @@ public class MusicPlayFragment extends Fragment {
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_VOLUME) {
                 //媒体音量发生变化--更新音量条
                 int volume = msg.getData().getInt("volume");
-                if (volume >= 0 && volume <= 150) {
-                    int afterVolume = (int) (volume / 1.5);
-                    sbVolume.setProgress(afterVolume);
+                if (volume >= 0 && volume <= maxVolume) {
+                    sbVolume.setProgress(volume);
                 }
             }
         }
