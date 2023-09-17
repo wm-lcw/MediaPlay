@@ -56,7 +56,6 @@ public class SplashFragment extends Fragment {
     }
 
     private void initView() {
-        DebugLog.debug("initView() :"+splashView);
         TextView tvTranslate = splashView.findViewById(R.id.tv_translate);
 
         tvTranslate.post(() -> {

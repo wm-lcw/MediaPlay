@@ -103,9 +103,9 @@ public class MainActivity extends BasicActivity {
                 // service创建成功的时候立即初始化
                 musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
                 musicService.initPlayHelper(handler);
-                // 需要等musicService起来之后再给Fragment传参数，这里不好判断是过场动画先结束还是service先回调
-                // 稳妥的做法，两个地方都做处理
-                handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
+                // 需要等musicService起来之后再给Fragment传参数
+                mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
+                musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
             }
         }
 
@@ -393,7 +393,6 @@ public class MainActivity extends BasicActivity {
             transaction.addToBackStack(null);
             transaction.replace(R.id.fl_main_view, musicPlayFragment);
             transaction.commit();
-            handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
         }
     }
 
@@ -434,22 +433,11 @@ public class MainActivity extends BasicActivity {
                 getSupportFragmentManager().popBackStack();
             } else if (msg.what == Constant.HANDLER_MESSAGE_START_MAIN_VIEW) {
                 // 入场动画结束，进入主页Fragment
+                // musicService连接完成时已经调用setDataFromMainActivity设置参数了，不需要重新设置
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.fl_main_view, mainViewFragment);
                 transaction.commit();
-                // 切换页面后需要延时一会再设置相关参数, 这里不好判断musicService是否已加载完成
-                handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
-            } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW) {
-                // 切换页面后，延时设置相关参数
-                if (mainViewFragment.isVisible()){
-                    mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
-                }
-                if (musicPlayFragment.isVisible()){
-                    musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
-                }
-                refreshFragmentStatus();
-                refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY) {
                 // 权限申请操作完成后，此时service可能没有完全起来，需要延时一会才能获取service对象进行初始化
                 initDataDelay();
@@ -580,7 +568,6 @@ public class MainActivity extends BasicActivity {
         }
         if (mainViewFragment.isVisible()) {
             mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
-            // 在mainViewFragment不可见的情况下也需要刷新PersonalPageFragment，所以不能放到上面的isVisible()中
             mainViewFragment.refreshCustomerList();
         }
     }

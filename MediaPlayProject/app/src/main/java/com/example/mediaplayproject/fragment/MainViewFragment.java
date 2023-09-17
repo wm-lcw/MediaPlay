@@ -132,6 +132,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         initMusicSource();
     }
 
+    /**
+     *  初始化逻辑修改后，在onResume阶段musicService已经启动了，
+     *  @author wm
+     *  @createTime 2023/9/18 0:02
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -142,20 +147,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         initPlayStateAndInfo();
     }
 
-    /**
-     * 在onResume阶段service还是null
-     * 要等Activity获取service之后调用该方法传service过来，再去做service相关的初始化工作
-     * 该方法调用时机--处于onResume到Fragment运行的中间阶段
-     */
     @SuppressLint("ClickableViewAccessibility")
     public void setDataFromMainActivity(MusicPlayService service, Handler handler, MainActivity.MyFragmentCallBack fragmentCallBack) {
         musicService = service;
         this.mActivityHandle = handler;
         myFragmentCallBack = fragmentCallBack;
-        // 进入界面获取一下音量信息和当前音乐列表
-        getInfoFromService();
-        // 初始化播放主页的状态
-        initPlayStateAndInfo();
     }
 
     /**
