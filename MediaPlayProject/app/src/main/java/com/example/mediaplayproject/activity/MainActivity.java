@@ -47,6 +47,7 @@ import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
 import com.example.mediaplayproject.fragment.PlayListFragment;
+import com.example.mediaplayproject.fragment.SplashFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
@@ -70,6 +71,7 @@ public class MainActivity extends BasicActivity {
     private static boolean isFloatWindowPermissionRequested = false;
     private Context mContext;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+    private SplashFragment splashFragment;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
     private ListViewPagerAdapter listViewPagerAdapter;
@@ -101,9 +103,9 @@ public class MainActivity extends BasicActivity {
                 // service创建成功的时候立即初始化
                 musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
                 musicService.initPlayHelper(handler);
-                // 需要等service起来之后再给Fragment传service
-                mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
-                musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
+                // 需要等musicService起来之后再给Fragment传参数，这里不好判断是过场动画先结束还是service先回调
+                // 稳妥的做法，两个地方都做处理
+                handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
             }
         }
 
@@ -271,14 +273,19 @@ public class MainActivity extends BasicActivity {
         }
     }
 
+    private void initData(){
+        // 判断完权限后可能service还没有完全起来，所以需要延迟一会再继续初始化
+        handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY,500);
+    }
+
     /**
      * 初始化操作(音乐资源、Ui布局)
      * @author wm
      * @createTime 2023/8/24 18:08
      */
     @SuppressLint("ClickableViewAccessibility")
-    private void initData() {
-        // 初始化音乐列表资源
+    private void initDataDelay() {
+        // 初始化音乐列表资源, 这里可能service还没起来
         DataRefreshService.initResource();
 
         // 从DataRefreshService中获取音乐列表，上次播放的信息等
@@ -294,11 +301,12 @@ public class MainActivity extends BasicActivity {
         createFloatView();
 
         // 创建Fragment实例，并加载显示MainViewFragment
+        splashFragment = SplashFragment.getInstance(mContext, handler);
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.fl_main_view, mainViewFragment);
+        transaction.add(R.id.fl_main_view, splashFragment);
         transaction.commit();
 
         // 启动MusicPlayService服务
@@ -385,7 +393,7 @@ public class MainActivity extends BasicActivity {
             transaction.addToBackStack(null);
             transaction.replace(R.id.fl_main_view, musicPlayFragment);
             transaction.commit();
-            musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
+            handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
         }
     }
 
@@ -424,6 +432,27 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW) {
                 // 回退到主页Fragment，之前切换到PlayFragment时需要加上transaction.addToBackStack(null);
                 getSupportFragmentManager().popBackStack();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_START_MAIN_VIEW) {
+                // 入场动画结束，进入主页Fragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.fl_main_view, mainViewFragment);
+                transaction.commit();
+                // 切换页面后需要延时一会再设置相关参数, 这里不好判断musicService是否已加载完成
+                handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW,500);
+            } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT_VIEW) {
+                // 切换页面后，延时设置相关参数
+                if (mainViewFragment.isVisible()){
+                    mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
+                }
+                if (musicPlayFragment.isVisible()){
+                    musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
+                }
+                refreshFragmentStatus();
+                refreshListStatus();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY) {
+                // 权限申请操作完成后，此时service可能没有完全起来，需要延时一会才能获取service对象进行初始化
+                initDataDelay();
             }
         }
     };
@@ -551,9 +580,9 @@ public class MainActivity extends BasicActivity {
         }
         if (mainViewFragment.isVisible()) {
             mainViewFragment.refreshPlayState(isPlaying, mPosition, musicListName, musicInfo, firstPlay);
+            // 在mainViewFragment不可见的情况下也需要刷新PersonalPageFragment，所以不能放到上面的isVisible()中
+            mainViewFragment.refreshCustomerList();
         }
-        // 在mainViewFragment不可见的情况下也需要刷新PersonalPageFragment，所以不能放到上面的isVisible()中
-        mainViewFragment.refreshCustomerList();
     }
 
     /**

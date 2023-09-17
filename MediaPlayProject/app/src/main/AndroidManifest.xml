@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:versionCode="1"
-    android:versionName="2.1.7">
+    android:versionName="2.1.8">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -26,17 +26,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".activity.SplashActivity"
-            android:exported="true"
-            android:theme="@style/SplashTheme"
-            android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".service.MusicPlayService"
             android:enabled="true"
@@ -46,9 +35,13 @@
             android:name=".activity.MainActivity"
             android:exported="true"
             android:theme="@style/SplashTheme"
-            android:launchMode="singleTask"
-            android:taskAffinity="new.task"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustNothing">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
