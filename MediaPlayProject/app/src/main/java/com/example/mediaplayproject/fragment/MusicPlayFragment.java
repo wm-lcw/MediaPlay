@@ -58,11 +58,6 @@ public class MusicPlayFragment extends Fragment {
     private int mPosition = 0;
     private int playMode = 0;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
-
-
-    /**
-     * MusicPlayService对象，控制音乐播放service类
-     */
     private MusicPlayService musicService;
 
     public MusicPlayFragment(Context context) {
@@ -95,13 +90,20 @@ public class MusicPlayFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        initMusicSource();
-        registerReceiver();
         DebugLog.debug("");
+        registerReceiver();
     }
 
+    /**
+     *  从MainActivity更新数据到MusicPlayFragment中
+     *  @author wm
+     *  @createTime 2023/9/17 13:11
+     * @param service:
+     * @param handler:
+     * @param listName:
+     * @param position:
+     */
     public void setDataFromMainActivity(MusicPlayService service, Handler handler, String listName, int position) {
-        DebugLog.debug("");
         this.mActivityHandle = handler;
         musicService = service;
         musicListName = listName;
@@ -112,15 +114,9 @@ public class MusicPlayFragment extends Fragment {
     public void onResume() {
         super.onResume();
         DebugLog.debug("");
-        // 绑定控件
         bindView();
-        // 从service获取相关信息
         initData();
-        // 首次进入app时先刷新一次音乐列表的来源
-        switchMusicList();
-        //初始化播放主页的状态
         initPlayStateAndInfo();
-        // 初始化音量条
         initVolume();
     }
 
@@ -135,16 +131,14 @@ public class MusicPlayFragment extends Fragment {
         unregisterReceiver();
     }
 
-    private void initMusicSource() {
-        // 从BasicApplication中获取音乐列表，上次播放的信息等
-        playMode = DataRefreshService.getLastPlayMode();
-        musicListName = DataRefreshService.getLastPlayListName();
-        mPosition = DataRefreshService.getLastPosition();
-    }
-
+    /**
+     *  绑定控件
+     *  @author wm
+     *  @createTime 2023/9/17 13:12
+     */
     private void bindView() {
         ivBack = playView.findViewById(R.id.iv_play_view_back);
-        ivMore = playView.findViewById(R.id.iv_play_view_back);
+        ivMore = playView.findViewById(R.id.iv_play_view_more);
         ivMediaLoop = playView.findViewById(R.id.iv_loop);
         ivMediaPre = playView.findViewById(R.id.iv_pre);
         ivMediaPlay = playView.findViewById(R.id.iv_play);
@@ -171,11 +165,15 @@ public class MusicPlayFragment extends Fragment {
 
     }
 
-
-
+    /**
+     *  从DataRefreshService和service中获取数据
+     *  @author wm
+     *  @createTime 2023/9/17 13:13
+     */
     private void initData() {
-        DebugLog.debug("service " + musicService);
-        // 重新进入界面之后都获取一下音量信息和当前音乐列表
+        playMode = DataRefreshService.getLastPlayMode();
+        musicListName = DataRefreshService.getLastPlayListName();
+        mPosition = DataRefreshService.getLastPosition();
         if (musicService != null) {
             //再次进入界面时刷新播放状态按钮，初次进入默认为暂停状态
             isPlaying = musicService.isPlaying();
@@ -184,18 +182,19 @@ public class MusicPlayFragment extends Fragment {
             playMode = musicService.getPlayMode();
             musicListName = musicService.getMusicListName();
         }
-    }
-
-    private void switchMusicList() {
+        // 刷新音乐列表的来源
         List<MediaFileBean> tempList = DataRefreshService.getMusicListByName(musicListName);
         if (tempList != null && tempList.size() > 0){
-            // 更新播放列表等数据
             musicInfo = tempList;
         }
-
         initServicePlayHelper();
     }
 
+    /**
+     *  初始化播放状态
+     *  @author wm
+     *  @createTime 2023/9/17 13:15
+     */
     @SuppressLint("SetTextI18n")
     private void initPlayStateAndInfo() {
         //获取音乐列表之后，若是列表为不空，则将当前下标的歌曲信息显示出来
@@ -210,7 +209,7 @@ public class MusicPlayFragment extends Fragment {
             ivMediaLike.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
             ivMediaLike.setEnabled(true);
         } else {
-            //若列表为空，则播放、上下曲都不可点击
+            //若列表为空，则播放、上下曲、收藏按钮都不可点击
             tvCurrentMusicInfo.setText("");
             tvCurrentPlayTime.setText("");
             tvMediaTime.setText("");
@@ -222,30 +221,41 @@ public class MusicPlayFragment extends Fragment {
         }
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
 
-        //初始化播放模式的图标
-        if (playMode == 0) {
-            ivMediaLoop.setImageResource(R.mipmap.media_loop);
-        } else if (playMode == 1) {
+        // 初始化播放模式的图标
+        if (playMode == Constant.PLAY_MODE_SHUFFLE) {
             ivMediaLoop.setImageResource(R.mipmap.media_shuffle);
-        } else if (playMode == 2) {
+        } else if (playMode == Constant.PLAY_MODE_SINGLE) {
             ivMediaLoop.setImageResource(R.mipmap.media_single);
+        } else {
+            playMode = Constant.PLAY_MODE_LOOP;
+            ivMediaLoop.setImageResource(R.mipmap.media_loop);
         }
     }
 
+    /**
+     *  初始化音量和音量条
+     *  @author wm
+     *  @createTime 2023/9/17 13:08
+     */
     private void initVolume() {
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        // 获取当前设备媒体音量的最大值
         maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        // 设置拖动条的最大值,与设备的音量最大值保持同步，不需要做数值转换
         sbVolume.setMax(maxVolume);
-        //当前设备的
         if (currentVolume >= 0 && currentVolume <= maxVolume) {
             sbVolume.setProgress(currentVolume);
         }
     }
 
+    /**
+     *  初始化service
+     *  执行播放之前需要先调用initPlayData方法更新各项数据，避免数组越界
+     *  @author wm
+     *  @createTime 2023/9/17 13:26
+     */
     private void initServicePlayHelper() {
         if (musicService != null) {
-            //刷新Service里面的内容时，不用每次都初始化，最主要的是更新position和musicInfo
-            //初始化的时候需要先调用initPlayData方法更新各项数据，避免数组越界
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
         }
     }
@@ -255,7 +265,7 @@ public class MusicPlayFragment extends Fragment {
         @Override
         public void onClick(View view) {
             if (view == ivBack) {
-                // 发送消息给Activity更新列表状态
+                // 返回主页，需要发送消息给Activity调用getSupportFragmentManager()去处理
                 Message msg = new Message();
                 msg.what = Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW;
                 mActivityHandle.sendMessage(msg);
@@ -267,13 +277,15 @@ public class MusicPlayFragment extends Fragment {
                 initServicePlayHelper();
                 musicService.playPre();
             } else if (view == ivMediaPlay) {
+                initServicePlayHelper();
                 // 判断当前是否是首次播放，若是首次播放，则需要设置重头开始播放（Media的首次播放需要reset等流程）
-                toPlayMusic(musicInfo.get(mPosition), firstPlay);
+                musicService.play(musicInfo.get(mPosition), firstPlay, mPosition);
                 firstPlay = false;
             } else if (view == ivMediaNext) {
                 initServicePlayHelper();
                 musicService.playNext();
             } else if (view == ivMediaList) {
+                // 打开列表悬浮窗，需要发送消息给MainActivity处理
                 Message msg = new Message();
                 msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
                 mActivityHandle.sendMessage(msg);
@@ -301,7 +313,7 @@ public class MusicPlayFragment extends Fragment {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == sbVolume) {
                 if (fromUser) {
-                    //手动拖动seekbar时才设置音量（排除外部改变音量的影响）
+                    // 手动拖动seekbar时才设置音量（排除外部改变音量的影响）
                     mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, AudioManager.FLAG_PLAY_SOUND);
                 }
             }
@@ -393,7 +405,7 @@ public class MusicPlayFragment extends Fragment {
     };
 
     /**
-     *  更新播放状态
+     *  更新播放状态，由MainActivity调用
      *  @author wm
      *  @createTime 2023/9/3 16:23
      * @param state : 是否正在播放：true-播放；false-暂停
@@ -430,14 +442,14 @@ public class MusicPlayFragment extends Fragment {
         tvMediaTime.setText(mediaTime);
     }
 
-    private void toPlayMusic(MediaFileBean mediaFileBean, Boolean isRestPlayer) {
-        initServicePlayHelper();
-        musicService.play(mediaFileBean, isRestPlayer, mPosition);
-    }
-
+    /**
+     *  切换播放模式
+     *  @author wm
+     *  @createTime 2023/9/17 12:47
+     */
     private void changePlayMode() {
         playMode++;
-        if (playMode >= 3) {
+        if (playMode > Constant.PLAY_MODE_SINGLE) {
             playMode = Constant.PLAY_MODE_LOOP;
         }
         if (playMode == Constant.PLAY_MODE_LOOP) {

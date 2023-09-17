@@ -614,25 +614,14 @@ public class MainActivity extends BasicActivity {
                                 }
                             }
                         }
-
                     }
                 }
                 // 刷新service的播放列表信息
                 musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
 
-                // 刷新播放列表的高亮状态
-                for (PlayListFragment fragment : viewPagerLists) {
-                    if (musicListName.equalsIgnoreCase(fragment.getListName())) {
-                        fragment.setSelectPosition(mPosition);
-                        fragment.setSelection(mPosition);
-                    } else {
-                        fragment.setSelectPosition(-1);
-                    }
-                }
-
                 // 更新各个Fragment的数据
                 refreshFragmentStatus();
-                // 更新列表Ui
+                // 刷新播放列表的高亮状态
                 refreshListStatus();
             }
         }

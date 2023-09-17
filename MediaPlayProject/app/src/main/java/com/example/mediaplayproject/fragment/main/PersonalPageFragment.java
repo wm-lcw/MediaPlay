@@ -44,7 +44,6 @@ import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -53,7 +52,7 @@ import java.util.Set;
  */
 public class PersonalPageFragment extends Fragment implements CustomerMusicListAdapter.OnImageViewClickListener, MainListAdapter.MainListAdapterOnClickListener {
 
-    private Context mContext;
+    private final Context mContext;
     private View myView;
     private List<MediaFileBean> defaultList = new ArrayList<>();
     private List<MediaFileBean> favoriteList = new ArrayList<>();
@@ -385,7 +384,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle("创建列表");
         builder.setMessage("请输入列表名称：");
-        builder.setIcon(R.mipmap.ic_launcher);
+        builder.setIcon(R.mipmap.ic_customer_pre);
         builder.setView(inputText);
         //点击对话框以外的区域是否让对话框消失
         builder.setCancelable(true);
@@ -452,12 +451,15 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      *  @param item: 菜单子项
      *  @return : boolean
      */
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.share:
+                DebugLog.debug("share");
                 break;
             case R.id.edit:
+                DebugLog.debug("edit");
                 break;
             case R.id.delete:
                 showDeleteListAliasDialog();
@@ -479,10 +481,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         if (currentPlayingListName.equalsIgnoreCase(itemClickListName)){
             builder.setMessage("当前正在播放此列表，是否删除该列表？");
         } else {
-            builder.setMessage("是否删除该列表？");
+            builder.setMessage("");
         }
 
-        builder.setIcon(R.mipmap.ic_launcher);
+        builder.setIcon(R.mipmap.ic_delete_select_pre);
         //点击对话框以外的区域是否让对话框消失
         builder.setCancelable(true);
 
@@ -567,9 +569,8 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             Set<Integer> selectedItems = mainListAdapter.getSelectedItems();
             List<MediaFileBean> list = DataRefreshService.getMusicListByName(listName);
             List<Long> insertList = new ArrayList<>();
-            Iterator<Integer> iterator = selectedItems.iterator();
-            while (iterator.hasNext()){
-                int musicPosition = (int)iterator.next();
+            for (Integer selectedItem : selectedItems) {
+                int musicPosition = selectedItem;
                 insertList.add(list.get(musicPosition).getId());
                 deleteMusicHelperSet.add(list.get(musicPosition).getId());
             }
