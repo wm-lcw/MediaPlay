@@ -202,18 +202,7 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(musicListName)){
-            // 若是最近播放列表的上下曲，需要特殊处理，由MainActivity统一处理
-            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", mPosition);
-            bundle.putString("musicListName", musicListName);
-            intent.putExtras(bundle);
-            mContext.sendBroadcast(intent);
-        } else {
-            play(musicInfo.get(mPosition), true, mPosition);
-        }
-
+        dealToPlay();
     }
 
     /**
@@ -232,17 +221,7 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(musicListName)){
-            // 若是最近播放列表的上下曲，需要特殊处理，由MainActivity统一处理
-            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", mPosition);
-            bundle.putString("musicListName", musicListName);
-            intent.putExtras(bundle);
-            mContext.sendBroadcast(intent);
-        } else {
-            play(musicInfo.get(mPosition), true, mPosition);
-        }
+        dealToPlay();
     }
 
     /**
@@ -261,8 +240,27 @@ public class MusicPlayService extends Service {
             //随机播放
             mPosition = getRandomPosition();
         }
-        //单曲播放，mPosition没有改变，直接重新开始播放
-        play(musicInfo.get(mPosition), true, mPosition);
+        // 单曲播放，mPosition没有改变，直接重新开始播放
+        dealToPlay();
+    }
+
+    /**
+     *  判断是否是最近播放列表，若是最近播放列表需要发广播给Activity，由Activity执行播放，否则直接播放
+     *  @author wm
+     *  @createTime 2023/9/18 20:01
+     */
+    private void dealToPlay(){
+        if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(musicListName)){
+            // 若是最近播放列表的上下曲，需要特殊处理，由MainActivity统一处理
+            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", mPosition);
+            bundle.putString("musicListName", musicListName);
+            intent.putExtras(bundle);
+            mContext.sendBroadcast(intent);
+        } else {
+            play(musicInfo.get(mPosition), true, mPosition);
+        }
     }
 
     /**
