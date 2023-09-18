@@ -486,7 +486,7 @@ public class MainActivity extends BasicActivity {
         mFloatLayout = (LinearLayout) inflater.inflate(R.layout.layout_list_view_pager, null);
         setWindowOutTouch();
         musicListViewPager = mFloatLayout.findViewById(R.id.list_view_pager);
-        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, Constant.LIST_MODE_DEFAULT_NAME, Constant.LIST_SHOW_MODE_CURRENT);
+        PlayListFragment defaultListFragment = new PlayListFragment(mContext, musicInfo, musicListName, Constant.LIST_SHOW_MODE_CURRENT);
         PlayListFragment favoriteListFragment = new PlayListFragment(mContext, favoriteList, Constant.LIST_MODE_FAVORITE_NAME, Constant.LIST_SHOW_MODE_FAVORITE);
         PlayListFragment historyListFragment = new PlayListFragment(mContext, historyList, Constant.LIST_MODE_HISTORY_NAME, Constant.LIST_SHOW_MODE_HISTORY);
         viewPagerLists = new ArrayList<>();

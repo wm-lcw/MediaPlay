@@ -38,10 +38,16 @@ public class PlayListFragment extends Fragment {
     private int mPosition;
     private String listName;
     private boolean isInitSuccess = false;
+    /**
+     * listMode用来判断列表的类型，三个固定类型的列表
+     *     public static final int LIST_SHOW_MODE_CURRENT = 1;
+     *     public static final int LIST_SHOW_MODE_FAVORITE = 2;
+     *     public static final int LIST_SHOW_MODE_HISTORY = 3;
+     * */
     private int listMode;
 
     public PlayListFragment(Context context, List<MediaFileBean> list, String listName, int listMode) {
-        DebugLog.debug("PlayListFragment");
+        DebugLog.debug("PlayListFragment " + listName);
         this.mContext = context;
         this.musicList = list;
         this.listName = listName;
@@ -51,13 +57,11 @@ public class PlayListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DebugLog.debug("PlayListFragment");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_play_list, container, false);
-        DebugLog.debug("PlayListFragment");
         init();
         return fragmentView;
     }
@@ -65,7 +69,7 @@ public class PlayListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        DebugLog.debug("PlayListFragment");
+        DebugLog.debug("PlayListFragment " + listName);
         fragmentView.setFocusable(true);
         if (musicListAdapter != null) {
             if (musicList.size() > 0) {
@@ -75,14 +79,21 @@ public class PlayListFragment extends Fragment {
     }
 
     private void init() {
-        DebugLog.debug("PlayListFragment");
+        DebugLog.debug("PlayListFragment " + listName);
         if (listMode == Constant.LIST_SHOW_MODE_CURRENT){
             listName = DataRefreshService.getLastPlayListName();
             musicList = DataRefreshService.getMusicListByName(listName);
-            mPosition = DataRefreshService.getLastPosition();
         } else if (listMode == Constant.LIST_SHOW_MODE_FAVORITE){
             listName = Constant.LIST_MODE_FAVORITE_NAME;
             musicList = DataRefreshService.getFavoriteList();
+        } else if (listMode == Constant.LIST_SHOW_MODE_HISTORY){
+            listName = Constant.LIST_MODE_HISTORY_NAME;
+            musicList = DataRefreshService.getHistoryList();
+        }
+        if (DataRefreshService.getLastPlayListName().equalsIgnoreCase(listName)){
+            mPosition = DataRefreshService.getLastPosition();
+        } else {
+            mPosition = -1;
         }
         musicListAdapter = new MusicListAdapter(mContext, listName, musicList, mPosition);
         tvListTitle = fragmentView.findViewById(R.id.tv_list_title);
