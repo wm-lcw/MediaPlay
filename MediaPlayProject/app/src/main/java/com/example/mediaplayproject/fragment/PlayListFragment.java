@@ -71,10 +71,14 @@ public class PlayListFragment extends Fragment {
         super.onResume();
         DebugLog.debug("PlayListFragment " + listName);
         fragmentView.setFocusable(true);
-        if (musicListAdapter != null) {
-            if (musicList.size() > 0) {
-                musicListAdapter.notifyDataSetChanged();
+        if (musicListAdapter != null && musicList.size() > 0) {
+            if (DataRefreshService.getLastPlayListName().equalsIgnoreCase(listName)){
+                mPosition = DataRefreshService.getLastPosition();
+            } else {
+                mPosition = -1;
             }
+            setSelection(mPosition);
+            musicListAdapter.notifyDataSetChanged();
         }
     }
 
