@@ -433,72 +433,7 @@ public class DataRefreshService extends Service {
         return lastMusicId;
     }
 
-    /**
-     * 保存上次播放的音乐信息
-     *
-     * @param lastPlayListName: 列表名
-     * @param lastPosition:     音乐下标
-     * @param lastMusicId:      音乐的id
-     * @param lastPlayMode:     播放模式
-     * @author wm
-     * @createTime 2023/9/3 18:31
-     */
-    public static void setLastPlayInfo(String lastPlayListName, int lastPosition, long lastMusicId, int lastPlayMode) {
-        try {
 
-        } catch (Exception exception){
-            DebugLog.error("error " + exception.getMessage());
-            clearResource();
-        }
-        DebugLog.debug("thisId " + DataRefreshService.lastMusicId + "; input id "+ lastMusicId);
-        boolean isListNameSame = DataRefreshService.lastPlayListName.equalsIgnoreCase(lastPlayListName);
-        boolean isPositionSame = DataRefreshService.lastPosition == lastPosition;
-        boolean isMusicIdSame = DataRefreshService.lastMusicId == lastMusicId;
-        boolean isPlayModeSame = DataRefreshService.lastPlayMode == lastPlayMode;
-        if (isListNameSame && isPositionSame && isMusicIdSame && isPlayModeSame) {
-            // 有数据更改时才更新，否则不处理
-            DebugLog.debug("no deal");
-        } else {
-            DataRefreshService.lastPlayListName = lastPlayListName;
-            if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(lastPlayListName)){
-                // 最近播放列表保存的永远是最后一条记录
-                DataRefreshService.lastPosition = 0;
-            } else {
-                DataRefreshService.lastPosition = lastPosition;
-            }
-
-            DataRefreshService.lastMusicId = lastMusicId;
-            DataRefreshService.lastPlayMode = lastPlayMode;
-            updateLastInfo();
-        }
-        DebugLog.debug("refresh music idChange ? " + isMusicIdSame);
-        if (!isMusicIdSame && defaultListMap.containsKey(lastMusicId)){
-            // 只根据id去判定历史播放记录，id更改才刷新播放记录
-            addHistoryMusic(defaultListMap.get(lastMusicId));
-        }
-    }
-
-    /**
-     * 更新数据库中最后播放的信息
-     *
-     * @author wm
-     * @createTime 2023/9/3 18:31
-     */
-    private static void updateLastInfo() {
-        try {
-
-        } catch (Exception exception){
-            DebugLog.error("error " + exception.getMessage());
-            clearResource();
-        }
-        ContentValues values = new ContentValues();
-        values.put("lastPlayListName", lastPlayListName);
-        values.put("lastPlayMode", lastPlayMode);
-        values.put("lastMusicId", lastMusicId);
-        String selection = "infoRecord LIKE ?";
-        String[] selectionArgs = {"lastMusicInfo"};
-        db.update(LAST_MUSIC_INFO_TABLE, values, selection, selectionArgs);
-    }
 
     public static List<MediaFileBean> getDefaultList() {
         return defaultList;
@@ -551,6 +486,71 @@ public class DataRefreshService extends Service {
             DebugLog.debug("" + listName + " 列表不存在");
         }
         return musicInfo;
+
+    }
+
+    /**
+     * 保存上次播放的音乐信息
+     *
+     * @param lastPlayListName: 列表名
+     * @param lastPosition:     音乐下标
+     * @param lastMusicId:      音乐的id
+     * @param lastPlayMode:     播放模式
+     * @author wm
+     * @createTime 2023/9/3 18:31
+     */
+    public static void setLastPlayInfo(String lastPlayListName, int lastPosition, long lastMusicId, int lastPlayMode) {
+        try {
+            DebugLog.debug("thisId " + DataRefreshService.lastMusicId + "; input id "+ lastMusicId);
+            boolean isListNameSame = DataRefreshService.lastPlayListName.equalsIgnoreCase(lastPlayListName);
+            boolean isPositionSame = DataRefreshService.lastPosition == lastPosition;
+            boolean isMusicIdSame = DataRefreshService.lastMusicId == lastMusicId;
+            boolean isPlayModeSame = DataRefreshService.lastPlayMode == lastPlayMode;
+            if (isListNameSame && isPositionSame && isMusicIdSame && isPlayModeSame) {
+                // 有数据更改时才更新，否则不处理
+                DebugLog.debug("no deal");
+            } else {
+                DataRefreshService.lastPlayListName = lastPlayListName;
+                if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(lastPlayListName)){
+                    // 最近播放列表保存的永远是最后一条记录
+                    DataRefreshService.lastPosition = 0;
+                } else {
+                    DataRefreshService.lastPosition = lastPosition;
+                }
+
+                DataRefreshService.lastMusicId = lastMusicId;
+                DataRefreshService.lastPlayMode = lastPlayMode;
+                updateLastInfo();
+            }
+            DebugLog.debug("refresh music idChange ? " + isMusicIdSame);
+            if (!isMusicIdSame && defaultListMap.containsKey(lastMusicId)){
+                // 只根据id去判定历史播放记录，id更改才刷新播放记录
+                addHistoryMusic(defaultListMap.get(lastMusicId));
+            }
+        } catch (Exception exception){
+            DebugLog.error("error " + exception.getMessage());
+        }
+    }
+
+    /**
+     * 更新数据库中最后播放的信息
+     *
+     * @author wm
+     * @createTime 2023/9/3 18:31
+     */
+    private static void updateLastInfo() {
+        try {
+            DebugLog.debug("lastPlayListName " + lastPlayListName + "; lastMusicId " + lastMusicId);
+            ContentValues values = new ContentValues();
+            values.put("lastPlayListName", lastPlayListName);
+            values.put("lastPlayMode", lastPlayMode);
+            values.put("lastMusicId", lastMusicId);
+            String selection = "infoRecord LIKE ?";
+            String[] selectionArgs = {"lastMusicInfo"};
+            db.update(LAST_MUSIC_INFO_TABLE, values, selection, selectionArgs);
+        } catch (Exception exception){
+            DebugLog.error("error " + exception.getMessage());
+        }
 
     }
 

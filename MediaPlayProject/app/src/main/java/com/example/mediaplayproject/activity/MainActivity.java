@@ -274,7 +274,7 @@ public class MainActivity extends BasicActivity {
     }
 
     private void initData(){
-        // 判断完权限后可能service还没有完全起来，所以需要延迟一会再继续初始化
+        // 判断完权限后可能DataRefreshService还没有完全起来，所以需要延迟一会再继续初始化
         handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY,500);
     }
 
