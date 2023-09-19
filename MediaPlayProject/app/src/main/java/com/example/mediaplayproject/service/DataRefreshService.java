@@ -280,7 +280,6 @@ public class DataRefreshService extends Service {
                     musicListBean.setListId(listId);
                     // 将列表对象添加到自定义列表集合中
                     customerListsMap.put(listName, musicListBean);
-                    DebugLog.debug("customerList name + " + listName + "; ID " + listId);
                 }
             }
             // 关闭游标和数据库连接
@@ -311,7 +310,6 @@ public class DataRefreshService extends Service {
                     }
                     long musicBeanId = cursor.getLong(cursor.getColumnIndex("musicId"));
                     if (defaultListMap.containsKey(musicBeanId)) {
-                        DebugLog.debug("listName " + playListName + "; Id " + musicBeanId);
                         customerListsMap.get(playListName).getMusicList().add(defaultListMap.get(musicBeanId));
                     } else {
                         // 无效数据，需要在数据表中删除该数据
@@ -343,13 +341,21 @@ public class DataRefreshService extends Service {
                     lastPlayMode = cursor.getInt(cursor.getColumnIndex("lastPlayMode"));
                     lastMusicId = cursor.getLong(cursor.getColumnIndex("lastMusicId"));
                 } while (cursor.moveToNext());
-                //拿到数据以后，根据不同的列表找出上次播放歌曲的position
+                // 拿到数据以后，根据不同的列表找出上次播放歌曲的position
                 findPositionFromList();
+            } else {
+                // 首次使用时数据库中还没有数据,先插入一条空数据,否则后面的更新操作无法执行
+                ContentValues values = new ContentValues();
+                values.put("infoRecord", "lastMusicInfo");
+                values.put("lastPlayListName", lastPlayListName);
+                values.put("lastPlayMode", lastPlayMode);
+                values.put("lastMusicId", lastMusicId);
+                // 参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
+                db.insert(LAST_MUSIC_INFO_TABLE, null, values);
             }
             cursor.close();
         } catch (Exception exception){
             DebugLog.error("error " + exception.getMessage());
-            clearResource();
         }
 
     }
