@@ -21,13 +21,6 @@ import java.util.List;
 public class MusicDataBaseHelper extends SQLiteOpenHelper {
 
     /**
-     * 创建收藏列表数据表的指令
-     * */
-    public static final String CREATE_FAVORITE_MUSIC_LIST_TABLE = "create table favoriteList(" +
-            "musicRecordId integer primary key autoincrement," +
-            "musicId long(20))";
-
-    /**
      * 创建历史播放列表的指令
      * */
     public static final String CREATE_HISTORY_LIST_TABLE = "create table historyList(" +
@@ -45,20 +38,25 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
             "lastMusicId long(20))";
 
     /**
-     * 创建音乐列表的表，这里要先比Music表先建立，因为Music表中使用了Playlist表的id作为外键
+     * 创建所有音乐列表的表，这里要先比ALL_MUSIC表先建立，因为ALL_MUSIC表中使用了AllListsTable表的id作为外键
      * */
-    public static final String CREATE_LIST_TABLE = "CREATE TABLE IF NOT EXISTS Playlist (" +
+    public static final String CREATE_ALL_MUSIC_LIST_TABLE = "CREATE TABLE IF NOT EXISTS allListsTable (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "list_name TEXT)";
+            "listMode INTEGER," +
+            "listName TEXT)";
 
     /**
-     * 创建音乐表
+     * 创建所有音乐的数据表
      * */
-    public static final String CREATE_MUSIC_TABLE = "CREATE TABLE IF NOT EXISTS Music (" +
+    public static final String CREATE_ALL_MUSIC_TABLE = "CREATE TABLE IF NOT EXISTS allMusicTable (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "music_bean_id long(20)," +
-            "play_list_id INTEGER," +
-            "FOREIGN KEY(play_list_id) REFERENCES Playlist(id)" +
+            "musicId long(20)," +
+            "musicTitle TEXT," +
+            "musicArtist TEXT," +
+            "listName TEXT," +
+            "listMode INTEGER," +
+            "listId INTEGER," +
+            "FOREIGN KEY(listId) REFERENCES AllListsTable(id)" +
             "ON DELETE CASCADE " +
             "ON UPDATE CASCADE)";
 
@@ -68,12 +66,11 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_FAVORITE_MUSIC_LIST_TABLE);
         db.execSQL(CREATE_LAST_PLAY_INFO_TABLE);
         db.execSQL(CREATE_HISTORY_LIST_TABLE);
 
-        db.execSQL(CREATE_LIST_TABLE);
-        db.execSQL(CREATE_MUSIC_TABLE);
+        db.execSQL(CREATE_ALL_MUSIC_LIST_TABLE);
+        db.execSQL(CREATE_ALL_MUSIC_TABLE);
     }
 
     @Override

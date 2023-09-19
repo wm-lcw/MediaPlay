@@ -19,6 +19,10 @@ public class Constant {
     public static final int LIST_SHOW_MODE_FAVORITE = 2;
     public static final int LIST_SHOW_MODE_HISTORY = 3;
 
+    public static final int LIST_SAVE_LIST_MODE_DEFAULT = 1;
+    public static final int LIST_SAVE_LIST_MODE_FAVORITE = 2;
+    public static final int LIST_SAVE_LIST_MODE_CUSTOMER = 3;
+
 
     public final static int RESULT_IS_CURRENT_POSITION = 0;
     public final static int RESULT_BEFORE_CURRENT_POSITION = 1;
