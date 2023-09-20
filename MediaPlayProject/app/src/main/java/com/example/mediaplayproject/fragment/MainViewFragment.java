@@ -1,8 +1,11 @@
 package com.example.mediaplayproject.fragment;
 
 
+import static com.example.mediaplayproject.base.BasicApplication.getApplication;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,30 +13,33 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
+import com.example.mediaplayproject.adapter.musiclist.SearchResultListAdapter;
 import com.example.mediaplayproject.adapter.viewpager.MainViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.SearchMusicBean;
@@ -100,6 +106,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private Animation animation;
 
     private List<SearchMusicBean> searchResultList = new ArrayList<>();
+    private ImageView ivCloseSearch;
+    private RecyclerView searchResultRecyclerView;
+    private SearchResultListAdapter searchResultListAdapter;
+    private RelativeLayout mFloatLayout;
+    private WindowManager mWindowManager;
+    private WindowManager.LayoutParams wmParams;
 
     public MainViewFragment(Context context) {
         mContext = context;
@@ -133,6 +145,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_SEARCH_RESULT) {
                 // 全局搜索的handler消息
                 Toast.makeText(mContext,"resultListSize " + searchResultList.size(), Toast.LENGTH_SHORT).show();
+                showFloatView(searchResultList);
             }
         }
     };
@@ -149,6 +162,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 绑定布局资源,只能执行一次，不能放到start或者之后的方法里；
         // 否则会重复创建MusicViewPagerAdapter等操作，引发异常
         initData();
+        createFloatView();
         mainView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -178,6 +192,15 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         getInfoFromService();
         // 初始化播放主页的状态
         initPlayStateAndInfo();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
+            // 在Fragment失去焦点时，悬浮窗关闭, 需要判断mFloatLayout正在显示才执行移除，否则会报错
+            mWindowManager.removeView(mFloatLayout);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -394,6 +417,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                     });
                 }
             }
+        }  else if (view == ivCloseSearch) {
+            searchResultList = null;
+            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
+                // 在Fragment失去焦点时，悬浮窗关闭, 需要判断mFloatLayout正在显示才执行移除，否则会报错
+                mWindowManager.removeView(mFloatLayout);
+            }
         } else if (view == ivPlayMusic) {
             // 需要用firstPlay来判断当前是否是首次播放
             toPlayMusic(musicInfo.get(mPosition), firstPlay);
@@ -447,6 +476,65 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
     public void refreshCustomerList() {
         personalPageFragment.refreshCustomerList();
+    }
+
+    /**
+     *  创建搜索结果悬浮窗
+     *  @author wm
+     *  @createTime 2023/9/20 21:25
+     */
+    private void createFloatView() {
+        wmParams = new WindowManager.LayoutParams();
+        // 获取的是WindowManagerImpl.CompatModeWrapper
+        mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+        // 设置window type
+        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // 设置背景为透明，否则滑动ListView会出现残影
+        wmParams.format = PixelFormat.TRANSPARENT;
+        // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
+        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        // 调整悬浮窗显示的停靠位置为左侧顶部
+        wmParams.gravity = Gravity.START | Gravity.TOP;
+        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
+        wmParams.x = 0;
+        wmParams.y = 0;
+
+        // 设置悬浮窗口长宽数据
+        wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        initFloatView();
+    }
+
+    /**
+     *  初始化悬浮窗中的视图资源等
+     *  @author wm
+     *  @createTime 2023/9/3 16:50
+     */
+    @SuppressLint("InflateParams")
+    private void initFloatView() {
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        // 获取浮动窗口视图所在布局
+        mFloatLayout = (RelativeLayout) inflater.inflate(R.layout.layout_search_result_view, null);
+        ivCloseSearch = mFloatLayout.findViewById(R.id.iv_close_search);
+        ivCloseSearch.setOnClickListener(mListener);
+        searchResultRecyclerView = mFloatLayout.findViewById(R.id.lv_search_result_recycler_view);
+        searchResultListAdapter = new SearchResultListAdapter(mContext, searchResultList);
+        searchResultRecyclerView.setAdapter(searchResultListAdapter);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        searchResultRecyclerView.setLayoutManager(linearLayoutManager);
+    }
+
+    /**
+     * 显示搜索结果悬浮窗
+     * @author wm
+     * @createTime 2023/9/2 14:18
+     */
+    private void showFloatView(List<SearchMusicBean> list) {
+        DebugLog.debug("---list " + list.size());
+        // 每次打开悬浮窗列表时都先同步一次数据
+        searchResultListAdapter.setMusicList(list);
+        mWindowManager.addView(mFloatLayout, wmParams);
     }
 
 }
