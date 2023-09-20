@@ -36,6 +36,7 @@ public class Constant {
     public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 5;
     public static final int HANDLER_MESSAGE_START_MAIN_VIEW = 6;
     public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 7;
+    public static final int HANDLER_MESSAGE_REFRESH_SEARCH_RESULT = 8;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;
@@ -50,4 +51,7 @@ public class Constant {
 
     public static final int MAX_LENGTH_OF_LIST_NAME = 10;
     public static final int HISTORY_LIST_MAX_SIZE = 50;
+
+    public static final int SEARCH_ALL_MUSIC_FLAG = 0;
+    public static final int SEARCH_LIST_MUSIC_FLAG = 1;
 }

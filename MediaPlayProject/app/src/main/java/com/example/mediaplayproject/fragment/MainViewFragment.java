@@ -10,9 +10,12 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -33,6 +36,7 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
 import com.example.mediaplayproject.adapter.viewpager.MainViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
+import com.example.mediaplayproject.bean.SearchMusicBean;
 import com.example.mediaplayproject.fragment.main.DiscoveryFragment;
 import com.example.mediaplayproject.fragment.main.PersonalPageFragment;
 import com.example.mediaplayproject.fragment.main.ToolsFragment;
@@ -46,6 +50,11 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -90,6 +99,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private Handler mActivityHandle;
     private Animation animation;
 
+    private List<SearchMusicBean> searchResultList = new ArrayList<>();
+
     public MainViewFragment(Context context) {
         mContext = context;
     }
@@ -103,6 +114,28 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
         return instance;
     }
+
+    private static final ExecutorService threadPool = new ThreadPoolExecutor(
+            2,
+            5,
+            2L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(3),
+            Executors.defaultThreadFactory(),
+            new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
+
+    final Handler mainViewHandler = new Handler(Looper.myLooper()) {
+        @SuppressLint("ResourceAsColor")
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_SEARCH_RESULT) {
+                // 全局搜索的handler消息
+                Toast.makeText(mContext,"resultListSize " + searchResultList.size(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -355,7 +388,10 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             if (customizeEditText != null){
                 String inputText = customizeEditText.getText().trim();
                 if (!"".equals(inputText)){
-                    Toast.makeText(mContext,"input " + inputText, Toast.LENGTH_SHORT).show();
+                    threadPool.execute(() -> {
+                        searchResultList = DataRefreshService.searchMusic(Constant.SEARCH_ALL_MUSIC_FLAG, "ALL",inputText);
+                        mainViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_REFRESH_SEARCH_RESULT,500);
+                    });
                 }
             }
         } else if (view == ivPlayMusic) {

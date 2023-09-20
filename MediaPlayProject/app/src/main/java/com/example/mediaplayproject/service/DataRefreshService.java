@@ -12,6 +12,7 @@ import android.os.IBinder;
 
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
+import com.example.mediaplayproject.bean.SearchMusicBean;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicDataBaseHelper;
@@ -42,7 +43,6 @@ public class DataRefreshService extends Service {
     private static List<MediaFileBean> defaultList = new ArrayList<>();
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
     private static List<MediaFileBean> historyList = new ArrayList<>();
-    private static List<MediaFileBean> historyListOut = new ArrayList<>();
 
 
     private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
@@ -102,7 +102,7 @@ public class DataRefreshService extends Service {
      */
     public static void initResource() {
         clearResource();
-        searchMusic();
+        searchMusicFromDevice();
 
         if (defaultList.size() <= 0){
             // 默认列表为空，则将数据表的内容清空,后续的操作不再执行
@@ -139,7 +139,6 @@ public class DataRefreshService extends Service {
         defaultList.clear();
         favoriteList.clear();
         historyList.clear();
-        historyListOut.clear();
     }
 
     /**
@@ -147,7 +146,7 @@ public class DataRefreshService extends Service {
      *  @author wm
      *  @createTime 2023/2/11 15:46
      */
-    private static void searchMusic() {
+    private static void searchMusicFromDevice() {
         SearchFiles mSearcherFiles = SearchFiles.getInstance(context);
         // 搜索设备里的所有音乐媒体文件，存储到默认列表中（默认列表就是设备里的所有音乐文件）
         defaultList = mSearcherFiles.getMusicInfo();
@@ -183,11 +182,6 @@ public class DataRefreshService extends Service {
             *
             * 使用下面这种则不会报错
             * db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE + " WHERE listName = ?", new String[]{Constant.LIST_MODE_DEFAULT_NAME});
-            *
-            * 所以想使用 db.execSQL()方法执行SQL语句时，不要使用SQL语句全拼接的形式，要使用带参数的格式，
-            * 或者采用这种分开的写法
-            *    String query = "SELECT * FROM " + ALL_MUSIC_LIST_TABLE + " WHERE listMode = " + Constant.LIST_SAVE_LIST_MODE_CUSTOMER;
-            *    Cursor cursor = db.rawQuery(query, null);
             * */
             
             for (MediaFileBean mediaFileBean : defaultList) {
@@ -978,6 +972,48 @@ public class DataRefreshService extends Service {
         bundle.putString("listName", listName);
         intent.putExtras(bundle);
         context.sendBroadcast(intent);
+    }
+
+    /**
+     *  搜索音乐
+     *  @author wm
+     *  @createTime 2023/9/20 15:29
+     * @param flag: 标志是否是全局搜索，0-全局搜索； 1-列表内搜索
+     * @param sourceList:列表名， 仅在非全局搜索下有用
+     * @param keyWord: 检索关键字
+     * @return : java.util.List<com.example.mediaplayproject.bean.SearchMusicBean>
+     */
+    public static List<SearchMusicBean> searchMusic(int flag, String sourceList, String keyWord){
+        DebugLog.debug("flag " + flag + "; sourceList " + sourceList + "; keyWord " + keyWord);
+        List<SearchMusicBean> resultList = new ArrayList<>();
+        String query = "";
+        if (Constant.SEARCH_ALL_MUSIC_FLAG == flag) {
+            // 全局搜索
+            query = "SELECT * FROM " + ALL_MUSIC_TABLE +
+                    " WHERE musicTitle LIKE '%" + keyWord + "%' OR musicArtist LIKE '%" + keyWord + "%'";
+        } else {
+            List<MediaFileBean> list = getMusicListByName(sourceList);
+            if (list != null && list.size() > 0) {
+                // 列表存在且里面数据不为空才执行查询
+                query = "SELECT * FROM " + ALL_MUSIC_TABLE +
+                        " WHERE listName = '" + sourceList + "' AND " +
+                        "( musicTitle LIKE '%" + keyWord + "%' OR musicArtist LIKE '%" + keyWord + "%' )";
+            }
+        }
+        if (!"".equals(query)) {
+            Cursor cursor = db.rawQuery(query, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    long musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
+                    String musicTitle = cursor.getString(cursor.getColumnIndex("musicTitle"));
+                    String listName = cursor.getString(cursor.getColumnIndex("listName"));
+                    SearchMusicBean searchMusicBean = new SearchMusicBean(musicId, musicTitle, listName);
+                    resultList.add(searchMusicBean);
+                } while (cursor.moveToNext());
+            }
+        }
+        DebugLog.debug(" resultList " + resultList.size());
+        return resultList;
     }
 
 }
