@@ -336,7 +336,7 @@ public class DataRefreshService extends Service {
                     lastMusicId = cursor.getLong(cursor.getColumnIndex("lastMusicId"));
                 } while (cursor.moveToNext());
                 // 拿到数据以后，根据不同的列表找出上次播放歌曲的position
-                findPositionFromList();
+                lastPosition = findPositionFromList(lastPlayListName,lastMusicId);
             } else {
                 // 首次使用时数据库中还没有数据,先插入一条空数据,否则后面的更新操作无法执行
                 ContentValues values = new ContentValues();
@@ -359,26 +359,28 @@ public class DataRefreshService extends Service {
      * @createTime 2023/2/16 17:28
      * @description 根据播放的列表和音乐的ID确定position
      */
-    private static void findPositionFromList() {
+    public static int findPositionFromList(String listName, long musicId) {
         try {
-            List<MediaFileBean> tempList = getMusicListByName(lastPlayListName);
+            List<MediaFileBean> tempList = getMusicListByName(listName);
+            int result = 0;
             if ((tempList == null) || (tempList.size() <= 0)) {
                 // 列表为空，直接返回
-                return;
+                return 0;
             }
             long tempId;
             for (int i = 0; i < tempList.size(); i++) {
                 tempId = tempList.get(i).getId();
-                if (tempId == lastMusicId) {
-                    lastPosition = i;
-                    //找到了就直接退出循环
+                if (tempId == musicId) {
+                    result = i;
+                    // 找到了就直接退出循环
                     break;
                 }
             }
+            return result;
         } catch (Exception exception){
             DebugLog.error("error " + exception.getMessage());
+            return 0;
         }
-
     }
 
     /**
@@ -981,7 +983,7 @@ public class DataRefreshService extends Service {
      * @param flag: 标志是否是全局搜索，0-全局搜索； 1-列表内搜索
      * @param sourceList:列表名， 仅在非全局搜索下有用
      * @param keyWord: 检索关键字
-     * @return : java.util.List<com.example.mediaplayproject.bean.SearchMusicBean>
+     * @return : List<SearchMusicBean> ：搜索结果列表，SearchMusicBean为自定义的JavaBean对象
      */
     public static List<SearchMusicBean> searchMusic(int flag, String sourceList, String keyWord){
         DebugLog.debug("flag " + flag + "; sourceList " + sourceList + "; keyWord " + keyWord);
