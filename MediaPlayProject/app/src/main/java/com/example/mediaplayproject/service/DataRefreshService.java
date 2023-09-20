@@ -797,7 +797,7 @@ public class DataRefreshService extends Service {
                         favoriteListMap.remove(musicId);
                         // 从数据库中删除信息
                         db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE  + " WHERE musicId = ? " +
-                                        " AND listName = " + Constant.LIST_MODE_FAVORITE_NAME,
+                                        " AND listName = '" + Constant.LIST_MODE_FAVORITE_NAME + "'",
                                 new Long[]{musicId});
                     }
                 }

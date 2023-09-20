@@ -285,7 +285,8 @@ public class MainActivity extends BasicActivity {
      */
     @SuppressLint("ClickableViewAccessibility")
     private void initDataDelay() {
-        // 初始化音乐列表资源, 这里可能service还没起来
+        // 初始化音乐列表资源,
+        // 这里不能将初始化操作放到DataRefreshService的onCreate中操作，因为首次启动app时可能获取到的列表为空
         DataRefreshService.initResource();
 
         // 从DataRefreshService中获取音乐列表，上次播放的信息等
