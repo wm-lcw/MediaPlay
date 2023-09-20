@@ -314,7 +314,7 @@ public class DataRefreshService extends Service {
                     } else {
                         // 无效数据，需要在数据表中删除该数据
                         db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE +
-                                        " WHERE listName = " + playListName + " AND musicId = ?",
+                                        " WHERE listName = '" + playListName + "' AND musicId = ?",
                                 new Long[]{});
                     }
                 } while (cursor.moveToNext());
@@ -688,7 +688,7 @@ public class DataRefreshService extends Service {
                         // 列表中存在该歌曲才删除数据
                         customerListsMap.get(listName).getMusicList().remove(defaultListMap.get(musicId));
                         db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE +
-                                        " WHERE listName = " + listName + " AND musicId = ?",
+                                        " WHERE listName = '" + listName + "' AND musicId = ?",
                                 new Long[]{musicId});
                     }
                 }
@@ -756,7 +756,7 @@ public class DataRefreshService extends Service {
                     favoriteListMap.remove(mediaFileBean.getId());
                     // 从数据库中删除信息
                     db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE  + " WHERE musicId = ? " +
-                                    " AND listName = " + Constant.LIST_MODE_FAVORITE_NAME,
+                                    " AND listName = '" + Constant.LIST_MODE_FAVORITE_NAME + "'",
                             new Long[]{mediaFileBean.getId()});
                 }
                 sendMusicChangeBroadcast(listName, Constant.CUSTOMER_MUSIC_OPERATOR_DELETE, false, lastMusicId);
