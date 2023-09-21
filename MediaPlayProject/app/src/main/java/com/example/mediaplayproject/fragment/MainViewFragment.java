@@ -137,18 +137,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             new ThreadPoolExecutor.DiscardOldestPolicy()
     );
 
-    final Handler mainViewHandler = new Handler(Looper.myLooper()) {
-        @SuppressLint("ResourceAsColor")
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_SEARCH_RESULT) {
-                // 全局搜索的handler消息
-                Toast.makeText(mContext,"resultListSize " + searchResultList.size(), Toast.LENGTH_SHORT).show();
-                showFloatView(searchResultList);
-            }
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -410,11 +398,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             ToolsUtils.getInstance().hideKeyboard(mainView);
             if (customizeEditText != null){
                 String inputText = customizeEditText.getText().trim();
-                if (!"".equals(inputText)){
-                    threadPool.execute(() -> {
-                        searchResultList = DataRefreshService.searchMusic(Constant.SEARCH_ALL_MUSIC_FLAG, "ALL",inputText);
-                        mainViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_REFRESH_SEARCH_RESULT,500);
-                    });
+                if (!"".equals(inputText)) {
+                    mWindowManager.addView(mFloatLayout, wmParams);
+                    DataRefreshService.searchMusic(Constant.SEARCH_ALL_MUSIC_FLAG, "ALL", inputText);
                 }
             }
         }  else if (view == ivCloseSearch) {
@@ -523,18 +509,19 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         searchResultRecyclerView.setLayoutManager(linearLayoutManager);
+
     }
 
     /**
-     * 显示搜索结果悬浮窗
-     * @author wm
-     * @createTime 2023/9/2 14:18
+     *  刷新搜索结果，DataRefreshService检索操作结束后发送广播给MainActivity，MainActivity再调用本方法
+     *  @author wm
+     *  @createTime 2023/9/21 14:39
      */
-    private void showFloatView(List<SearchMusicBean> list) {
-        DebugLog.debug("---list " + list.size());
-        // 每次打开悬浮窗列表时都先同步一次数据
-        searchResultListAdapter.setMusicList(list);
-        mWindowManager.addView(mFloatLayout, wmParams);
+    public void refreshSearchResult(){
+        searchResultList = DataRefreshService.getSearchResultList();
+        if (mFloatLayout.isAttachedToWindow()){
+            searchResultListAdapter.setMusicList(searchResultList);
+        }
     }
 
 }

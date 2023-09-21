@@ -640,6 +640,11 @@ public class MainActivity extends BasicActivity {
                 refreshFragmentStatus();
                 // 刷新播放列表的高亮状态
                 refreshListStatus();
+            } else if(Constant.REFRESH_SEARCH_RESULT_ACTION.equals(intent.getAction())) {
+                // DataRefreshService发送的广播，搜索操作结束后通知Activity更新MainViewFragment的搜索结果
+                if (mainViewFragment.isVisible()){
+                    mainViewFragment.refreshSearchResult();
+                }
             }
         }
     }
@@ -736,6 +741,7 @@ public class MainActivity extends BasicActivity {
         filter.addAction(Constant.OPERATE_CUSTOMER_MUSIC_LIST_ACTION);
         filter.addAction(Constant.OPERATE_MUSIC_ACTION);
         filter.addAction(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
+        filter.addAction(Constant.REFRESH_SEARCH_RESULT_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
     }

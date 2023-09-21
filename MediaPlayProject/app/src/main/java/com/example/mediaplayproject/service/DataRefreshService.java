@@ -44,6 +44,8 @@ public class DataRefreshService extends Service {
     private static List<MediaFileBean> favoriteList = new ArrayList<>();
     private static List<MediaFileBean> historyList = new ArrayList<>();
 
+    private static List<SearchMusicBean> searchResultList = new ArrayList<>();
+
 
     private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
     private static int lastPlayMode = 0;
@@ -983,11 +985,11 @@ public class DataRefreshService extends Service {
      * @param flag: 标志是否是全局搜索，0-全局搜索； 1-列表内搜索
      * @param sourceList:列表名， 仅在非全局搜索下有用
      * @param keyWord: 检索关键字
-     * @return : List<SearchMusicBean> ：搜索结果列表，SearchMusicBean为自定义的JavaBean对象
      */
-    public static List<SearchMusicBean> searchMusic(int flag, String sourceList, String keyWord){
+    public static void searchMusic(int flag, String sourceList, String keyWord){
         DebugLog.debug("flag " + flag + "; sourceList " + sourceList + "; keyWord " + keyWord);
-        List<SearchMusicBean> resultList = new ArrayList<>();
+        // 每次检索前先清空旧的记录
+        searchResultList.clear();
         String query = "";
         if (Constant.SEARCH_ALL_MUSIC_FLAG == flag) {
             // 全局搜索
@@ -1010,12 +1012,23 @@ public class DataRefreshService extends Service {
                     String musicTitle = cursor.getString(cursor.getColumnIndex("musicTitle"));
                     String listName = cursor.getString(cursor.getColumnIndex("listName"));
                     SearchMusicBean searchMusicBean = new SearchMusicBean(musicId, musicTitle, listName);
-                    resultList.add(searchMusicBean);
+                    searchResultList.add(searchMusicBean);
                 } while (cursor.moveToNext());
             }
         }
-        DebugLog.debug(" resultList " + resultList.size());
-        return resultList;
+        // 搜索成功了发送广播给Activity，更新搜索结果
+        Intent intent = new Intent(Constant.REFRESH_SEARCH_RESULT_ACTION);
+        context.sendBroadcast(intent);
+        DebugLog.debug(" searchResultList " + searchResultList.size());
     }
 
+    /**
+     *  获取搜索结果集合
+     *  @author wm
+     *  @createTime 2023/9/21 14:36
+     * @return : java.util.List<com.example.mediaplayproject.bean.SearchMusicBean>
+     */
+    public static List<SearchMusicBean> getSearchResultList() {
+        return searchResultList;
+    }
 }
