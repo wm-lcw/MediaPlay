@@ -31,11 +31,11 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
@@ -56,11 +56,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author wm
@@ -112,6 +107,18 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private RelativeLayout mFloatLayout;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams wmParams;
+    private EditText searchEditText;
+
+    final Handler mainViewHandler = new Handler(Looper.myLooper()) {
+        @SuppressLint("ResourceAsColor")
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == Constant.HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD) {
+                ToolsUtils.getInstance().showKeyBoard(searchEditText);
+            }
+        }
+    };
 
     public MainViewFragment(Context context) {
         mContext = context;
@@ -127,22 +134,12 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         return instance;
     }
 
-    private static final ExecutorService threadPool = new ThreadPoolExecutor(
-            2,
-            5,
-            2L,
-            TimeUnit.SECONDS,
-            new ArrayBlockingQueue<Runnable>(3),
-            Executors.defaultThreadFactory(),
-            new ThreadPoolExecutor.DiscardOldestPolicy()
-    );
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -151,12 +148,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 否则会重复创建MusicViewPagerAdapter等操作，引发异常
         initData();
         createFloatView();
-        mainView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                ToolsUtils.getInstance().hideKeyboard(mainView);
-                return false;
-            }
+        mainView.setOnTouchListener((View v,  MotionEvent event) -> {
+            ToolsUtils.getInstance().hideKeyboard(mainView);
+            return false;
         });
         return mainView;
     }
@@ -223,6 +217,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
         customizeEditText = mainView.findViewById(R.id.custom_edit_text);
+        searchEditText = customizeEditText.getEditText();
         ivSettings = mainView.findViewById(R.id.iv_setting);
         ivSearch = mainView.findViewById(R.id.iv_search);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
@@ -238,6 +233,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivDiscovery.setOnClickListener(mListener);
         ivPersonal.setOnClickListener(mListener);
         ivTools.setOnClickListener(mListener);
+
+        searchEditText.setOnClickListener(mListener);
 
         LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
@@ -394,6 +391,13 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             ToolsUtils.getInstance().hideKeyboard(mainView);
             // 打开侧滑栏
             drawerLayout.openDrawer(GravityCompat.START);
+        } else if (view == searchEditText) {
+            // 点击搜索框，先隐藏搜索结果，再唤出输入法
+            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
+                mWindowManager.removeView(mFloatLayout);
+            }
+            // 延迟一点再唤出键盘，避免结果的视图还没消失就唤出键盘，造成键盘唤出失败
+            mainViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD,200);
         } else if (view == ivSearch) {
             ToolsUtils.getInstance().hideKeyboard(mainView);
             if (customizeEditText != null){
@@ -403,7 +407,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                     DataRefreshService.searchMusic(Constant.SEARCH_ALL_MUSIC_FLAG, "ALL", inputText);
                 }
             }
-        }  else if (view == ivCloseSearch) {
+        } else if (view == ivCloseSearch) {
             searchResultList = null;
             if (mWindowManager != null && mFloatLayout.isAttachedToWindow()) {
                 // 在Fragment失去焦点时，悬浮窗关闭, 需要判断mFloatLayout正在显示才执行移除，否则会报错

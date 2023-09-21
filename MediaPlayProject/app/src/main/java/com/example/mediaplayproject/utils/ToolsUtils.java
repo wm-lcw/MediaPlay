@@ -35,4 +35,17 @@ public class ToolsUtils {
             view.clearFocus();
         }
     }
+
+    /**
+     *  开启键盘
+     *  @author wm
+     *  @createTime 2023/9/21 17:52
+     * @param view:
+     */
+    public void showKeyBoard(View view){
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (view != null) {
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
 }
