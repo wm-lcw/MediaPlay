@@ -20,6 +20,7 @@
     <color name="bg_volume_seekbar">#D6F2E9</color><!-- 音量条已覆盖的背景色 -->
     <color name="bg_volume_background">#4D91A2B7</color><!-- 音量条背景色 -->
     <color name="bg_volume_thumb">#00000000</color><!-- 音量条滑块背景色 -->
+    <color name="bg_search_view">#FAE7EAEB</color><!-- 搜索结果视图的背景 -->
     <!--透明-->
     <color name="transparent">#00000000</color>
     <!--半透明-->
