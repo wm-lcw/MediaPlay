@@ -6,8 +6,8 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -474,20 +474,22 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 获取的是WindowManagerImpl.CompatModeWrapper
         mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
         // 设置window type
-        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }
         // 设置背景为透明，否则滑动ListView会出现残影
         wmParams.format = PixelFormat.TRANSPARENT;
         // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        // 调整悬浮窗显示的停靠位置为左侧顶部
-        wmParams.gravity = Gravity.START | Gravity.TOP;
+        // 调整悬浮窗显示的停靠位置为顶部和水平方向上居中显示
+        wmParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = 0;
-        wmParams.y = 0;
+        wmParams.y = 140;
 
         // 设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         initFloatView();
     }
 
