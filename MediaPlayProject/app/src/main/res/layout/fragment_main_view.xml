@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <!--搜索栏-->
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/ll_top_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,16 +25,16 @@
                 android:id="@+id/iv_setting"
                 android:layout_width="@dimen/dp_35"
                 android:layout_height="@dimen/dp_35"
-                android:layout_gravity="start|center"
+                android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/dp_15"
                 android:src="@drawable/sidebar_button_style" />
 
             <com.example.mediaplayproject.view.CustomizeEditText
                 android:id="@+id/custom_edit_text"
-                android:layout_width="@dimen/dp_200"
-                android:layout_height="@dimen/dp_55"
+                android:layout_width="@dimen/dp_260"
+                android:layout_height="@dimen/dp_60"
+                android:layout_centerInParent="true"
                 android:layout_marginStart="@dimen/dp_30"
-                android:layout_gravity="center"
                 android:background="@null"
                 android:hint="music"
                 android:maxLength="5"
@@ -42,14 +42,15 @@
                 android:padding="10dp"
                 android:textColor="@color/black" />
             <ImageView
-                android:id="@+id/iv_search"
+                android:id="@+id/iv_main_view_more"
                 android:layout_width="@dimen/dp_35"
-                android:layout_height="@dimen/dp_45"
-                android:layout_marginStart="@dimen/dp_20"
-                android:layout_gravity="center"
-                android:src="@drawable/search_view_style" />
+                android:layout_height="@dimen/dp_35"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp_20"
+                android:src="@drawable/more_view_style"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <!--ViewPager-->
         <LinearLayout

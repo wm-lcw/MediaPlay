@@ -22,15 +22,26 @@
             android:textColorHint="@color/white"
             android:textSize="14sp" />
 
+
+
         <Button
             android:id="@+id/bt_clear"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_gravity="right|center_vertical"
-            android:layout_margin="10dp"
-            android:padding="5dp"
+            android:layout_margin="5dp"
             android:background="@mipmap/ic_delete_nor"
             tools:ignore="RtlHardcoded" />
+
+        <ImageView
+            android:id="@+id/iv_search"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/search_view_style"
+            tools:ignore="RtlHardcoded" />
+
     </LinearLayout>
 
 </LinearLayout>

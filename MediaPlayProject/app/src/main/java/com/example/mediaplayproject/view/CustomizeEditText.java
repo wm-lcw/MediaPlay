@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.mediaplayproject.R;
@@ -20,6 +21,7 @@ import com.example.mediaplayproject.R;
 public class CustomizeEditText extends LinearLayout implements View.OnClickListener, TextWatcher {
     private EditText editText;
     private Button clearButton;
+    private ImageView searchImageView;
 
     /**
      *  设置editText的提示文字
@@ -47,10 +49,12 @@ public class CustomizeEditText extends LinearLayout implements View.OnClickListe
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.view_edittext,this,true);
         editText = findViewById(R.id.et_view);
+        searchImageView =findViewById(R.id.iv_search);
         editText.addTextChangedListener(this);
         clearButton = findViewById(R.id.bt_clear);
         clearButton.setVisibility(GONE);
         clearButton.setOnClickListener(this);
+
     }
 
     @Override
@@ -97,5 +101,15 @@ public class CustomizeEditText extends LinearLayout implements View.OnClickListe
      */
     public EditText getEditText(){
         return editText;
+    }
+
+    /**
+     *  获取搜索图标
+     *  @author wm
+     *  @createTime 2023/9/21 19:37
+     * @return : android.widget.ImageView
+     */
+    public ImageView getSearchImageView() {
+        return searchImageView;
     }
 }

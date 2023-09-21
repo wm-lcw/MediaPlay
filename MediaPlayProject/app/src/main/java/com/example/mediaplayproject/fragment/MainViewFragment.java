@@ -218,8 +218,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
         customizeEditText = mainView.findViewById(R.id.custom_edit_text);
         searchEditText = customizeEditText.getEditText();
+        ivSearch = customizeEditText.getSearchImageView();
         ivSettings = mainView.findViewById(R.id.iv_setting);
-        ivSearch = mainView.findViewById(R.id.iv_search);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
         ivMusicList = mainView.findViewById(R.id.iv_current_list);
         ivDiscovery = mainView.findViewById(R.id.iv_discovery);
@@ -489,7 +489,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         wmParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
         wmParams.x = 0;
-        wmParams.y = 140;
+        wmParams.y = 160;
 
         // 设置悬浮窗口长宽数据
         wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
