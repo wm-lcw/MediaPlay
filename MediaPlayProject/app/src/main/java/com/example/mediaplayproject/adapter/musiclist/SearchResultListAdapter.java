@@ -42,7 +42,7 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
         // 文字选中的颜色
         text_selected_color = resources.getColor(R.color.text_pressed);
         // 文字未选中状态的selector
-        colors = mContext.getResources().getColorStateList(R.color.listview_text_color_selector);
+        colors = mContext.getResources().getColorStateList(R.color.search_view_text_color_selector);
         resources = null;
     }
 
@@ -61,10 +61,23 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onBindViewHolder(@NonNull SearchResultListAdapter.ViewHolder holder, int position) {
+
         SearchMusicBean searchMusicBean = musicList.get(position);
         holder.musicName.setText(searchMusicBean.getMusicTitle());
         holder.musicArtist.setText("原唱 ：" + searchMusicBean.getSourceArtist());
         holder.listName.setText(searchMusicBean.getSourceListName());
+
+        // 当前播放歌曲高亮显示
+        long currentMusicId = DataRefreshService.getLastMusicId();
+        String currentMusicList = DataRefreshService.getLastPlayListName();
+        boolean isCurrentId = musicList.get(position).getMusicId() == currentMusicId;
+        boolean isCurrentList = currentMusicList.equalsIgnoreCase(musicList.get(position).getSourceListName());
+        if (isCurrentId && isCurrentList) {
+            holder.musicName.setTextColor(text_selected_color);
+        }  else {
+            holder.musicName.setTextColor(colors);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             long musicId = musicList.get(position).getMusicId();
             String musicListName = musicList.get(position).getSourceListName();

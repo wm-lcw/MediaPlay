@@ -462,6 +462,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
         // 刷新播放状态信息
         initPlayStateAndInfo();
+
+        // 刷新搜索结果的高亮显示
+        if (searchResultListAdapter != null){
+            searchResultListAdapter.notifyDataSetChanged();
+        }
     }
 
 
