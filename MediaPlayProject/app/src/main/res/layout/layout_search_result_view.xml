@@ -27,12 +27,13 @@
                 android:text="SearchResult" />
             <ImageView
                 android:id="@+id/iv_close_search"
-                android:layout_width="@dimen/dp_40"
-                android:layout_height="@dimen/dp_40"
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="@dimen/dp_5"
                 android:layout_marginEnd="@dimen/dp_30"
-                android:src="@mipmap/ic_close_nor"/>
+                android:src="@mipmap/ic_delete_nor"/>
 
         </RelativeLayout>
 

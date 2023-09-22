@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,9 +8,12 @@
     android:orientation="vertical"
     android:background="@drawable/ic_music_start1">
     <LinearLayout
+        android:id="@+id/ll_top_title"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <!--顶部标题栏-返回键-功能键-->
         <RelativeLayout
             android:layout_marginTop="@dimen/dp_40"
             android:layout_width="match_parent"
@@ -49,6 +52,7 @@
                 android:src="@drawable/more_view_style"/>
         </RelativeLayout>
 
+        <!--音量条-->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,16 +85,15 @@
                 android:background="@drawable/volume_mute1_style"/>
         </RelativeLayout>
 
-
-
     </LinearLayout>
 
-
-
+    <!--播放器进度条-->
     <LinearLayout
+        android:id="@+id/ll_play_seekbar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="300dp"
+        android:layout_above="@+id/ll_bottom_view"
+        android:layout_marginBottom="40dp"
         android:orientation="horizontal"
         android:layout_gravity="center">
         <TextView
@@ -118,11 +121,16 @@
             android:layout_height="20dp"/>
 
     </LinearLayout>
+
+    <!--底部控制栏-上下曲、暂停-->
     <LinearLayout
-        android:layout_marginTop="50dp"
+        android:id="@+id/ll_bottom_view"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_30"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center">
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -191,4 +199,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

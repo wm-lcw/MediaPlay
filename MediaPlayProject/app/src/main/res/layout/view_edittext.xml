@@ -26,11 +26,11 @@
 
         <Button
             android:id="@+id/bt_clear"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="right|center_vertical"
             android:layout_margin="5dp"
-            android:background="@mipmap/ic_delete_nor"
+            android:background="@mipmap/ic_close_nor"
             tools:ignore="RtlHardcoded" />
 
         <ImageView
