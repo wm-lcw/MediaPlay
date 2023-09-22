@@ -63,6 +63,7 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
     public void onBindViewHolder(@NonNull SearchResultListAdapter.ViewHolder holder, int position) {
         SearchMusicBean searchMusicBean = musicList.get(position);
         holder.musicName.setText(searchMusicBean.getMusicTitle());
+        holder.musicArtist.setText("原唱 ：" + searchMusicBean.getSourceArtist());
         holder.listName.setText(searchMusicBean.getSourceListName());
         holder.itemView.setOnClickListener(v -> {
             long musicId = musicList.get(position).getMusicId();
@@ -87,12 +88,12 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView musicName;
-        TextView listName;
+        TextView musicName, musicArtist, listName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             musicName = itemView.findViewById(R.id.tv_music_name);
+            musicArtist = itemView.findViewById(R.id.tv_music_artist);
             listName = itemView.findViewById(R.id.tv_list_name);
         }
     }

@@ -1010,8 +1010,9 @@ public class DataRefreshService extends Service {
                 do {
                     long musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
                     String musicTitle = cursor.getString(cursor.getColumnIndex("musicTitle"));
+                    String musicArtist = cursor.getString(cursor.getColumnIndex("musicArtist"));
                     String listName = cursor.getString(cursor.getColumnIndex("listName"));
-                    SearchMusicBean searchMusicBean = new SearchMusicBean(musicId, musicTitle, listName);
+                    SearchMusicBean searchMusicBean = new SearchMusicBean(musicId, musicTitle, musicArtist, listName);
                     searchResultList.add(searchMusicBean);
                 } while (cursor.moveToNext());
             }

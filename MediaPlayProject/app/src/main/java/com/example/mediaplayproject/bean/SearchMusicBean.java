@@ -12,16 +12,19 @@ public class SearchMusicBean {
 
     private long musicId;
     private String musicTitle;
+    private String sourceArtist;
     private String sourceListName;
 
     public SearchMusicBean() {
     }
 
-    public SearchMusicBean(long musicId, String musicTitle, String sourceListName) {
+    public SearchMusicBean(long musicId, String musicTitle, String sourceArtist, String sourceListName) {
         this.musicId = musicId;
         this.musicTitle = musicTitle;
+        this.sourceArtist = sourceArtist;
         this.sourceListName = sourceListName;
     }
+
 
     public long getMusicId() {
         return musicId;
@@ -37,6 +40,14 @@ public class SearchMusicBean {
 
     public void setMusicTitle(String musicTitle) {
         this.musicTitle = musicTitle;
+    }
+
+    public String getSourceArtist() {
+        return sourceArtist;
+    }
+
+    public void setSourceArtist(String sourceArtist) {
+        this.sourceArtist = sourceArtist;
     }
 
     public String getSourceListName() {

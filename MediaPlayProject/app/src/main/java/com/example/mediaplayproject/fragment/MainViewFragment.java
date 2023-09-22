@@ -13,6 +13,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -515,7 +516,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         searchResultRecyclerView.setLayoutManager(linearLayoutManager);
-
+        // 添加Android自带的分割线
+        searchResultRecyclerView.addItemDecoration(new DividerItemDecoration(mContext,DividerItemDecoration.VERTICAL));
     }
 
     /**
