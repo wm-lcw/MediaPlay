@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -10,21 +10,24 @@
         android:text="title"
         android:singleLine="true"
         android:textSize="@dimen/sp_18"
-        android:gravity="center_vertical|left"
-        android:layout_gravity="center"
-        android:layout_width="@dimen/dp_100"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/dp_35"
-        android:layout_marginLeft="@dimen/dp_15" />
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/dp_15"
+        android:gravity="left"
+        android:layout_toStartOf="@+id/tv_list_name" />
 
     <TextView
         android:id="@+id/tv_list_name"
         android:text="listName"
         android:singleLine="true"
         android:textSize="@dimen/sp_18"
-        android:gravity="center_vertical|left"
-        android:layout_marginStart="@dimen/dp_50"
-        android:layout_gravity="center"
-        android:layout_width="@dimen/dp_100"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/dp_35"
-        android:layout_marginLeft="@dimen/dp_15" />
-</LinearLayout>
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/dp_15"
+        android:layout_marginEnd="@dimen/dp_15"
+        android:gravity="center"/>
+</RelativeLayout>
