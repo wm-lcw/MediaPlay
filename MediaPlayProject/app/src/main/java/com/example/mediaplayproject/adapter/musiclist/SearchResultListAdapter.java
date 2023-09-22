@@ -2,8 +2,10 @@ package com.example.mediaplayproject.adapter.musiclist;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.SearchMusicBean;
+import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.Constant;
 
 import java.util.List;
 
@@ -60,11 +64,26 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
         SearchMusicBean searchMusicBean = musicList.get(position);
         holder.musicName.setText(searchMusicBean.getMusicTitle());
         holder.listName.setText(searchMusicBean.getSourceListName());
+        holder.itemView.setOnClickListener(v -> {
+            long musicId = musicList.get(position).getMusicId();
+            String musicListName = musicList.get(position).getSourceListName();
+            int playPosition = DataRefreshService.findPositionFromList(musicListName,musicId);
+            Intent intent = new Intent(Constant.CHANGE_MUSIC_ACTION);
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", playPosition);
+            bundle.putString("musicListName", musicListName);
+            intent.putExtras(bundle);
+            mContext.sendBroadcast(intent);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return musicList.size();
+        if (musicList == null) {
+            return 0;
+        } else {
+            return musicList.size();
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
