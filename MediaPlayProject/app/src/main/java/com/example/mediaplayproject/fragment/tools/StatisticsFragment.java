@@ -33,7 +33,7 @@ public class StatisticsFragment extends Fragment {
 
     private View myView;
     private Context mContext;
-    private TextView tvPlayTotal, tvArtistTotal, tvPlayFromArtist;
+    private TextView tvPlayTotal, tvArtistTotal, tvPlayFromArtist, tvPlayTime;
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
@@ -73,6 +73,7 @@ public class StatisticsFragment extends Fragment {
         tvPlayTotal = myView.findViewById(R.id.tv_play_total);
         tvArtistTotal = myView.findViewById(R.id.tv_artist_total);
         tvPlayFromArtist = myView.findViewById(R.id.tv_play_from_artist_total);
+        tvPlayTime = myView.findViewById(R.id.tv_play_time);
     }
 
     @Override
@@ -89,35 +90,23 @@ public class StatisticsFragment extends Fragment {
     }
 
     final Handler toolsViewHandler = new Handler(Looper.myLooper()) {
-        @SuppressLint("ResourceAsColor")
+        @SuppressLint({"ResourceAsColor", "SetTextI18n"})
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
-                tvPlayTotal.setText("您播放最多的歌曲是 " + playTotalList.get(0).getKey() + " , 共播放了 " + playTotalList.get(0).getValue() + "次");
-                tvArtistTotal.setText("您最喜欢的歌手是 " + artistTotalList.get(0).getKey() + " , 共播放了 " + artistTotalList.get(0).getValue() + "首TA的音乐");
+                tvPlayTotal.setText("你播放最多的歌曲是 " + playTotalList.get(0).getKey()
+                        + " ,\n\t    共播放了 " + playTotalList.get(0).getValue() + "次");
+                tvArtistTotal.setText("你最喜欢的歌手是 " + artistTotalList.get(0).getKey()
+                        + " ,\n\t    共播放了 " + artistTotalList.get(0).getValue() + "首TA的音乐");
                 if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0) {
-
+                    tvPlayFromArtist.setText("在" + artistTotalList.get(0).getKey() + "的歌曲中你最喜欢 "
+                        + mostPlayFromArtistTotalList.get(0).getKey() + " ,\n\t    共播放了 "
+                        + mostPlayFromArtistTotalList.get(0).getValue() + "次");
                 }
-                tvPlayFromArtist.setText("在" + artistTotalList.get(0).getKey() + "的歌曲中你最喜欢 " + mostPlayFromArtistTotalList.get(0).getKey() + " , 共播放了 " + mostPlayFromArtistTotalList.get(0).getValue() + "次");
-                DebugLog.debug("time " + DataRefreshService.getTotalPlayTime());
-//                for (int i = 0; i < 3 ; i++){
-//                    DebugLog.debug("play total " + playTotalList.get(i).getKey()
-//                            + ";  " + playTotalList.get(i).getValue());
-//                }
-//
-//                for (int i = 0; i < 3 ; i++){
-//                    DebugLog.debug("play total " + artistTotalList.get(i).getKey()
-//                            + ";  " + artistTotalList.get(i).getValue());
-//                }
-//
-//                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0){
-//                    for (int i = 0 ; i < mostPlayFromArtistTotalList.size() ; i++){
-//                        DebugLog.debug("" + mostPlayFromArtistTotalList.get(i).getKey() +
-//                                "; " + mostPlayFromArtistTotalList.get(i).getValue());
-//                    }
-//
-//                }
+                long count = DataRefreshService.getTotalPlayTime()/240;
+                tvPlayTime.setText("你一共听了 " + DataRefreshService.getTotalPlayTime() + " 秒的音乐"
+                        + " ,\n\t    约等于听了 " + count + " 首音乐");
 
 
             }
