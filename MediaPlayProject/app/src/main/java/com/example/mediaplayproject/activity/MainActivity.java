@@ -349,7 +349,7 @@ public class MainActivity extends BasicActivity {
             if (mainViewFragment.isVisible()) {
                 //调用双击退出函数
                 exitBy2Click();
-            } else if (musicPlayFragment.isVisible()) {
+            } else if (musicPlayFragment.isVisible() || statisticsFragment.isVisible()) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.fl_main_view, mainViewFragment);
