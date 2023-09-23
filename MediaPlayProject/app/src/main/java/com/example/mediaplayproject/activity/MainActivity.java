@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -107,7 +108,7 @@ public class MainActivity extends BasicActivity {
                 musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
                 musicService.initPlayHelper(handler);
                 // 需要等musicService起来之后再给Fragment传参数
-                mainViewFragment.setDataFromMainActivity(musicService, handler, myFragmentCallBack);
+                mainViewFragment.setDataFromMainActivity(musicService, handler);
                 musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
             }
         }
@@ -305,7 +306,7 @@ public class MainActivity extends BasicActivity {
         createFloatView();
 
         // 创建Fragment实例，并加载显示MainViewFragment
-        splashFragment = SplashFragment.getInstance(mContext, handler);
+        splashFragment = SplashFragment.getInstance(mContext);
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
         statisticsFragment = StatisticsFragment.getInstance(mContext);
@@ -318,7 +319,6 @@ public class MainActivity extends BasicActivity {
         // 启动MusicPlayService服务
         Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
-
         registerReceiver();
     }
 
@@ -350,10 +350,7 @@ public class MainActivity extends BasicActivity {
                 //调用双击退出函数
                 exitBy2Click();
             } else if (musicPlayFragment.isVisible() || statisticsFragment.isVisible()) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fl_main_view, mainViewFragment);
-                transaction.commit();
+                returnMainFragment();
             }
         }
         return false;
@@ -378,28 +375,6 @@ public class MainActivity extends BasicActivity {
             }, 2, 10, TimeUnit.SECONDS);
         } else {
             moveTaskToBack(false);
-        }
-    }
-
-
-    public interface FragmentCallBack {
-        /**
-         * 切换Fragment
-         * @author wm
-         * @createTime 2023/8/23 18:31
-         */
-        void changeFragment();
-    }
-    public MyFragmentCallBack myFragmentCallBack = new MyFragmentCallBack();
-    public class MyFragmentCallBack implements FragmentCallBack {
-        @Override
-        public void changeFragment() {
-            // 切换Fragment，后续拓展多个Fragment
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.addToBackStack(null);
-            transaction.replace(R.id.fl_main_view, musicPlayFragment);
-            transaction.commit();
         }
     }
 
@@ -435,16 +410,6 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT) {
                 // 显示音乐列表悬浮窗
                 showFloatView();
-            } else if (msg.what == Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW) {
-                // 回退到主页Fragment，之前切换到PlayFragment时需要加上transaction.addToBackStack(null);
-                getSupportFragmentManager().popBackStack();
-            } else if (msg.what == Constant.HANDLER_MESSAGE_START_MAIN_VIEW) {
-                // 入场动画结束，进入主页Fragment
-                // musicService连接完成时已经调用setDataFromMainActivity设置参数了，不需要重新设置
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fl_main_view, mainViewFragment);
-                transaction.commit();
             } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY) {
                 // 权限申请操作完成后，此时service可能没有完全起来，需要延时一会才能获取service对象进行初始化
                 initDataDelay();
@@ -655,24 +620,14 @@ public class MainActivity extends BasicActivity {
                 // 切换Fragment的广播
                 String fragmentName = intent.getExtras().getString("fragment");
                 DebugLog.debug("action fragment "  + fragmentName);
-                if ("statisticsFragment".equals(fragmentName)) {
-                    try{
-                        FragmentManager fragmentManager = getSupportFragmentManager();
-                        FragmentTransaction transaction = fragmentManager.beginTransaction();
-                        transaction.addToBackStack(null);
-                        transaction.replace(R.id.fl_main_view, statisticsFragment);
-                        transaction.commit();
-                    } catch (Exception e) {
-                        DebugLog.debug(e.getMessage());
-                    }
-
+                if (Constant.STATISTICS_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
+                    changeFragment(statisticsFragment);
+                } else if (Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
+                    changeFragment(musicPlayFragment);
                 }
             } else if(Constant.RETURN_MAIN_VIEW_ACTION.equals(intent.getAction())) {
-                // 返回MainViewFragment的广播
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fl_main_view, mainViewFragment);
-                transaction.commit();
+                // 返回或进入MainViewFragment的广播
+                returnMainFragment();
             }
         }
     }
@@ -790,6 +745,40 @@ public class MainActivity extends BasicActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     *  返回MainViewFragment的操作
+     *  @author wm
+     *  @createTime 2023/9/24 0:06
+     */
+    private void returnMainFragment(){
+        try {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.fl_main_view, mainViewFragment);
+            transaction.commit();
+        } catch (Exception exception){
+            DebugLog.debug(exception.getMessage());
+        }
+    }
+
+    /**
+     *  切换其他Fragment的操作
+     *  @author wm
+     *  @createTime 2023/9/24 0:14
+     * @param fragment: 要切换的Fragment
+     */
+    private void changeFragment(Fragment fragment){
+        try {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.addToBackStack(null);
+            transaction.replace(R.id.fl_main_view, fragment);
+            transaction.commit();
+        } catch (Exception exception){
+            DebugLog.debug(exception.getMessage());
         }
     }
 }

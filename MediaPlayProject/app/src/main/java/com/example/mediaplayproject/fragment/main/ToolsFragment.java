@@ -81,7 +81,7 @@ public class ToolsFragment extends Fragment {
         if (view == btnTest) {
             Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
             Bundle bundle = new Bundle();
-            bundle.putString("fragment", "statisticsFragment");
+            bundle.putString("fragment", Constant.STATISTICS_FRAGMENT_ACTION_FLAG);
             intent.putExtras(bundle);
             mContext.sendBroadcast(intent);
         }

@@ -32,12 +32,10 @@ public class Constant {
     public static final int HANDLER_MESSAGE_REFRESH_PLAY_STATE = 1;
     public static final int HANDLER_MESSAGE_REFRESH_LIST_STATE = 2;
     public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
-    public static final int HANDLER_MESSAGE_RETURN_MAIN_VIEW = 4;
-    public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 5;
-    public static final int HANDLER_MESSAGE_START_MAIN_VIEW = 6;
-    public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 7;
-    public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 8;
-    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 9;
+    public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 4;
+    public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 5;
+    public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 6;
+    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 7;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;
@@ -58,4 +56,7 @@ public class Constant {
 
     public static final int SEARCH_ALL_MUSIC_FLAG = 0;
     public static final int SEARCH_LIST_MUSIC_FLAG = 1;
+
+    public static final String STATISTICS_FRAGMENT_ACTION_FLAG = "StatisticsFragment";
+    public static final String MUSIC_PLAY_FRAGMENT_ACTION_FLAG = "MusicPlayFragment";
 }

@@ -92,6 +92,7 @@ public class MusicPlayFragment extends Fragment {
     public void onStart() {
         super.onStart();
         DebugLog.debug("");
+        bindView();
         registerReceiver();
     }
 
@@ -115,7 +116,6 @@ public class MusicPlayFragment extends Fragment {
     public void onResume() {
         super.onResume();
         DebugLog.debug("");
-        bindView();
         initData();
         initPlayStateAndInfo();
         initVolume();
@@ -268,10 +268,9 @@ public class MusicPlayFragment extends Fragment {
         @Override
         public void onClick(View view) {
             if (view == ivBack) {
-                // 返回主页，需要发送消息给Activity调用getSupportFragmentManager()去处理
-                Message msg = new Message();
-                msg.what = Constant.HANDLER_MESSAGE_RETURN_MAIN_VIEW;
-                mActivityHandle.sendMessage(msg);
+                // 返回主页
+                Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
+                mContext.sendBroadcast(intent);
             } else if (view == ivMore) {
                 DebugLog.debug("more");
             } else if (view == ivMute) {

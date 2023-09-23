@@ -5,6 +5,7 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
@@ -88,7 +89,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivPlayRevolve;
     private TextView tvCurrentMusicInfo;
 
-    private MainActivity.MyFragmentCallBack myFragmentCallBack;
 
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private List<MediaFileBean> defaultList = new ArrayList<>();
@@ -187,10 +187,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void setDataFromMainActivity(MusicPlayService service, Handler handler, MainActivity.MyFragmentCallBack fragmentCallBack) {
+    public void setDataFromMainActivity(MusicPlayService service, Handler handler) {
         musicService = service;
         this.mActivityHandle = handler;
-        myFragmentCallBack = fragmentCallBack;
     }
 
     /**
@@ -439,7 +438,11 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
 
         // 点击到其他区域，就跳转进去MusicPlayFragment页面
-        myFragmentCallBack.changeFragment();
+        Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putString("fragment", Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG);
+        intent.putExtras(bundle);
+        mContext.sendBroadcast(intent);
     };
 
 

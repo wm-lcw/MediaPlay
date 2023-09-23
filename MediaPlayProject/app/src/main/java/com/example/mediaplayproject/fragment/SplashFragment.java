@@ -2,6 +2,7 @@ package com.example.mediaplayproject.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -26,17 +27,15 @@ public class SplashFragment extends Fragment {
     private TranslateAnimation translateAnimation;
     private View splashView;
     private Context mContext;
-    private Handler mHandler;
-    public SplashFragment(Context context, Handler handler) {
+    public SplashFragment(Context context) {
         mContext = context;
-        mHandler = handler;
     }
     @SuppressLint("StaticFieldLeak")
     private static SplashFragment instance;
 
-    public static SplashFragment getInstance(Context context, Handler handler) {
+    public static SplashFragment getInstance(Context context) {
         if (instance == null) {
-            instance = new SplashFragment(context, handler);
+            instance = new SplashFragment(context);
         }
         return instance;
     }
@@ -61,7 +60,7 @@ public class SplashFragment extends Fragment {
         tvTranslate.post(() -> {
             // 通过post拿到的tvTranslate.getWidth()不会为0。
             translateAnimation = new TranslateAnimation(0, tvTranslate.getWidth(), 0, 0);
-            translateAnimation.setDuration(1000);
+            translateAnimation.setDuration(1500);
             translateAnimation.setFillAfter(true);
             tvTranslate.startAnimation(translateAnimation);
 
@@ -74,10 +73,10 @@ public class SplashFragment extends Fragment {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    // 动画结束时跳转到主页面
-                    Message msg = new Message();
-                    msg.what = Constant.HANDLER_MESSAGE_START_MAIN_VIEW;
-                    mHandler.sendMessage(msg);
+                    // 动画结束时跳转到主页面, musicService连接完成时已经调用setDataFromMainActivity设置参数了
+                    // 直接切换Fragment即可，不需要重新设置MainViewFragment的参数
+                    Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
+                    mContext.sendBroadcast(intent);
                 }
 
                 @Override
