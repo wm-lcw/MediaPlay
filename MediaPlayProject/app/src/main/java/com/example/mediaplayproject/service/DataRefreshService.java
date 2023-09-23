@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -19,6 +20,7 @@ import com.example.mediaplayproject.utils.MusicDataBaseHelper;
 import com.example.mediaplayproject.utils.SearchFiles;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,8 @@ public class DataRefreshService extends Service {
     private static List<MediaFileBean> historyList = new ArrayList<>();
 
     private static List<SearchMusicBean> searchResultList = new ArrayList<>();
+
+    private static HashMap<Long, Integer> playTotalMap = new HashMap<>();
 
 
     private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
@@ -174,6 +178,9 @@ public class DataRefreshService extends Service {
                 } while (cursor.moveToNext());
             }
 
+            // 清空前调用一次，避免清空时，播放次数的数据丢失
+            initPlayTotals();
+
             // 先清空默认列表的歌曲，再重新添加一次
             db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE + " WHERE listName = ?",
                     new String[]{Constant.LIST_MODE_DEFAULT_NAME});
@@ -185,27 +192,61 @@ public class DataRefreshService extends Service {
             * 使用下面这种则不会报错
             * db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE + " WHERE listName = ?", new String[]{Constant.LIST_MODE_DEFAULT_NAME});
             * */
-            
+            int playTotals = 0;
             for (MediaFileBean mediaFileBean : defaultList) {
-                
                 // 将默认列表中的音乐放到HashMap中，主要是为了后面筛选自定义列表中的歌曲
                 defaultListMap.put(mediaFileBean.getId(), mediaFileBean);
+                if (playTotalMap.containsKey(mediaFileBean.getId())) {
+                    playTotals = playTotalMap.get(mediaFileBean.getId());
+                } else {
+                    playTotals = 0;
+                }
 
                 // 将数据重新写入数据库
                 ContentValues values = new ContentValues();
                 values.put("musicId", mediaFileBean.getId());
                 values.put("musicTitle", mediaFileBean.getTitle());
                 values.put("musicArtist", mediaFileBean.getArtist());
+                values.put("playTotal", playTotals);
                 values.put("listName", Constant.LIST_MODE_DEFAULT_NAME);
                 values.put("listMode", Constant.LIST_SAVE_LIST_MODE_DEFAULT);
                 values.put("listId", defaultListId);
                 db.insert(ALL_MUSIC_TABLE, null, values);
             }
+
+            // 写入默认列表后再次读取数据，过滤一些已删除歌曲的数据
+            initPlayTotals();
+
         } catch (Exception exception){
             DebugLog.error("error " + exception.getMessage());
             clearResource();
         }
 
+    }
+
+    /**
+     *  获取歌曲播放次数，并存入对应的Map中
+     *  @author wm
+     *  @createTime 2023/9/23 11:30
+     */
+    private static void initPlayTotals(){
+        try {
+            playTotalMap.clear();
+            // 获取歌曲播放次数(数据只存在默认列表中)
+            String queryPlayTotal = "SELECT * FROM " + ALL_MUSIC_TABLE +
+                    " WHERE listMode = " + Constant.LIST_SAVE_LIST_MODE_DEFAULT;
+            Cursor cursor = db.rawQuery(queryPlayTotal, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    long musicId = cursor.getLong(cursor.getColumnIndex("musicId"));
+                    int playTotal = cursor.getInt(cursor.getColumnIndex("playTotal"));
+                    playTotalMap.put(musicId, playTotal);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception exception){
+            DebugLog.error("error " + exception.getMessage());
+        }
     }
 
     /**
@@ -524,6 +565,9 @@ public class DataRefreshService extends Service {
             if (!isMusicIdSame && defaultListMap.containsKey(lastMusicId)){
                 // 只根据id去判定历史播放记录，id更改才刷新播放记录
                 addHistoryMusic(defaultListMap.get(lastMusicId));
+
+                // 更新歌曲的播放次数（后面拓展播放时间）
+                updatePlayTotalInfo(lastMusicId);
             }
         } catch (Exception exception){
             DebugLog.error("error " + exception.getMessage());
@@ -550,6 +594,64 @@ public class DataRefreshService extends Service {
             DebugLog.error("error " + exception.getMessage());
         }
 
+    }
+
+    /**
+     *  更新播放次数Map和数据表中的音乐播放次数
+     *  @author wm
+     *  @createTime 2023/9/23 11:51
+     * @param musicId:
+     * @return : void
+     */
+    private static void updatePlayTotalInfo(Long musicId) {
+        try {
+            int playTotal = 0;
+            if (playTotalMap != null  && playTotalMap.containsKey(musicId)) {
+                playTotal = playTotalMap.get(musicId) + 1;
+                playTotalMap.put(musicId,playTotal);
+            }
+            ContentValues values = new ContentValues();
+            values.put("playTotal", playTotal);
+            String selection = "listMode = ? AND musicId = ?";
+            String[] selectionArgs = {String.valueOf(Constant.LIST_SAVE_LIST_MODE_DEFAULT), String.valueOf(musicId)};
+            // 这里的返回值可以判断操作是否成功，返回值大于0表示操作成功（更新操作的行）
+            int update = db.update(ALL_MUSIC_TABLE, values, selection, selectionArgs);
+        } catch (Exception exception){
+            DebugLog.error("error " + exception.getMessage());
+        }
+    }
+
+    /**
+     *  获取音乐播放的次数统计列表（降序）
+     *  @author wm
+     *  @createTime 2023/9/23 15:05
+     * @return : java.util.List<java.util.Map.Entry<java.lang.String,java.lang.Integer>>
+     */
+    public static List<Map.Entry<String, Integer>> getPlayTotalList() {
+        try {
+            // 将<musicId, total> 转为 <musicName, total>，方便UI展示
+            HashMap<String, Integer> playNameTotalMap = new HashMap<>(playTotalMap.size());
+            for (Map.Entry<Long, Integer> entry : playTotalMap.entrySet()) {
+                String musicName = defaultListMap.get(entry.getKey()).getTitle();
+                playNameTotalMap.put(musicName, entry.getValue());
+            }
+            // 转换为list,再重写sort比较器
+            List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>(playNameTotalMap.entrySet());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                playTotalList.sort(new Comparator<Map.Entry<String, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                        return o2.getValue().compareTo(o1.getValue());
+                    }
+                });
+            }
+            // 这里拿到的playTotalList已经是一个按照播放次数降序的List
+            DebugLog.debug("playTotalList " + playTotalList);
+            return playTotalList;
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+            return null;
+        }
     }
 
     /**

@@ -53,10 +53,11 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
             "musicId long(20)," +
             "musicTitle TEXT," +
             "musicArtist TEXT," +
+            "playTotal INTEGER," +
             "listName TEXT," +
             "listMode INTEGER," +
             "listId INTEGER," +
-            "FOREIGN KEY(listId) REFERENCES AllListsTable(id)" +
+            "FOREIGN KEY(listId) REFERENCES allListsTable(id)" +
             "ON DELETE CASCADE " +
             "ON UPDATE CASCADE)";
 

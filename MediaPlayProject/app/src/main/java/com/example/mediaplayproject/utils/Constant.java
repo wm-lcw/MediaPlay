@@ -37,6 +37,7 @@ public class Constant {
     public static final int HANDLER_MESSAGE_START_MAIN_VIEW = 6;
     public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 7;
     public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 8;
+    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 9;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;
