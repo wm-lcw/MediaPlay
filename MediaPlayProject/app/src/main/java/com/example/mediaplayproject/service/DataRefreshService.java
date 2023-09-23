@@ -58,6 +58,7 @@ public class DataRefreshService extends Service {
     private static int lastPlayMode = 0;
     private static int lastPosition = 0;
     private static long lastMusicId = 0;
+    private static long totalPlayTime = 0;
 
     private final static String ALL_MUSIC_LIST_TABLE = "allListsTable";
     private final static String ALL_MUSIC_TABLE = "allMusicTable";
@@ -380,6 +381,7 @@ public class DataRefreshService extends Service {
                     lastPlayListName = cursor.getString(cursor.getColumnIndex("lastPlayListName"));
                     lastPlayMode = cursor.getInt(cursor.getColumnIndex("lastPlayMode"));
                     lastMusicId = cursor.getLong(cursor.getColumnIndex("lastMusicId"));
+                    totalPlayTime = cursor.getLong(cursor.getColumnIndex("totalPlayTime"));
                 } while (cursor.moveToNext());
                 // 拿到数据以后，根据不同的列表找出上次播放歌曲的position
                 lastPosition = findPositionFromList(lastPlayListName,lastMusicId);
@@ -390,6 +392,7 @@ public class DataRefreshService extends Service {
                 values.put("lastPlayListName", lastPlayListName);
                 values.put("lastPlayMode", lastPlayMode);
                 values.put("lastMusicId", lastMusicId);
+                values.put("totalPlayTime", totalPlayTime);
                 // 参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
                 db.insert(LAST_MUSIC_INFO_TABLE, null, values);
             }
@@ -475,7 +478,14 @@ public class DataRefreshService extends Service {
         return lastMusicId;
     }
 
+    public static long getTotalPlayTime() {
+        return totalPlayTime;
+    }
 
+    public static void setTotalPlayTime(long totalPlayTime) {
+        DataRefreshService.totalPlayTime = totalPlayTime;
+        updateLastInfo();
+    }
 
     public static List<MediaFileBean> getDefaultList() {
         return defaultList;
@@ -585,11 +595,12 @@ public class DataRefreshService extends Service {
      */
     private static void updateLastInfo() {
         try {
-            DebugLog.debug("lastPlayListName " + lastPlayListName + "; lastMusicId " + lastMusicId);
+//            DebugLog.debug("lastPlayListName " + lastPlayListName + "; lastMusicId " + lastMusicId);
             ContentValues values = new ContentValues();
             values.put("lastPlayListName", lastPlayListName);
             values.put("lastPlayMode", lastPlayMode);
             values.put("lastMusicId", lastMusicId);
+            values.put("totalPlayTime", totalPlayTime);
             String selection = "infoRecord LIKE ?";
             String[] selectionArgs = {"lastMusicInfo"};
             db.update(LAST_MUSIC_INFO_TABLE, values, selection, selectionArgs);

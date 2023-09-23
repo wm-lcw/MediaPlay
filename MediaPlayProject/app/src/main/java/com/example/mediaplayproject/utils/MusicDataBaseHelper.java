@@ -35,7 +35,8 @@ public class MusicDataBaseHelper extends SQLiteOpenHelper {
             "infoRecord TEXT," +
             "lastPlayListName TEXT," +
             "lastPlayMode integer DEFAULT 0," +
-            "lastMusicId long(20))";
+            "lastMusicId long(20), " +
+            "totalPlayTime long(20))";
 
     /**
      * 创建所有音乐列表的表，这里要先比ALL_MUSIC表先建立，因为ALL_MUSIC表中使用了AllListsTable表的id作为外键

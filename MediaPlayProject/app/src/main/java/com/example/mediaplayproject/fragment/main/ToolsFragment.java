@@ -91,23 +91,24 @@ public class ToolsFragment extends Fragment {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
-                for (int i = 0; i < 3 ; i++){
-                    DebugLog.debug("play total " + playTotalList.get(i).getKey()
-                            + ";  " + playTotalList.get(i).getValue());
-                }
-
-                for (int i = 0; i < 3 ; i++){
-                    DebugLog.debug("play total " + artistTotalList.get(i).getKey()
-                            + ";  " + artistTotalList.get(i).getValue());
-                }
-
-                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0){
-                    for (int i = 0 ; i < mostPlayFromArtistTotalList.size() ; i++){
-                        DebugLog.debug("" + mostPlayFromArtistTotalList.get(i).getKey() +
-                                "; " + mostPlayFromArtistTotalList.get(i).getValue());
-                    }
-
-                }
+                DebugLog.debug("time " + DataRefreshService.getTotalPlayTime());
+//                for (int i = 0; i < 3 ; i++){
+//                    DebugLog.debug("play total " + playTotalList.get(i).getKey()
+//                            + ";  " + playTotalList.get(i).getValue());
+//                }
+//
+//                for (int i = 0; i < 3 ; i++){
+//                    DebugLog.debug("play total " + artistTotalList.get(i).getKey()
+//                            + ";  " + artistTotalList.get(i).getValue());
+//                }
+//
+//                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0){
+//                    for (int i = 0 ; i < mostPlayFromArtistTotalList.size() ; i++){
+//                        DebugLog.debug("" + mostPlayFromArtistTotalList.get(i).getKey() +
+//                                "; " + mostPlayFromArtistTotalList.get(i).getValue());
+//                    }
+//
+//                }
 
 
             }

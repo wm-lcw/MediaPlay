@@ -32,6 +32,11 @@ import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 音乐播放器service，用于支持后台播放
@@ -62,6 +67,18 @@ public class MusicPlayService extends Service {
     private int playMode = 0;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
 
+    private Long playTotalTime = 0L;
+
+    private static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(
+            2,
+            5,
+            2L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(3),
+            Executors.defaultThreadFactory(),
+            new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -69,6 +86,26 @@ public class MusicPlayService extends Service {
         createNotificationChannel();
         //注册广播接收器
         registerMusicReceiver();
+
+        // 开始计时器
+        startRecordPlayTime();
+    }
+
+    private void startRecordPlayTime() {
+        playTotalTime = DataRefreshService.getTotalPlayTime();
+        THREAD_POOL.execute(() -> {
+            while (true) {
+                if (helper != null && helper.isPlaying()){
+                    playTotalTime++;
+                    DataRefreshService.setTotalPlayTime(playTotalTime);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
