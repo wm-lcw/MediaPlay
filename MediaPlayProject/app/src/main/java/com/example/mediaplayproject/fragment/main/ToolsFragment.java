@@ -36,6 +36,7 @@ public class ToolsFragment extends Fragment {
     private Button btnTest;
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
+    private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
 
     private static ToolsFragment instance;
     public static ToolsFragment getInstance() {
@@ -80,6 +81,7 @@ public class ToolsFragment extends Fragment {
     private void refreshDataFromService(){
         playTotalList = DataRefreshService.getPlayTotalList();
         artistTotalList = DataRefreshService.getArtistTotalList();
+        mostPlayFromArtistTotalList = DataRefreshService.getMostPlayFromArtistTotalList(artistTotalList.get(0));
         toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
     }
 
@@ -98,6 +100,16 @@ public class ToolsFragment extends Fragment {
                     DebugLog.debug("play total " + artistTotalList.get(i).getKey()
                             + ";  " + artistTotalList.get(i).getValue());
                 }
+
+                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0){
+                    for (int i = 0 ; i < mostPlayFromArtistTotalList.size() ; i++){
+                        DebugLog.debug("" + mostPlayFromArtistTotalList.get(i).getKey() +
+                                "; " + mostPlayFromArtistTotalList.get(i).getValue());
+                    }
+
+                }
+
+
             }
         }
     };

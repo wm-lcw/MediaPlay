@@ -51,6 +51,7 @@ public class DataRefreshService extends Service {
     private static List<SearchMusicBean> searchResultList = new ArrayList<>();
 
     private static HashMap<Long, Integer> playTotalMap = new HashMap<>();
+    private static List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
 
 
     private static String lastPlayListName = Constant.LIST_MODE_DEFAULT_NAME;
@@ -665,6 +666,7 @@ public class DataRefreshService extends Service {
     @Nullable
     public static List<Map.Entry<String, Integer>> getArtistTotalList() {
         try {
+            artistTotalList.clear();
             HashMap<String, Integer> artistNameTotalMap = new HashMap<>();
             int tempTotal;
             for (Map.Entry<Long, Integer> entry : playTotalMap.entrySet()) {
@@ -677,7 +679,7 @@ public class DataRefreshService extends Service {
                 artistNameTotalMap.put(artist, tempTotal);
             }
             // 转换为list,再重写sort比较器
-            List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>(artistNameTotalMap.entrySet());
+            artistTotalList = new ArrayList<>(artistNameTotalMap.entrySet());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 artistTotalList.sort(new Comparator<Map.Entry<String, Integer>>() {
                     @Override
@@ -687,6 +689,48 @@ public class DataRefreshService extends Service {
                 });
             }
             return artistTotalList;
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     *  获取歌手总播放列表中播放最多的歌曲
+     *  @author wm
+     *  @createTime 2023/9/23 16:47
+     * @param artistItem: Map.Entry<String, Integer>, 传的参数是artistTotalList中的元素
+     * @return : java.util.List<java.util.Map.Entry<java.lang.String,java.lang.Integer>>
+     */
+    @Nullable
+    public static List<Map.Entry<String, Integer>> getMostPlayFromArtistTotalList(Map.Entry<String, Integer> artistItem) {
+        try {
+            if (!artistTotalList.contains(artistItem)) {
+                DebugLog.debug("null");
+                return null;
+            }
+            String artistName = artistItem.getKey();
+            HashMap<String, Integer> musicFromArtistTotalMap = new HashMap<>();
+            // 获取默认列表中歌手为artistName的数据项
+            String query = "SELECT * FROM " + ALL_MUSIC_TABLE +
+                    " WHERE listMode = " + Constant.LIST_SAVE_LIST_MODE_DEFAULT +
+                    " AND musicArtist = '" + artistName +"'";
+            Cursor cursor = db.rawQuery(query, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    String musicName = cursor.getString(cursor.getColumnIndex("musicTitle"));
+                    int musicTotal = cursor.getInt(cursor.getColumnIndex("playTotal"));
+                    musicFromArtistTotalMap.put(musicName, musicTotal);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            DebugLog.debug("musicFromArtistTotalMap size " + musicFromArtistTotalMap.size());
+            // 转换为list,再重写sort比较器
+            List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>(musicFromArtistTotalMap.entrySet());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mostPlayFromArtistTotalList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+            }
+            return mostPlayFromArtistTotalList;
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
             return null;
