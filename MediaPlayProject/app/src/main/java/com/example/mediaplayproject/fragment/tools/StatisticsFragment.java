@@ -1,4 +1,4 @@
-package com.example.mediaplayproject.fragment.main;
+package com.example.mediaplayproject.fragment.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -14,79 +14,72 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
-import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 /**
- * @author wm
+ * @Description: java类作用描述
+ * @author: wm
  */
-public class ToolsFragment extends Fragment {
+public class StatisticsFragment extends Fragment {
 
-    private Context mContext;
     private View myView;
-    private Button btnTest;
+    private Context mContext;
+    private TextView tvPlayTotal, tvArtistTotal, tvPlayFromArtist;
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
 
-    public ToolsFragment(Context context){
+    public StatisticsFragment() {
+    }
+
+    public StatisticsFragment(Context context) {
         mContext = context;
     }
-    private static ToolsFragment instance;
-    public static ToolsFragment getInstance(Context context) {
+
+    @SuppressLint("StaticFieldLeak")
+    private static StatisticsFragment instance;
+
+    public static StatisticsFragment getInstance(Context context) {
         if (instance == null) {
-            instance = new ToolsFragment(context);
+            instance = new StatisticsFragment(context);
         }
         return instance;
     }
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        myView = inflater.inflate(R.layout.fragment_tools, container, false);
-
-        myView.setOnTouchListener((v, event) -> {
-            ToolsUtils.getInstance().hideKeyboard(myView);
-            return false;
-        });
+        myView = inflater.inflate(R.layout.fragment_statistics, container, false);;
         initView();
         return myView;
     }
 
     private void initView() {
-        btnTest = myView.findViewById(R.id.btn_test);
-        btnTest.setOnClickListener(mListener);
+        tvPlayTotal = myView.findViewById(R.id.tv_play_total);
+        tvArtistTotal = myView.findViewById(R.id.tv_artist_total);
+        tvPlayFromArtist = myView.findViewById(R.id.tv_play_from_artist_total);
     }
 
-    private final View.OnClickListener mListener = view -> {
-        if (view == btnTest) {
-            Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
-            Bundle bundle = new Bundle();
-            bundle.putString("fragment", "statisticsFragment");
-            intent.putExtras(bundle);
-            mContext.sendBroadcast(intent);
-        }
-    };
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshDataFromService();
+    }
 
     private void refreshDataFromService(){
         playTotalList = DataRefreshService.getPlayTotalList();
@@ -101,6 +94,12 @@ public class ToolsFragment extends Fragment {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
+                tvPlayTotal.setText("您播放最多的歌曲是 " + playTotalList.get(0).getKey() + " , 共播放了 " + playTotalList.get(0).getValue() + "次");
+                tvArtistTotal.setText("您最喜欢的歌手是 " + artistTotalList.get(0).getKey() + " , 共播放了 " + artistTotalList.get(0).getValue() + "首TA的音乐");
+                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0) {
+
+                }
+                tvPlayFromArtist.setText("在" + artistTotalList.get(0).getKey() + "的歌曲中你最喜欢 " + mostPlayFromArtistTotalList.get(0).getKey() + " , 共播放了 " + mostPlayFromArtistTotalList.get(0).getValue() + "次");
                 DebugLog.debug("time " + DataRefreshService.getTotalPlayTime());
 //                for (int i = 0; i < 3 ; i++){
 //                    DebugLog.debug("play total " + playTotalList.get(i).getKey()
@@ -124,5 +123,4 @@ public class ToolsFragment extends Fragment {
             }
         }
     };
-
 }

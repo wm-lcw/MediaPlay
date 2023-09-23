@@ -48,6 +48,7 @@ import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
 import com.example.mediaplayproject.fragment.PlayListFragment;
 import com.example.mediaplayproject.fragment.SplashFragment;
+import com.example.mediaplayproject.fragment.tools.StatisticsFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
@@ -92,6 +93,8 @@ public class MainActivity extends BasicActivity {
     private ArrayList<PlayListFragment> viewPagerLists;
     private boolean isShowList = false, mRegistered = false;
     private MainMusicBroadcastReceiver mainMusicBroadcastReceiver;
+
+    private StatisticsFragment statisticsFragment;
 
     private MusicPlayService musicService;
     private final ServiceConnection connection = new ServiceConnection() {
@@ -305,6 +308,8 @@ public class MainActivity extends BasicActivity {
         splashFragment = SplashFragment.getInstance(mContext, handler);
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
+        statisticsFragment = StatisticsFragment.getInstance(mContext);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.fl_main_view, splashFragment);
@@ -645,6 +650,23 @@ public class MainActivity extends BasicActivity {
                 if (mainViewFragment.isVisible()){
                     mainViewFragment.refreshSearchResult();
                 }
+            } else if(Constant.CHANGE_FRAGMENT_ACTION.equals(intent.getAction())) {
+
+                // 切换Fragment的广播
+                String fragmentName = intent.getExtras().getString("fragment");
+                DebugLog.debug("action fragment "  + fragmentName);
+                if ("statisticsFragment".equals(fragmentName)) {
+                    try{
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentTransaction transaction = fragmentManager.beginTransaction();
+                        transaction.addToBackStack(null);
+                        transaction.replace(R.id.fl_main_view, statisticsFragment);
+                        transaction.commit();
+                    } catch (Exception e) {
+                        DebugLog.debug(e.getMessage());
+                    }
+
+                }
             }
         }
     }
@@ -742,6 +764,7 @@ public class MainActivity extends BasicActivity {
         filter.addAction(Constant.OPERATE_MUSIC_ACTION);
         filter.addAction(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
         filter.addAction(Constant.REFRESH_SEARCH_RESULT_ACTION);
+        filter.addAction(Constant.CHANGE_FRAGMENT_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
     }

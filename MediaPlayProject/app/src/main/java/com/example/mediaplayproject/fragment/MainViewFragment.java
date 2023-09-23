@@ -243,7 +243,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         // 初始化主页ViewPager
         discoveryFragment = DiscoveryFragment.getInstance();
         personalPageFragment = PersonalPageFragment.getInstance(mContext);
-        toolsFragment = ToolsFragment.getInstance();
+        toolsFragment = ToolsFragment.getInstance(mContext);
         mainViewPagerLists = new ArrayList<>();
         mainViewPagerLists.add(discoveryFragment);
         mainViewPagerLists.add(personalPageFragment);

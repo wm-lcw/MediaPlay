@@ -50,6 +50,7 @@ public class Constant {
     public static final String OPERATE_MUSIC_ACTION = "com.example.media.play.operate.music.action";
     public static final String STOP_PLAY_CUSTOMER_MUSIC_ACTION = "com.example.media.play.stop.play.customer.music.action";
     public static final String REFRESH_SEARCH_RESULT_ACTION = "com.example.media.play.refresh.search.result.action";
+    public static final String CHANGE_FRAGMENT_ACTION = "com.example.media.play.change.fragment.action";
 
     public static final int MAX_LENGTH_OF_LIST_NAME = 10;
     public static final int HISTORY_LIST_MAX_SIZE = 50;

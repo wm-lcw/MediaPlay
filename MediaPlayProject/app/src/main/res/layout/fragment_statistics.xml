@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.tools.StatisticsFragment">
+    <RelativeLayout
+        android:layout_marginTop="@dimen/dp_50"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/teal_200">
+        <RelativeLayout
+            android:id="@+id/rl_play_total"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50"
+                android:src="@mipmap/ic_list_like_choose"/>
+
+            <TextView
+                android:id="@+id/tv_play_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp_30"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_artist_total"
+            android:layout_below="@+id/rl_play_total"
+            android:layout_marginTop="@dimen/dp_30"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp_30"
+                android:src="@mipmap/ic_list_like_choose"/>
+
+            <TextView
+                android:id="@+id/tv_artist_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_30"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_play_from_artist_total"
+            android:layout_below="@+id/rl_artist_total"
+            android:layout_marginTop="@dimen/dp_30"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50"
+                android:src="@mipmap/ic_list_like_choose"/>
+
+            <TextView
+                android:id="@+id/tv_play_from_artist_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/dp_30"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>
