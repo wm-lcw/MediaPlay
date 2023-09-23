@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import androidx.annotation.Nullable;
+
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
 import com.example.mediaplayproject.bean.SearchMusicBean;
@@ -608,7 +610,7 @@ public class DataRefreshService extends Service {
             int playTotal = 0;
             if (playTotalMap != null  && playTotalMap.containsKey(musicId)) {
                 playTotal = playTotalMap.get(musicId) + 1;
-                playTotalMap.put(musicId,playTotal);
+                playTotalMap.put(musicId, playTotal);
             }
             ContentValues values = new ContentValues();
             values.put("playTotal", playTotal);
@@ -616,7 +618,7 @@ public class DataRefreshService extends Service {
             String[] selectionArgs = {String.valueOf(Constant.LIST_SAVE_LIST_MODE_DEFAULT), String.valueOf(musicId)};
             // 这里的返回值可以判断操作是否成功，返回值大于0表示操作成功（更新操作的行）
             int update = db.update(ALL_MUSIC_TABLE, values, selection, selectionArgs);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             DebugLog.error("error " + exception.getMessage());
         }
     }
@@ -627,6 +629,7 @@ public class DataRefreshService extends Service {
      *  @createTime 2023/9/23 15:05
      * @return : java.util.List<java.util.Map.Entry<java.lang.String,java.lang.Integer>>
      */
+    @Nullable
     public static List<Map.Entry<String, Integer>> getPlayTotalList() {
         try {
             // 将<musicId, total> 转为 <musicName, total>，方便UI展示
@@ -646,8 +649,44 @@ public class DataRefreshService extends Service {
                 });
             }
             // 这里拿到的playTotalList已经是一个按照播放次数降序的List
-            DebugLog.debug("playTotalList " + playTotalList);
             return playTotalList;
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     *  获取作者的总播放次数统计列表（降序）
+     *  @author wm
+     *  @createTime 2023/9/23 16:08
+     * @return : java.util.List<java.util.Map.Entry<java.lang.String,java.lang.Integer>>
+     */
+    @Nullable
+    public static List<Map.Entry<String, Integer>> getArtistTotalList() {
+        try {
+            HashMap<String, Integer> artistNameTotalMap = new HashMap<>();
+            int tempTotal;
+            for (Map.Entry<Long, Integer> entry : playTotalMap.entrySet()) {
+                String artist = defaultListMap.get(entry.getKey()).getArtist();
+                if (artistNameTotalMap.containsKey(artist)){
+                    tempTotal = artistNameTotalMap.get(artist) + entry.getValue();
+                } else {
+                    tempTotal = entry.getValue();
+                }
+                artistNameTotalMap.put(artist, tempTotal);
+            }
+            // 转换为list,再重写sort比较器
+            List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>(artistNameTotalMap.entrySet());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                artistTotalList.sort(new Comparator<Map.Entry<String, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                        return o2.getValue().compareTo(o1.getValue());
+                    }
+                });
+            }
+            return artistTotalList;
         } catch (Exception exception) {
             DebugLog.debug("error " + exception.getMessage());
             return null;

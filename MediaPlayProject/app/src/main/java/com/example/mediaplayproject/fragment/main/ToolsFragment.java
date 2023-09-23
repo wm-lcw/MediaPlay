@@ -35,6 +35,7 @@ public class ToolsFragment extends Fragment {
     private View myView;
     private Button btnTest;
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
+    private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
 
     private static ToolsFragment instance;
     public static ToolsFragment getInstance() {
@@ -78,6 +79,7 @@ public class ToolsFragment extends Fragment {
 
     private void refreshDataFromService(){
         playTotalList = DataRefreshService.getPlayTotalList();
+        artistTotalList = DataRefreshService.getArtistTotalList();
         toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
     }
 
@@ -90,6 +92,11 @@ public class ToolsFragment extends Fragment {
                 for (int i = 0; i < 3 ; i++){
                     DebugLog.debug("play total " + playTotalList.get(i).getKey()
                             + ";  " + playTotalList.get(i).getValue());
+                }
+
+                for (int i = 0; i < 3 ; i++){
+                    DebugLog.debug("play total " + artistTotalList.get(i).getKey()
+                            + ";  " + artistTotalList.get(i).getValue());
                 }
             }
         }
