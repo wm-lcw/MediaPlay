@@ -20,7 +20,7 @@
                 android:layout_width="@dimen/dp_40"
                 android:layout_height="@dimen/dp_40"
                 android:layout_marginStart="@dimen/dp_20"
-                android:src="@mipmap/ic_back_nor"/>
+                android:src="@drawable/back_view_style_grey"/>
             <TextView
                 android:id="@+id/tv_statistics_title"
                 android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
                 android:layout_height="@dimen/dp_40"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="@dimen/dp_20"
-                android:src="@mipmap/ic_more_nor"/>
+                android:src="@drawable/more_view_style_grey"/>
         </RelativeLayout>
 
         <!--歌曲播放次数-->

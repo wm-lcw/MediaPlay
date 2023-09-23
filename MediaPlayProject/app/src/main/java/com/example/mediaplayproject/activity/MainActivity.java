@@ -381,6 +381,7 @@ public class MainActivity extends BasicActivity {
         }
     }
 
+
     public interface FragmentCallBack {
         /**
          * 切换Fragment
@@ -651,7 +652,6 @@ public class MainActivity extends BasicActivity {
                     mainViewFragment.refreshSearchResult();
                 }
             } else if(Constant.CHANGE_FRAGMENT_ACTION.equals(intent.getAction())) {
-
                 // 切换Fragment的广播
                 String fragmentName = intent.getExtras().getString("fragment");
                 DebugLog.debug("action fragment "  + fragmentName);
@@ -667,6 +667,12 @@ public class MainActivity extends BasicActivity {
                     }
 
                 }
+            } else if(Constant.RETURN_MAIN_VIEW_ACTION.equals(intent.getAction())) {
+                // 返回MainViewFragment的广播
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.fl_main_view, mainViewFragment);
+                transaction.commit();
             }
         }
     }
@@ -765,6 +771,7 @@ public class MainActivity extends BasicActivity {
         filter.addAction(Constant.STOP_PLAY_CUSTOMER_MUSIC_ACTION);
         filter.addAction(Constant.REFRESH_SEARCH_RESULT_ACTION);
         filter.addAction(Constant.CHANGE_FRAGMENT_ACTION);
+        filter.addAction(Constant.RETURN_MAIN_VIEW_ACTION);
         mContext.registerReceiver(mainMusicBroadcastReceiver, filter);
         mRegistered = true;
     }

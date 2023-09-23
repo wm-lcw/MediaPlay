@@ -14,12 +14,12 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
-import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,7 @@ public class StatisticsFragment extends Fragment {
     private View myView;
     private Context mContext;
     private TextView tvPlayTotal, tvArtistTotal, tvPlayFromArtist, tvPlayTime;
+    private ImageView ivBack, ivMore;
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
@@ -70,10 +71,15 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void initView() {
+        ivBack = myView.findViewById(R.id.iv_statistics_back);
+        ivMore = myView.findViewById(R.id.iv_statistics_more);
         tvPlayTotal = myView.findViewById(R.id.tv_play_total);
         tvArtistTotal = myView.findViewById(R.id.tv_artist_total);
         tvPlayFromArtist = myView.findViewById(R.id.tv_play_from_artist_total);
         tvPlayTime = myView.findViewById(R.id.tv_play_time);
+
+        ivBack.setOnClickListener(mListener);
+        ivMore.setOnClickListener(mListener);
     }
 
     @Override
@@ -112,4 +118,17 @@ public class StatisticsFragment extends Fragment {
             }
         }
     };
+
+    private final View.OnClickListener mListener = view -> {
+        if (view == ivBack) {
+            // 返回主页
+            Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
+            mContext.sendBroadcast(intent);
+        } else if (view == ivMore) {
+            // 更多功能
+
+        }
+    };
+
+
 }
