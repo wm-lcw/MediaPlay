@@ -289,23 +289,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     private String getFormatTime(int time) {
-        return String.format("%s", formatTime(time));
+        return String.format("%s", ToolsUtils.getInstance().formatTime(time));
     }
 
     private Handler getMActivityHandle() {
         return mActivityHandle;
     }
 
-    /**
-     * @author wm
-     * @createTime 2023/2/3 18:40
-     * @description 格式化获取到的时间
-     */
-    public static String formatTime(int time) {
-        if (time / 1000 % 60 < 10) {
-            return (time / 1000 / 60) + ":0" + time / 1000 % 60;
-        } else {
-            return (time / 1000 / 60) + ":" + time / 1000 % 60;
-        }
-    }
+
 }

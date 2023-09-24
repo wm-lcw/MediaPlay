@@ -66,4 +66,17 @@ public class ToolsUtils {
         config.locale = new Locale(language, country);
         resources.updateConfiguration(config, displayMetrics);
     }
+
+    /**
+     * @author wm
+     * @createTime 2023/2/3 18:40
+     * @description 格式化获取到的时间
+     */
+    public String formatTime(int time) {
+        if (time / 1000 % 60 < 10) {
+            return (time / 1000 / 60) + ":0" + time / 1000 % 60;
+        } else {
+            return (time / 1000 / 60) + ":" + time / 1000 % 60;
+        }
+    }
 }

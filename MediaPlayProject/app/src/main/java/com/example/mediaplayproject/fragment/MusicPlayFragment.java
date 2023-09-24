@@ -30,6 +30,7 @@ import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -204,7 +205,7 @@ public class MusicPlayFragment extends Fragment {
         if (musicInfo.size() > 0) {
             tvCurrentMusicInfo.setText(musicInfo.get(mPosition).getTitle());
             tvCurrentPlayTime.setText(currentTime);
-            tvMediaTime.setText(MusicPlayerHelper.formatTime(musicInfo.get(mPosition).getDuration()));
+            tvMediaTime.setText(ToolsUtils.getInstance().formatTime(musicInfo.get(mPosition).getDuration()));
             ivMediaPre.setEnabled(true);
             ivMediaPlay.setEnabled(true);
             ivMediaNext.setEnabled(true);

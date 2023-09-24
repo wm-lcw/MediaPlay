@@ -55,6 +55,7 @@ import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.StatusBar;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -98,7 +99,7 @@ public class MainActivity extends BasicActivity {
 
     private int seekbarProgress = 0;
     private String currentMusicInfo = "";
-    private String currentPlayTime = "";
+    private String currentPlayTime = "00:00";
     private String mediaTime = "";
 
 
@@ -306,6 +307,11 @@ public class MainActivity extends BasicActivity {
         defaultList = DataRefreshService.getDefaultList();
         favoriteList = DataRefreshService.getFavoriteList();
         historyList = DataRefreshService.getHistoryList();
+
+        // 这里需要初始化currentMusicInfo这几个属性，避免打开app没有播放音乐进去播放页面时，音乐信息为空白
+        // seekbarProgress不需要初始化，默认就是0, currentPlayTime 默认是 "00:00";
+        currentMusicInfo = musicInfo.get(mPosition).getTitle();
+        mediaTime = ToolsUtils.getInstance().formatTime(musicInfo.get(mPosition).getDuration());
 
         // 创建悬浮窗视图
         createFloatView();
