@@ -2,7 +2,6 @@ package com.example.mediaplayproject.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 
 
@@ -143,7 +142,7 @@ public class PlayListFragment extends Fragment {
         }
     }
 
-    private View.OnClickListener mListener = view -> {
+    private final View.OnClickListener mListener = view -> {
         if (view == ivLocalList) {
             setSelection(mPosition);
         }

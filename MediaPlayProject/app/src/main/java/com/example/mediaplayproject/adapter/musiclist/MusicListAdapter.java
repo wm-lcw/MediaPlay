@@ -65,7 +65,6 @@ public class MusicListAdapter extends BaseAdapter {
         bg_selected_color = resources.getColor(R.color.bg_selected);
         // 文字未选中状态的selector
         colors = mContext.getResources().getColorStateList(R.color.listview_text_color_selector);
-        resources = null;
     }
 
     @Override

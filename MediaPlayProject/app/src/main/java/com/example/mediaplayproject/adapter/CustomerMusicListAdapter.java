@@ -33,7 +33,6 @@ public class CustomerMusicListAdapter extends BaseAdapter {
         this.mContext = mContext;
         this.musicInfoList = musicList;
         this.currentPlayingListName = currentPlayingListName;
-        DebugLog.debug("--" + this.musicInfoList);
     }
 
     public void changeCustomerList(List<MusicListBean> musicList){
@@ -73,7 +72,7 @@ public class CustomerMusicListAdapter extends BaseAdapter {
             holder.tvCustomerListSize = convertView.findViewById(R.id.tv_list_size);
             holder.ivListPlaying = convertView.findViewById(R.id.iv_is_playing);
             holder.ivListSettings = convertView.findViewById(R.id.iv_customer_list_settings);
-            //将Holder存储到convertView中
+            // 将Holder存储到convertView中
             convertView.setTag(holder);
         } else {
             // convertView不为空时，从convertView中取出Holder
@@ -90,7 +89,6 @@ public class CustomerMusicListAdapter extends BaseAdapter {
 
         convertView.findViewById(R.id.iv_customer_list_settings).setOnClickListener(v -> {
             // 对列表做操作
-            DebugLog.debug("settings ");
             if (mListener != null){
                 mListener.onSettingImageViewClick(v, musicInfoList.get(position).getListName());
             }

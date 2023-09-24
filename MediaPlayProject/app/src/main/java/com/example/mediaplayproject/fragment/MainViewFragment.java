@@ -40,7 +40,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.activity.MainActivity;
 import com.example.mediaplayproject.adapter.musiclist.SearchResultListAdapter;
 import com.example.mediaplayproject.adapter.viewpager.MainViewPagerAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
@@ -382,8 +381,8 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         if (musicService != null) {
             // 播放前先初始化service
             musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
+            musicService.play(mediaFileBean, isRestPlayer, mPosition);
         }
-        musicService.play(mediaFileBean, isRestPlayer, mPosition);
     }
 
     private final View.OnClickListener mListener = view -> {
@@ -456,6 +455,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      * @author wm
      * @createTime 2023/8/24 19:23
      */
+    @SuppressLint("NotifyDataSetChanged")
     public void refreshPlayState(boolean isPlaying, int mPosition, String musicListName, List<MediaFileBean> musicInfo, boolean firstPlay) {
         this.isPlaying = isPlaying;
         this.mPosition = mPosition;

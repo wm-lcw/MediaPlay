@@ -42,4 +42,5 @@
     <string name="cancel">取消</string>
 
     <string name="change_language_tip">设置成功，下次启应用生效.</string>
+    <string name="singer">原唱：</string>
 </resources>

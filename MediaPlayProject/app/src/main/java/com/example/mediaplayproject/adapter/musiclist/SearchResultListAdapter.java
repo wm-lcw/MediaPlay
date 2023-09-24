@@ -34,6 +34,7 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
     private int text_selected_color;
     private ColorStateList colors;
 
+    @SuppressLint("UseCompatLoadingForColorStateLists")
     public SearchResultListAdapter(Context context, List<SearchMusicBean> musicList) {
         
         this.mContext = context;
@@ -43,9 +44,15 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
         text_selected_color = resources.getColor(R.color.text_pressed);
         // 文字未选中状态的selector
         colors = mContext.getResources().getColorStateList(R.color.search_view_text_color_selector);
-        resources = null;
     }
 
+    /**
+     *  刷新搜索结果列表
+     *  @author wm
+     *  @createTime 2023/9/24 21:07
+     * @param list:
+     */
+    @SuppressLint("NotifyDataSetChanged")
     public void setMusicList(List<SearchMusicBean> list) {
         this.musicList = list;
         notifyDataSetChanged();
@@ -64,7 +71,8 @@ public class SearchResultListAdapter extends RecyclerView.Adapter<SearchResultLi
 
         SearchMusicBean searchMusicBean = musicList.get(position);
         holder.musicName.setText(searchMusicBean.getMusicTitle());
-        holder.musicArtist.setText("原唱 ：" + searchMusicBean.getSourceArtist());
+        String musicArtistString = mContext.getString(R.string.singer) + searchMusicBean.getSourceArtist();
+        holder.musicArtist.setText(musicArtistString);
         holder.listName.setText(searchMusicBean.getSourceListName());
 
         // 当前播放歌曲高亮显示

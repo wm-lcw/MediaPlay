@@ -46,21 +46,20 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.context = this;
-        //Activity布局加载前的处理
+        // Activity布局加载前的处理
         initBeforeView(savedInstanceState);
         changeLanguage();
         EventBus.getDefault().register(this);
         Intent dataRefreshService = new Intent(context, DataRefreshService.class);
         startService(dataRefreshService);
-        //添加继承这个BaseActivity的Activity
+        // 添加继承这个BaseActivity的Activity
         BasicApplication.getActivityManager().addActivity(this);
 
-
-        //绑定布局id
+        // 绑定布局id
         if (getLayoutId() > 0) {
             setContentView(getLayoutId());
         }
-        //初始化数据
+        // 初始化数据
         initBundleData(savedInstanceState);
     }
 
@@ -134,6 +133,11 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
 
     }
 
+    /**
+     *  切换语言
+     *  @author wm
+     *  @createTime 2023/9/24 21:12
+     */
     public void changeLanguage() {
         try {
             String currentLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_LANGUAGE,"zh");

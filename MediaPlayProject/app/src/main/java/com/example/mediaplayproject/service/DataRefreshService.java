@@ -22,7 +22,6 @@ import com.example.mediaplayproject.utils.MusicDataBaseHelper;
 import com.example.mediaplayproject.utils.SearchFiles;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +67,12 @@ public class DataRefreshService extends Service {
     private static int defaultListId = 0;
     private static int favoriteListId = 1;
 
-    private static final ExecutorService threadPool = new ThreadPoolExecutor(
+    private static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(
             2,
             5,
             2L,
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<Runnable>(3),
+            new ArrayBlockingQueue<>(3),
             Executors.defaultThreadFactory(),
             new ThreadPoolExecutor.DiscardOldestPolicy()
     );
@@ -196,7 +195,7 @@ public class DataRefreshService extends Service {
             * 使用下面这种则不会报错
             * db.execSQL("DELETE FROM " + ALL_MUSIC_TABLE + " WHERE listName = ?", new String[]{Constant.LIST_MODE_DEFAULT_NAME});
             * */
-            int playTotals = 0;
+            int playTotals;
             for (MediaFileBean mediaFileBean : defaultList) {
                 // 将默认列表中的音乐放到HashMap中，主要是为了后面筛选自定义列表中的歌曲
                 defaultListMap.put(mediaFileBean.getId(), mediaFileBean);
@@ -444,7 +443,7 @@ public class DataRefreshService extends Service {
             // 从历史播放的数据表中获取数据
             String query = "SELECT * FROM " + HISTORY_LIST_TABLE + " ORDER BY musicRecordId DESC";
             Cursor cursor = db.rawQuery(query, null);
-            long musicId = 0;
+            long musicId;
             // 存在数据才返回true
             if (cursor.moveToFirst()) {
                 do {
@@ -614,7 +613,6 @@ public class DataRefreshService extends Service {
      *  @author wm
      *  @createTime 2023/9/23 11:51
      * @param musicId:
-     * @return : void
      */
     private static void updatePlayTotalInfo(Long musicId) {
         try {
@@ -652,12 +650,7 @@ public class DataRefreshService extends Service {
             // 转换为list,再重写sort比较器
             List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>(playNameTotalMap.entrySet());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                playTotalList.sort(new Comparator<Map.Entry<String, Integer>>() {
-                    @Override
-                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                        return o2.getValue().compareTo(o1.getValue());
-                    }
-                });
+                playTotalList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
             }
             // 这里拿到的playTotalList已经是一个按照播放次数降序的List
             return playTotalList;
@@ -691,12 +684,7 @@ public class DataRefreshService extends Service {
             // 转换为list,再重写sort比较器
             artistTotalList = new ArrayList<>(artistNameTotalMap.entrySet());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                artistTotalList.sort(new Comparator<Map.Entry<String, Integer>>() {
-                    @Override
-                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                        return o2.getValue().compareTo(o1.getValue());
-                    }
-                });
+                artistTotalList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
             }
             return artistTotalList;
         } catch (Exception exception) {
@@ -757,7 +745,7 @@ public class DataRefreshService extends Service {
     public static void createNewCustomerMusicList(String listName) {
         try {
             if (!customerListsMap.containsKey(listName)) {
-                threadPool.execute(() -> {
+                THREAD_POOL.execute(() -> {
                     DebugLog.debug("insert new list " + listName);
                     // 插入数据
                     ContentValues values = new ContentValues();
@@ -770,6 +758,7 @@ public class DataRefreshService extends Service {
                     if (cursor != null && cursor.moveToFirst()) {
                         listId = cursor.getLong(cursor.getColumnIndex("id"));
                     }
+                    cursor.close();
                     if (listId != 0) {
                         MusicListBean musicListBean = new MusicListBean(listName);
                         musicListBean.setListId(listId);
@@ -794,7 +783,7 @@ public class DataRefreshService extends Service {
     public static void deleteCustomerMusicList(String listName) {
         try {
             if (customerListsMap.containsKey(listName)) {
-                threadPool.execute(() -> {
+                THREAD_POOL.execute(() -> {
                     DebugLog.debug("delete list " + listName);
                     db.execSQL("DELETE FROM " + ALL_MUSIC_LIST_TABLE + " WHERE listName = ?",
                             new String[]{listName});
@@ -821,7 +810,7 @@ public class DataRefreshService extends Service {
             if (!customerListsMap.containsKey(listName)) {
                 return;
             }
-            threadPool.execute(() -> {
+            THREAD_POOL.execute(() -> {
                 long listId = customerListsMap.get(listName).getListId();
                 List<MediaFileBean> tempList = customerListsMap.get(listName).getMusicList();
 
@@ -863,7 +852,7 @@ public class DataRefreshService extends Service {
             if (!customerListsMap.containsKey(listName)) {
                 return;
             }
-            threadPool.execute(() -> {
+            THREAD_POOL.execute(() -> {
                 boolean deleteMusic = false;
                 if (lastPlayListName.equalsIgnoreCase(listName) && musicList.contains(lastMusicId)) {
                     // 删除的歌曲里面包含当前正在播放的歌曲，则需要让MainActivity停止播放，再进行删除操作
@@ -968,7 +957,7 @@ public class DataRefreshService extends Service {
      */
     public static void deleteFavoriteMusic(String listName, List<Long> musicList) {
         try {
-            threadPool.execute(() -> {
+            THREAD_POOL.execute(() -> {
                 DebugLog.debug("list contains id " + musicList.contains(lastMusicId));
                 boolean deleteMusic = false;
                 if (lastPlayListName.equalsIgnoreCase(listName) && musicList.contains(lastMusicId)) {
@@ -1055,7 +1044,7 @@ public class DataRefreshService extends Service {
      */
     public static void deleteMultipleHistoryMusic(List<Long> deleteMusicList) {
         try {
-            threadPool.execute(() -> {
+            THREAD_POOL.execute(() -> {
                 boolean deleteMusic = false;
                 if (lastPlayListName.equalsIgnoreCase(Constant.LIST_MODE_HISTORY_NAME) && deleteMusicList.contains(lastMusicId)) {
                     // 删除的歌曲里面包含当前正在播放的歌曲，则需要让MainActivity停止播放，再进行删除操作
@@ -1211,6 +1200,7 @@ public class DataRefreshService extends Service {
                     searchResultList.add(searchMusicBean);
                 } while (cursor.moveToNext());
             }
+            cursor.close();
         }
         // 搜索成功了发送广播给Activity，更新搜索结果
         Intent intent = new Intent(Constant.REFRESH_SEARCH_RESULT_ACTION);

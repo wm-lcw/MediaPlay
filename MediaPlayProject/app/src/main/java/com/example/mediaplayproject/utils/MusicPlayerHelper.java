@@ -229,8 +229,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @description 媒体源播放完成后要调用的回调的接口定义
      */
     public interface OnCompletionListener {
+
         /**
-         * 在播放期间到达媒体源的末尾时调用
+         *  在播放期间到达媒体源的末尾时调用
+         *  @author wm
+         *  @createTime 2023/9/24 21:26
+         * @param mp:
          */
         void onCompletion(MediaPlayer mp);
     }

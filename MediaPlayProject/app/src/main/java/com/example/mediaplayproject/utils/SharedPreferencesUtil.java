@@ -199,7 +199,7 @@ public class SharedPreferencesUtil {
     public static <T> List<T> getListData(String key, Class<T> cls) {
         List<T> list = new ArrayList<>();
         String json = sp.getString(key, "");
-        if (!json.equals("") && json.length() > 0) {
+        if (!"".equals(json) && json.length() > 0) {
             Gson gson = new Gson();
             JsonArray array = new JsonParser().parse(json).getAsJsonArray();
             for (JsonElement elem : array) {
@@ -256,9 +256,7 @@ public class SharedPreferencesUtil {
     /**
      * 查询某个key是否已经存在
      *
-     * @param context
-     * @param key
-     * @return
+     * @param key:
      */
     public static boolean contains(Context context, String key) {
         return sp.contains(key);

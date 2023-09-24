@@ -72,7 +72,6 @@ public class CustomizeEditText extends LinearLayout implements View.OnClickListe
      *  @author wm
      *  @createTime 2023/9/16 16:30
      * @param editable:
-     * @return : void
      */
     @Override
     public void afterTextChanged(Editable editable) {

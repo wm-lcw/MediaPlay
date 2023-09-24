@@ -12,7 +12,6 @@ import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -273,7 +272,7 @@ public class MusicPlayFragment extends Fragment {
         android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(dataPath);
         byte[] data = mmr.getEmbeddedPicture();
-        Bitmap albumPicture = null;
+        Bitmap albumPicture;
         if (data != null) {
             // 获取bitmap对象
             albumPicture = BitmapFactory.decodeByteArray(data, 0, data.length);

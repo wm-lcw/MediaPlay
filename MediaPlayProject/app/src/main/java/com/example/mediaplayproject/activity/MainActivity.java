@@ -74,11 +74,9 @@ public class MainActivity extends BasicActivity {
     private static boolean isFloatWindowPermissionRequested = false;
     private Context mContext;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
-    private SplashFragment splashFragment;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
     private StatisticsFragment statisticsFragment;
-    private ListViewPagerAdapter listViewPagerAdapter;
     private ViewPager2 musicListViewPager;
 
     private boolean isPlaying = false, firstPlay = true;
@@ -317,7 +315,7 @@ public class MainActivity extends BasicActivity {
         createFloatView();
 
         // 创建Fragment实例，并加载显示MainViewFragment
-        splashFragment = SplashFragment.getInstance(mContext);
+        SplashFragment splashFragment = SplashFragment.getInstance(mContext);
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
         statisticsFragment = StatisticsFragment.getInstance(mContext);
@@ -482,7 +480,7 @@ public class MainActivity extends BasicActivity {
         viewPagerLists.add(defaultListFragment);
         viewPagerLists.add(favoriteListFragment);
         viewPagerLists.add(historyListFragment);
-        listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
+        ListViewPagerAdapter listViewPagerAdapter = new ListViewPagerAdapter((FragmentActivity) mContext, viewPagerLists);
         musicListViewPager.setAdapter(listViewPagerAdapter);
     }
 
@@ -494,7 +492,7 @@ public class MainActivity extends BasicActivity {
     private void showFloatView() {
         // 每次打开悬浮窗列表时都先同步一次数据
         if (viewPagerLists.get(0).isInitSuccess()){
-            // 规定第一个FragmentList就是动态更改的，所以直接用get(0)获取第一个页面
+            // 规定第一个FragmentList就是动态列表的，所以直接用get(0)获取第一个页面
             viewPagerLists.get(0).changePlayList(musicInfo,musicListName,mPosition);
         }
         // 每次打开默认选中第一个列表，即当前播放列表

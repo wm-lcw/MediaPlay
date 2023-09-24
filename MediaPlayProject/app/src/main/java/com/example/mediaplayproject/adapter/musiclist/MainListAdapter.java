@@ -38,10 +38,11 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     private String listName = Constant.LIST_MODE_DEFAULT_NAME;
     private MainListAdapterOnClickListener mListener;
     private int defaultSelection = -1;
-    private int text_selected_color;
-    private ColorStateList colors;
+    private final int text_selected_color;
+    private final ColorStateList colors;
     private String currentPlayingListName = Constant.LIST_MODE_DEFAULT_NAME;
 
+    @SuppressLint("UseCompatLoadingForColorStateLists")
     public MainListAdapter(Context context, List<MediaFileBean> musicList) {
         this.mContext = context;
         this.musicList = musicList;
@@ -50,7 +51,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
         text_selected_color = resources.getColor(R.color.text_pressed);
         // 文字未选中状态的selector
         colors = mContext.getResources().getColorStateList(R.color.listview_text_color_selector);
-        resources = null;
     }
 
     /**
@@ -115,9 +115,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
             if (isChecked){
                 selectedItems.add(position);
             } else {
-                if (selectedItems.contains(position)) {
-                    selectedItems.remove(position);
-                }
+                selectedItems.remove(position);
             }
             if (checkSelectedItem()){
                 mListener.onSelectedItem(isSelectSetEmpty);
@@ -175,6 +173,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
      *  @createTime 2023/9/8 22:55
      * @param state: true-多选状态； false-点击播放状态
      */
+    @SuppressLint("NotifyDataSetChanged")
     public void setSelectionState(boolean state){
         isSelectionMode = state;
         if (!state){
@@ -200,6 +199,7 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
      *  @createTime 2023/9/8 23:00
      * @param isAllSelected: true-全选； false-取消全选
      */
+    @SuppressLint("NotifyDataSetChanged")
     public void selectAllItem(boolean isAllSelected){
         isSelectionAll = isAllSelected;
         if (isSelectionAll){

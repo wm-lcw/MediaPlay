@@ -15,31 +15,32 @@ import android.view.WindowManager;
  */
 public class StatusBar {
     private Activity activity;
-
-
     public StatusBar(Activity activity){
         this.activity = activity;
     }
-
-
     public void setColor(int color){
         //将状态栏设置为传入的color
-        if (Build.VERSION.SDK_INT >= 21) {
-            View view = activity.getWindow().getDecorView();
-            view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            activity.getWindow().setStatusBarColor(activity.getResources().getColor(color));
-        }
+        View view = activity.getWindow().getDecorView();
+        view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        activity.getWindow().setStatusBarColor(activity.getResources().getColor(color));
     }
 
-    //隐藏状态栏
+    /**
+     *  隐藏状态栏
+     *  @author wm
+     *  @createTime 2023/9/24 21:27
+     */
     public void hide(){
-        if (Build.VERSION.SDK_INT >= 21) {
-            activity.getWindow()
-                    .setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
+        activity.getWindow()
+                .setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    //设置状态栏字体颜色
+    /**
+     *  设置状态栏字体颜色
+     *  @author wm
+     *  @createTime 2023/9/24 21:27
+     * @param isDarkBackground:
+     */
     public void setTextColor(boolean isDarkBackground){
         View decor = activity.getWindow().getDecorView();
         if (isDarkBackground) {

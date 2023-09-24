@@ -35,9 +35,6 @@ public class ToolsFragment extends Fragment {
     private Context mContext;
     private View myView;
     private Button btnTest;
-    private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
-    private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
-    private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
 
     public ToolsFragment(Context context){
         mContext = context;
@@ -87,42 +84,8 @@ public class ToolsFragment extends Fragment {
         }
     };
 
-
-    private void refreshDataFromService(){
-        playTotalList = DataRefreshService.getPlayTotalList();
-        artistTotalList = DataRefreshService.getArtistTotalList();
-        mostPlayFromArtistTotalList = DataRefreshService.getMostPlayFromArtistTotalList(artistTotalList.get(0));
-        toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
-
-    final Handler toolsViewHandler = new Handler(Looper.myLooper()) {
-        @SuppressLint("ResourceAsColor")
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
-                DebugLog.debug("time " + DataRefreshService.getTotalPlayTime());
-//                for (int i = 0; i < 3 ; i++){
-//                    DebugLog.debug("play total " + playTotalList.get(i).getKey()
-//                            + ";  " + playTotalList.get(i).getValue());
-//                }
-//
-//                for (int i = 0; i < 3 ; i++){
-//                    DebugLog.debug("play total " + artistTotalList.get(i).getKey()
-//                            + ";  " + artistTotalList.get(i).getValue());
-//                }
-//
-//                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0){
-//                    for (int i = 0 ; i < mostPlayFromArtistTotalList.size() ; i++){
-//                        DebugLog.debug("" + mostPlayFromArtistTotalList.get(i).getKey() +
-//                                "; " + mostPlayFromArtistTotalList.get(i).getValue());
-//                    }
-//
-//                }
-
-
-            }
-        }
-    };
-
 }

@@ -1,5 +1,6 @@
 package com.example.mediaplayproject.service;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,6 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * @author wm
  * @Description: 音乐播放器service，用于支持后台播放
  */
 public class MusicPlayService extends Service {
@@ -74,7 +76,7 @@ public class MusicPlayService extends Service {
             5,
             2L,
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<Runnable>(3),
+            new ArrayBlockingQueue<>(3),
             Executors.defaultThreadFactory(),
             new ThreadPoolExecutor.DiscardOldestPolicy()
     );
@@ -324,10 +326,6 @@ public class MusicPlayService extends Service {
 
     }
 
-    /**
-     * @createTime 2023/2/8 16:12
-     * @description 描述该方法的功能
-     */
     public int getPosition() {
         return mPosition;
     }
@@ -336,35 +334,18 @@ public class MusicPlayService extends Service {
         this.mPosition = position;
     }
 
-    /**
-     * @createTime 2023/2/8 16:12
-     * @description 描述该方法的功能
-     */
     public boolean getInitResult() {
         return isInitPlayHelper;
     }
 
-    /**
-     * @createTime 2023/2/8 16:12
-     * @description 描述该方法的功能
-     */
     public boolean getFirstPlay() {
         return firstPlay;
     }
 
-    /**
-     * @createTime 2023/2/8 17:30
-     * @description 获取播放模式
-     */
     public int getPlayMode() {
         return playMode;
     }
 
-    /**
-     * @param mode 播放模式
-     * @createTime 2023/2/8 17:52
-     * @description 设置播放模式
-     */
     public void setPlayMode(int mode) {
         playMode = mode;
     }
@@ -394,10 +375,12 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/8 14:32
      * @description 显示通知栏
      */
+    @SuppressLint("UnspecifiedImmutableFlag")
     private void showNotify() {
         remoteViews = getContentView();
         //设置PendingIntent
         Intent it = new Intent(this, MainActivity.class);
+        it.putExtra("notify", true);
         PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 
         //创建通知栏信息
@@ -405,10 +388,6 @@ public class MusicPlayService extends Service {
                 //设置图标
                 .setSmallIcon(R.mipmap.ic_notify_icon)
                 .setWhen(System.currentTimeMillis())
-                //标题
-                //.setContentTitle("微信")
-                //正文消息
-                //.setContentText("你有一条新消息")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 //设置点击启动的Intent
                 .setContentIntent(pi)
@@ -429,15 +408,16 @@ public class MusicPlayService extends Service {
      * @createTime 2023/2/8 14:32
      * @description 获取通知栏布局对象
      */
+    @SuppressLint("UnspecifiedImmutableFlag")
     private RemoteViews getContentView() {
         RemoteViews mRemoteViews = new RemoteViews(this.getPackageName(), R.layout.layout_notify_view);
         //通知栏控制器上一首按钮广播操作
         Intent intentPrev = new Intent(PREV);
-        PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this, 0, intentPrev, 0);
+         PendingIntent prevPendingIntent = PendingIntent.getBroadcast(this, 0, intentPrev, 0);
         //为prev控件注册事件
         mRemoteViews.setOnClickPendingIntent(R.id.btn_play_prev, prevPendingIntent);
 
-        //通知栏控制器播放暂停按钮广播操作  //用于接收广播时过滤意图信息
+        //通知栏控制器播放暂停按钮广播操作
         Intent intentPlay = new Intent(PLAY);
         PendingIntent playPendingIntent = PendingIntent.getBroadcast(this, 0, intentPlay, 0);
         //为play控件注册事件
@@ -543,7 +523,6 @@ public class MusicPlayService extends Service {
             remoteViews.setTextViewText(R.id.tv_song_title, musicInfo.get(position).getTitle());
             remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
         }
-
 
         //发送通知
         notificationManager.notify(NOTIFICATION_ID, notification);
