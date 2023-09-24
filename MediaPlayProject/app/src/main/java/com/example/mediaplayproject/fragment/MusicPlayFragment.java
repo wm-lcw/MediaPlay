@@ -6,8 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,6 +24,9 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -29,7 +37,6 @@ import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
-import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
@@ -43,7 +50,7 @@ public class MusicPlayFragment extends Fragment {
 
     private final Context mContext;
     private View playView;
-    private ImageView ivBack, ivMore, ivMute, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike;
+    private ImageView ivBack, ivMore, ivMute, ivMediaLoop, ivMediaPre, ivMediaPlay, ivMediaNext, ivMediaList, ivMediaLike, ivMusicPic;
     private SeekBar sbVolume, sbProgress;
     private int maxVolume = 150;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
@@ -61,6 +68,7 @@ public class MusicPlayFragment extends Fragment {
     private int playMode = 0;
     private String musicListName = Constant.LIST_MODE_DEFAULT_NAME;
     private MusicPlayService musicService;
+    private Animation animation;
 
     public MusicPlayFragment(Context context) {
         mContext = context;
@@ -142,6 +150,7 @@ public class MusicPlayFragment extends Fragment {
         ivBack = playView.findViewById(R.id.iv_play_view_back);
         ivMore = playView.findViewById(R.id.iv_play_view_more);
         ivMute = playView.findViewById(R.id.iv_mute);
+        ivMusicPic = playView.findViewById(R.id.iv_music_pic);
         ivMediaLoop = playView.findViewById(R.id.iv_loop);
         ivMediaPre = playView.findViewById(R.id.iv_pre);
         ivMediaPlay = playView.findViewById(R.id.iv_play);
@@ -166,6 +175,14 @@ public class MusicPlayFragment extends Fragment {
         sbVolume.setOnSeekBarChangeListener(mSeekBarListener);
         sbProgress.setOnSeekBarChangeListener(mSeekBarListener);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        // 设置图标旋转的动画
+        animation = AnimationUtils.loadAnimation(mContext, R.anim.ic_playing_animation);
+        //设置动画匀速运动
+        // setInterpolator表示设置旋转速率。
+        // LinearInterpolator为匀速效果，AccelerateInterpolator为加速效果，DecelerateInterpolator为减速效果
+        LinearInterpolator lin = new LinearInterpolator();
+        animation.setInterpolator(lin);
 
     }
 
@@ -223,7 +240,16 @@ public class MusicPlayFragment extends Fragment {
             ivMediaLike.setEnabled(false);
             currentTime = "00:00";
         }
+        // 设定音乐专辑图片
+        ivMusicPic.setImageBitmap(getAlbumPicture(musicInfo.get(mPosition).getData()));
+
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+        // 设置旋转图标的状态
+        if (isPlaying){
+            ivMusicPic.startAnimation(animation);
+        } else {
+            ivMusicPic.clearAnimation();
+        }
 
         // 初始化播放模式的图标
         if (playMode == Constant.PLAY_MODE_SHUFFLE) {
@@ -235,6 +261,52 @@ public class MusicPlayFragment extends Fragment {
             ivMediaLoop.setImageResource(R.mipmap.media_loop);
         }
     }
+
+    /**
+     *  获取歌曲专辑图片
+     *  @author wm
+     *  @createTime 2023/9/24 19:40
+     * @param dataPath: 音乐资源的路径
+     * @return : android.graphics.Bitmap
+     */
+    public Bitmap getAlbumPicture(String dataPath) {
+        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(dataPath);
+        byte[] data = mmr.getEmbeddedPicture();
+        Bitmap albumPicture = null;
+        if (data != null) {
+            // 获取bitmap对象
+            albumPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+            // 获取宽高
+            int width = albumPicture.getWidth();
+            int height = albumPicture.getHeight();
+            // 创建操作图片用的Matrix对象
+            Matrix matrix = new Matrix();
+            // 计算缩放比例
+            float sx = ((float) 120 / width);
+            float sy = ((float) 120 / height);
+            // 设置缩放比例
+            matrix.postScale(sx, sy);
+            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+        } else {
+            albumPicture = BitmapFactory.decodeResource(getResources(), R.drawable.music);
+            //music1是从歌曲文件读取不出来专辑图片时用来代替的默认专辑图片
+            int width = albumPicture.getWidth();
+            int height = albumPicture.getHeight();
+            // 创建操作图片用的Matrix对象
+            Matrix matrix = new Matrix();
+            // 计算缩放比例
+            float sx = ((float) 120 / width);
+            float sy = ((float) 120 / height);
+            // 设置缩放比例
+            matrix.postScale(sx, sy);
+            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+        }
+        return albumPicture;
+    }
+
 
     /**
      *  初始化音量和音量条

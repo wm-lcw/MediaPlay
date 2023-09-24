@@ -87,6 +87,21 @@
 
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/ll_music_pic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_top_title"
+        android:layout_margin="@dimen/dp_100">
+        <ImageView
+            android:id="@+id/iv_music_pic"
+            android:layout_width="@dimen/dp_200"
+            android:layout_height="@dimen/dp_200"
+            android:layout_centerInParent="true"
+            android:background="@drawable/music"/>
+    </RelativeLayout>
+
+
     <!--播放器进度条-->
     <LinearLayout
         android:id="@+id/ll_play_seekbar_view"
