@@ -5,26 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
-import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -34,7 +27,7 @@ public class ToolsFragment extends Fragment {
 
     private Context mContext;
     private View myView;
-    private Button btnTest;
+    private LinearLayout llStatistics, llTimeOff, llChangeLanguage;
 
     public ToolsFragment(Context context){
         mContext = context;
@@ -70,12 +63,16 @@ public class ToolsFragment extends Fragment {
     }
 
     private void initView() {
-        btnTest = myView.findViewById(R.id.btn_test);
-        btnTest.setOnClickListener(mListener);
+        llStatistics = myView.findViewById(R.id.ll_tools_statistics);
+        llTimeOff = myView.findViewById(R.id.ll_tools_time_off);
+        llChangeLanguage = myView.findViewById(R.id.ll_tools_change_language);
+        llStatistics.setOnClickListener(mListener);
+        llTimeOff.setOnClickListener(mListener);
+        llChangeLanguage.setOnClickListener(mListener);
     }
 
     private final View.OnClickListener mListener = view -> {
-        if (view == btnTest) {
+        if (view == llStatistics) {
             Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
             Bundle bundle = new Bundle();
             bundle.putString("fragment", Constant.STATISTICS_FRAGMENT_ACTION_FLAG);

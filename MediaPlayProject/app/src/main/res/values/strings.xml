@@ -43,6 +43,9 @@
 
     <string name="change_language_tip">The setting succeeds, The next startup takes effect.</string>
     <string name="singer">singer：</string>
+    <string name="record">Record</string>
+    <string name="timing_off">Timing Off</string>
+    <string name="change_language">Change Language</string>
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
