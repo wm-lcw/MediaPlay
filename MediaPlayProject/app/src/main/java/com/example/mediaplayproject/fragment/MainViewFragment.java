@@ -240,7 +240,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
 
         // 初始化主页ViewPager
-        discoveryFragment = DiscoveryFragment.getInstance();
+        discoveryFragment = DiscoveryFragment.getInstance(mContext);
         personalPageFragment = PersonalPageFragment.getInstance(mContext);
         toolsFragment = ToolsFragment.getInstance(mContext);
         mainViewPagerLists = new ArrayList<>();

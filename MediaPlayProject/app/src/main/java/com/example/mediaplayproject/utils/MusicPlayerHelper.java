@@ -153,9 +153,14 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @description 是否正在播放
      */
     public Boolean isPlaying() {
-        if (player != null){
-            return player.isPlaying();
-        } else {
+        try {
+            if (player != null){
+                return player.isPlaying();
+            } else {
+                return false;
+            }
+        } catch (Exception exception) {
+            DebugLog.debug(exception.getMessage());
             return false;
         }
     }

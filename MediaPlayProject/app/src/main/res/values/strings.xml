@@ -41,6 +41,8 @@
     <string name="delete_success">Delete Success!</string>
     <string name="delete_failed">Delete Failed!</string>
 
+    <string name="change_language_tip">The setting succeeds, The next startup takes effect.</string>
+
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
     <string name="music_time" translatable="false"> 00:00 </string>

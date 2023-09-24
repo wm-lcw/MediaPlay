@@ -11,7 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.mediaplayproject.service.DataRefreshService;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+import com.example.mediaplayproject.utils.ToolsUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 /**
  * @author wm
@@ -38,13 +45,17 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.context = this;
         //Activity布局加载前的处理
         initBeforeView(savedInstanceState);
-        this.context = this;
+        changeLanguage();
+        EventBus.getDefault().register(this);
         Intent dataRefreshService = new Intent(context, DataRefreshService.class);
         startService(dataRefreshService);
         //添加继承这个BaseActivity的Activity
         BasicApplication.getActivityManager().addActivity(this);
+
+
         //绑定布局id
         if (getLayoutId() > 0) {
             setContentView(getLayoutId());
@@ -53,8 +64,16 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
         initBundleData(savedInstanceState);
     }
 
+    /**
+     *  初始化一些操作，该方法在setContentView之前被调用
+     *  @author wm
+     *  @createTime 2023/9/24 14:33
+     * @param savedInstanceState:
+     */
     @Override
-    public void initBeforeView(Bundle savedInstanceState) {}
+    public void initBeforeView(Bundle savedInstanceState) {
+        changeLanguage();
+    }
 
     @Override
     public void initBundleData(Bundle savedInstanceState) {
@@ -105,6 +124,27 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
         DebugLog.debug("---");
         stopService(new Intent(context, DataRefreshService.class));
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(String msg) {
+        if (Constant.SWITCH_LANGUAGE.equals(msg)) {
+            changeLanguage();
+            recreate();//刷新界面
+        }
+
+    }
+
+    public void changeLanguage() {
+        try {
+            String currentLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_LANGUAGE,"zh");
+            String currentCountry = (String) SharedPreferencesUtil.getData(Constant.CURRENT_COUNTRY,"CN");
+            ToolsUtils.getInstance().changeLanguage(context, currentLanguage, currentCountry);
+        } catch (Exception exception) {
+            DebugLog.debug(exception.getMessage());
+        }
+
+    }
+
 }
 
 

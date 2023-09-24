@@ -5,6 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 
+import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+
 /**
  * @author wm
  * @Description 工程管理
@@ -25,6 +27,7 @@ public class BasicApplication extends Application {
         activityManager = new ActivityManager();
         context = getApplicationContext();
         application = this;
+        SharedPreferencesUtil.getInstance(getContext(),"mediaPlay");
     }
 
     @Override

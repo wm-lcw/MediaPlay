@@ -1,8 +1,14 @@
 package com.example.mediaplayproject.utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import java.util.Locale;
 
 
 /**
@@ -47,5 +53,17 @@ public class ToolsUtils {
         if (view != null) {
             imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
         }
+    }
+
+    public final void changeLanguage(Context context, String language, String country) {
+        if (context == null || TextUtils.isEmpty(language)) {
+            return;
+        }
+        DebugLog.debug(language + " " + country);
+        Resources resources = context.getResources();
+        Configuration config = resources.getConfiguration();
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        config.locale = new Locale(language, country);
+        resources.updateConfiguration(config, displayMetrics);
     }
 }
