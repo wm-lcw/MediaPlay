@@ -34,8 +34,9 @@ public class Constant {
     public static final int HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER = 3;
     public static final int HANDLER_MESSAGE_SHOW_LIST_FRAGMENT = 4;
     public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 5;
-    public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 6;
-    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 7;
+    public static final int HANDLER_MESSAGE_DELAY_INIT_FRAGMENT = 6;
+    public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 7;
+    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 8;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;

@@ -595,7 +595,6 @@ public class DataRefreshService extends Service {
      */
     private static void updateLastInfo() {
         try {
-//            DebugLog.debug("lastPlayListName " + lastPlayListName + "; lastMusicId " + lastMusicId);
             ContentValues values = new ContentValues();
             values.put("lastPlayListName", lastPlayListName);
             values.put("lastPlayMode", lastPlayMode);

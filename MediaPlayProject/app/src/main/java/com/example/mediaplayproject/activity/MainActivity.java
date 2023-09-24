@@ -76,6 +76,7 @@ public class MainActivity extends BasicActivity {
     private SplashFragment splashFragment;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
+    private StatisticsFragment statisticsFragment;
     private ListViewPagerAdapter listViewPagerAdapter;
     private ViewPager2 musicListViewPager;
 
@@ -95,7 +96,11 @@ public class MainActivity extends BasicActivity {
     private boolean isShowList = false, mRegistered = false;
     private MainMusicBroadcastReceiver mainMusicBroadcastReceiver;
 
-    private StatisticsFragment statisticsFragment;
+    private int seekbarProgress = 0;
+    private String currentMusicInfo = "";
+    private String currentPlayTime = "";
+    private String mediaTime = "";
+
 
     private MusicPlayService musicService;
     private final ServiceConnection connection = new ServiceConnection() {
@@ -400,10 +405,10 @@ public class MainActivity extends BasicActivity {
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {
                 // playHelper发送的消息，用于更新播放进度，目前只用于MusicPlayFragment
-                int seekbarProgress = msg.getData().getInt("seekbarProgress");
-                String currentMusicInfo = msg.getData().getString("currentPlayingInfo");
-                String currentPlayTime = msg.getData().getString("currentTime");
-                String mediaTime = msg.getData().getString("mediaTime");
+                seekbarProgress = msg.getData().getInt("seekbarProgress");
+                currentMusicInfo = msg.getData().getString("currentPlayingInfo");
+                currentPlayTime = msg.getData().getString("currentTime");
+                mediaTime = msg.getData().getString("mediaTime");
                 if (musicPlayFragment.isVisible()) {
                     musicPlayFragment.refreshCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
                 }
@@ -413,6 +418,12 @@ public class MainActivity extends BasicActivity {
             } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY) {
                 // 权限申请操作完成后，此时service可能没有完全起来，需要延时一会才能获取service对象进行初始化
                 initDataDelay();
+            } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT) {
+                // 切换Fragment后，延迟一会再设置相关参数
+                if (musicPlayFragment.isVisible()) {
+                    // 同步当前播放进度，解决在主页先播放然后暂停，进入播放页后进度条仍未0的问题
+                    musicPlayFragment.refreshCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
+                }
             }
         }
     };
@@ -625,6 +636,7 @@ public class MainActivity extends BasicActivity {
                 } else if (Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     changeFragment(musicPlayFragment);
                 }
+                handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT,200);
             } else if(Constant.RETURN_MAIN_VIEW_ACTION.equals(intent.getAction())) {
                 // 返回或进入MainViewFragment的广播
                 returnMainFragment();
