@@ -1,5 +1,47 @@
 <resources>
     <string name="app_name">MediaPlay</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="default_list_name">Default List</string>
+    <string name="favorite_list_name">Favorite List</string>
+    <string name="history_list_name">History List</string>
+    <string name="custom_list_name">Custom Playlists</string>
+
+    <string name="select_all">Select All</string>
+    <string name="cancel_select_all">Cancel Select All</string>
+    <string name="add_to">Add To</string>
+    <string name="delete">Delete</string>
+
+    <string name="add_to_list">Add To Playlist</string>
+
+    <string name="share_list">Share</string>
+    <string name="edit_list">Edit List Info</string>
+    <string name="delete_list">Delete Music List</string>
+
+    <string name="search_result_title">Search Result</string>
+
+    <string name="create_custom_list">Create Custom List</string>
+    <string name="input_custom_list_name">Input List Name</string>
+    <string name="delete_custom_list">Delete </string>
+    <string name="list"> List? </string>
+    <string name="delete_custom_list_tip">This list is currently playing, delete it?</string>
+
+    <string name="create_list_repeat">You cannot duplicate a list that already exists！</string>
+    <string name="list_name_limit">The list name exceeds the maximum supported length(</string>
+
+    <string name="delete_music">Whether to delete the selected songs ? </string>
+    <string name="delete_music_tip">Selected song is currently playing, delete it?</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="create_success">Create Success!</string>
+    <string name="create_failed">Create Failed!</string>
+    <string name="add_success">Add Success!</string>
+    <string name="add_failed">Add Failed!</string>
+    <string name="delete_success">Delete Success!</string>
+    <string name="delete_failed">Delete Failed!</string>
+
+    <string name="music_text" translatable="false"> music </string>
+    <string name="music_artist" translatable="false"> artist </string>
+    <string name="music_time" translatable="false"> 00:00 </string>
 </resources>

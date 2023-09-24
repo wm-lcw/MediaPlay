@@ -5,6 +5,7 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -245,9 +246,9 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
             try {
                 List<Long> insertList = getSelectMusicIdList();
                 DataRefreshService.insertCustomerMusic(customerLists.get(position).getListName(),insertList);
-                Toast.makeText(mContext,"添加成功！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,R.string.add_success,Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
-                Toast.makeText(mContext,"添加失败！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,R.string.add_failed,Toast.LENGTH_SHORT).show();
                 DebugLog.debug("error " + exception.getMessage());
             }
             // 刷新列表的歌曲数量
@@ -281,9 +282,28 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
         mWindowManager.addView(mFloatLayout, wmParams);
         mainListAdapter.notifyDataSetChanged();
-        tvMainViewListName.setText(listName);
-        tvSelectAll.setText("全选");
+        setListName(listName);
+        tvSelectAll.setText(R.string.select_all);
         isShowList = true;
+    }
+
+    /**
+     *  动态显示主页展开的列表名，
+     *  Constant中定义名称常量不能兼容中英文两种翻译，所以固定的几个列表需要动态设定列表名称
+     *  @author wm
+     *  @createTime 2023/9/24 13:02
+     * @param listName:
+     */
+    private void setListName(String listName){
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)){
+            tvMainViewListName.setText(R.string.default_list_name);
+        } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
+            tvMainViewListName.setText(R.string.favorite_list_name);
+        } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
+            tvMainViewListName.setText(R.string.history_list_name);
+        } else {
+            tvMainViewListName.setText(listName);
+        }
     }
 
     /**
@@ -382,31 +402,32 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private void showCreateListAliasDialog() {
         EditText inputText = new EditText(mContext);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("创建列表");
-        builder.setMessage("请输入列表名称：");
+        builder.setTitle(R.string.create_custom_list);
+        builder.setMessage(R.string.input_custom_list_name);
         builder.setIcon(R.mipmap.ic_customer_pre);
         builder.setView(inputText);
         //点击对话框以外的区域是否让对话框消失
         builder.setCancelable(true);
 
         //设置正面按钮
-        builder.setPositiveButton("确定", (dialog, which) -> {
+        builder.setPositiveButton(R.string.ok, (dialog, which) -> {
             String inputListName = inputText.getText().toString().trim();
             if (!"".equals(inputListName)) {
                 if (DataRefreshService.getMusicListByName(inputListName) != null) {
-                    Toast.makeText(mContext, "不能重复创建已存在的列表！", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, R.string.create_list_repeat, Toast.LENGTH_LONG).show();
                 } else if (inputListName.length() > Constant.MAX_LENGTH_OF_LIST_NAME) {
-                    Toast.makeText(mContext, "列表名超过支持的最大长度("+
-                            Constant.MAX_LENGTH_OF_LIST_NAME +")！", Toast.LENGTH_LONG).show();
+                    String listNameLimitTip = this.getString(R.string.list_name_limit) + Constant.MAX_LENGTH_OF_LIST_NAME +")！";
+                    Toast.makeText(mContext, listNameLimitTip, Toast.LENGTH_LONG).show();
                 } else {
                     DataRefreshService.createNewCustomerMusicList(inputListName);
+                    Toast.makeText(mContext, R.string.create_success, Toast.LENGTH_LONG).show();
                 }
             }
             dialog.dismiss();
         });
 
         //设置反面按钮
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
 
         //创建AlertDialog对象
         AlertDialog dialog = builder.create();
@@ -477,9 +498,14 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
      */
     private void showDeleteListAliasDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("是否删除'" + itemClickListName +"'列表?");
+        /// 若设置的字符是需要几个字符拼接起来的，不能直接使用R.string.xxx，需要使用this.getString先获取字符
+        /// 且不能直接在setTitle中拼接，需要先拼接到String中再使用,如下面的语句不会正常输出
+        /// builder.setTitle(this.getString(R.string.delete_custom_list) + " " + itemClickListName +);
+        String title = this.getString(R.string.delete_custom_list) + " " +
+                itemClickListName + " " + this.getString(R.string.list);
+        builder.setTitle(title);
         if (currentPlayingListName.equalsIgnoreCase(itemClickListName)){
-            builder.setMessage("当前正在播放此列表，是否删除该列表？");
+            builder.setMessage(R.string.delete_music_tip);
         } else {
             builder.setMessage("");
         }
@@ -489,14 +515,20 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         builder.setCancelable(true);
 
         // 设置正面按钮
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            // 删除音乐列表
-            DataRefreshService.deleteCustomerMusicList(itemClickListName);
-            dialog.dismiss();
+        builder.setPositiveButton(R.string.ok, (dialog, which) -> {
+            try {
+                // 删除音乐列表
+                DataRefreshService.deleteCustomerMusicList(itemClickListName);
+                dialog.dismiss();
+                Toast.makeText(mContext, R.string.delete_success,Toast.LENGTH_SHORT).show();
+            } catch (Exception exception){
+                Toast.makeText(mContext, R.string.delete_failed,Toast.LENGTH_SHORT).show();
+                DebugLog.debug("error " + exception.getMessage());
+            }
         });
 
         // 设置反面按钮
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
 
         // 创建AlertDialog对象
         AlertDialog dialog = builder.create();
@@ -514,13 +546,13 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         String listName = mainListAdapter.getListName();
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         List<Long> deleteList = getSelectMusicIdList();
-        builder.setTitle("是否删除'" + listName +"'列表中的选中歌曲?");
+        builder.setTitle(R.string.delete_music);
         long lastPlayId = DataRefreshService.getLastMusicId();
         boolean includePlayingMusic = currentPlayingListName.equalsIgnoreCase(listName) && deleteMusicHelperSet.contains(lastPlayId);
         if (includePlayingMusic){
-            builder.setMessage("当前播放歌曲即将被删除，请确认？");
+            builder.setMessage(R.string.delete_music_tip);
         } else {
-            builder.setMessage("是否删除选中歌曲？");
+            builder.setMessage("");
         }
 
         builder.setIcon(R.mipmap.ic_launcher);
@@ -528,12 +560,12 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         builder.setCancelable(true);
 
         // 设置正面按钮
-        builder.setPositiveButton("确定", (dialog, which) -> {
+        builder.setPositiveButton(R.string.ok, (dialog, which) -> {
             try {
                 DataRefreshService.deleteMultipleMusic(listName,deleteList);
-                Toast.makeText(mContext,"删除成功！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, R.string.delete_success,Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
-                Toast.makeText(mContext,"删除失败！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, R.string.delete_failed,Toast.LENGTH_SHORT).show();
                 DebugLog.debug("error " + exception.getMessage());
             }
             // 需要刷新页面
@@ -544,7 +576,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         });
 
         // 设置反面按钮
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
 
         // 创建AlertDialog对象
         AlertDialog dialog = builder.create();
@@ -667,7 +699,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }  else if (view == llSelectAll){
             boolean isSelectedAll = mainListAdapter.isSelectionAll();
             mainListAdapter.selectAllItem(!isSelectedAll);
-            tvSelectAll.setText(isSelectedAll ? "全选" : "取消全选");
+            tvSelectAll.setText(isSelectedAll ? R.string.select_all : R.string.cancel_select_all);
         } else if(view == llAddToList){
             // 在打开添加页面之前，需要刷新一下自定义创建列表的数据
             initMusicSource();

@@ -2,6 +2,7 @@ package com.example.mediaplayproject.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 
 
@@ -124,8 +125,22 @@ public class PlayListFragment extends Fragment {
         musicListAdapter.notifyDataSetChanged();
     }
 
+    /**
+     *  刷新列表名称
+     *  @author wm
+     *  @createTime 2023/9/24 13:11
+     */
     private void refreshListTitle() {
-        tvListTitle.setText(listName);
+        // 固定的几个列表需要动态设定列表名称
+        if (Constant.LIST_MODE_DEFAULT_NAME.equalsIgnoreCase(listName)){
+            tvListTitle.setText(R.string.default_list_name);
+        } else if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(listName)){
+            tvListTitle.setText(R.string.favorite_list_name);
+        } else if (Constant.LIST_MODE_HISTORY_NAME.equalsIgnoreCase(listName)){
+            tvListTitle.setText(R.string.history_list_name);
+        } else {
+            tvListTitle.setText(listName);
+        }
     }
 
     private View.OnClickListener mListener = view -> {

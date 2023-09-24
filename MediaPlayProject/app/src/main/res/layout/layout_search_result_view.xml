@@ -24,7 +24,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:textSize="@dimen/sp_19"
-                android:text="SearchResult" />
+                android:text="@string/search_result_title" />
             <ImageView
                 android:id="@+id/iv_close_search"
                 android:layout_width="@dimen/dp_30"

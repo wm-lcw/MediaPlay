@@ -20,7 +20,7 @@
                 android:layout_width="@dimen/dp_30"
                 android:layout_height="@dimen/dp_30"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/dp_15"
+                android:layout_marginStart="@dimen/dp_15"
                 android:background="@mipmap/media_list" />
 
             <TextView
@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="@dimen/dp_20"
-                android:text="默认列表"
+                android:text="@string/default_list_name"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_17" />
 
@@ -55,7 +55,7 @@
                 android:layout_width="@dimen/dp_30"
                 android:layout_height="@dimen/dp_30"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/dp_15"
+                android:layout_marginStart="@dimen/dp_15"
                 android:background="@mipmap/ic_list_like_choose" />
 
             <TextView
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="@dimen/dp_20"
-                android:text="收藏列表"
+                android:text="@string/favorite_list_name"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_17" />
 
@@ -90,7 +90,7 @@
                 android:layout_width="@dimen/dp_30"
                 android:layout_height="@dimen/dp_30"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/dp_15"
+                android:layout_marginStart="@dimen/dp_15"
                 android:background="@mipmap/ic_recently_green" />
 
             <TextView
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="@dimen/dp_20"
-                android:text="最近播放"
+                android:text="@string/history_list_name"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_17" />
 
@@ -132,7 +132,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@+id/iv_add_list"
                     android:gravity="center"
-                    android:text="自定义歌单"
+                    android:text="@string/custom_list_name"
                     android:textColor="@color/white"
                     android:textSize="@dimen/sp_19" />
 

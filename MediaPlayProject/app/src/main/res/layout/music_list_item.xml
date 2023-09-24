@@ -7,14 +7,14 @@
 
     <TextView
         android:id="@+id/tv_music_name"
-        android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
         android:lines="1"
-        android:textSize="@dimen/dp_20"
+        android:textSize="@dimen/sp_20"
         android:layout_weight="8"
         android:layout_width="0dp"
         android:layout_height="@dimen/dp_40"
         android:textColor="@color/white"
-        android:text="musicList"/>
+        android:text="@string/default_list_name"/>
     <ImageView
         android:layout_weight="1"
         android:id="@+id/iv_delete_music"

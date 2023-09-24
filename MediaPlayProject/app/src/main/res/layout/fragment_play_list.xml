@@ -15,12 +15,12 @@
         <TextView
             android:id="@+id/tv_list_title"
             android:gravity="center"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="@dimen/dp_30"
             android:textColor="@color/white"
-            android:text="收藏列表"
+            android:text="@string/default_list_name"
             android:textSize="@dimen/sp_18"/>
         <ImageView
             android:id="@+id/iv_local_music"

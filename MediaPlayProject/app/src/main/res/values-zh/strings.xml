@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">MediaPlay</string>
+
+    <string name="default_list_name">默认列表</string>
+    <string name="favorite_list_name">收藏列表</string>
+    <string name="history_list_name">最近播放</string>
+    <string name="custom_list_name">自定义列表</string>
+
+    <string name="select_all">全选</string>
+    <string name="cancel_select_all">取消全选</string>
+    <string name="add_to">添加</string>
+    <string name="delete">删除</string>
+
+    <string name="add_to_list">添加到</string>
+
+    <string name="share_list">分享</string>
+    <string name="edit_list">编辑列表信息</string>
+    <string name="delete_list">删除列表</string>
+
+    <string name="search_result_title">搜索结果</string>
+
+    <string name="create_custom_list">创建自定义列表</string>
+    <string name="input_custom_list_name">请输入列表名</string>
+    <string name="delete_custom_list">是否要删除 </string>
+    <string name="list">列表 </string>
+    <string name="delete_custom_list_tip">该列表正在播放，是否删除?</string>
+
+    <string name="create_list_repeat">不能重复创建已存在的列表！ </string>
+    <string name="list_name_limit">列表名超过支持的最大长度(</string>
+
+    <string name="delete_music">是否删除选中的音乐 ? </string>
+    <string name="delete_music_tip">选中的音乐正在播放，是否要删除?</string>
+
+    <string name="create_success">创建成功!</string>
+    <string name="create_failed">创建失败!</string>
+    <string name="add_success">添加成功!</string>
+    <string name="add_failed">添加失败!</string>
+    <string name="delete_success">删除成功!</string>
+    <string name="delete_failed">删除失败!</string>
+
+    <string name="ok">确认</string>
+    <string name="cancel">取消</string>
+</resources>
