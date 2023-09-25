@@ -44,7 +44,11 @@
     <string name="change_language_tip">设置成功，下次启应用生效.</string>
     <string name="singer">原唱：</string>
 
+    <string name="all_tools">所有工具</string>
+    <string name="shortcut_tools">快捷工具</string>
     <string name="record">音乐记录</string>
     <string name="timing_off">定时关闭</string>
     <string name="change_language">设置语言</string>
+
+
 </resources>

@@ -1,172 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".fragment.main.PersonalPageFragment">
 
     <LinearLayout
+        android:id="@+id/ll_default_list"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@drawable/bg_music_list_view">
+
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_15"
+            android:background="@mipmap/media_list" />
+
+        <TextView
+            android:id="@+id/tv_default_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_20"
+            android:text="@string/default_list_name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_17" />
+
+        <ImageView
+            android:id="@+id/iv_default_list_playing"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginVertical="@dimen/dp_7"
+            android:layout_marginStart="@dimen/dp_120"
+            android:background="@mipmap/ic_is_playing"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_favorite_list"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:layout_marginTop="@dimen/dp_3"
+        android:background="@drawable/bg_music_list_view"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_15"
+            android:background="@mipmap/ic_list_like_choose" />
+
+        <TextView
+            android:id="@+id/tv_favorite_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_20"
+            android:text="@string/favorite_list_name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_17" />
+
+        <ImageView
+            android:id="@+id/iv_favorite_list_playing"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginVertical="@dimen/dp_7"
+            android:layout_marginStart="@dimen/dp_120"
+            android:background="@mipmap/ic_is_playing"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_history_list"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:layout_marginTop="@dimen/dp_3"
+        android:background="@drawable/bg_music_list_view"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_15"
+            android:background="@mipmap/ic_recently_green" />
+
+        <TextView
+            android:id="@+id/tv_history_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/dp_20"
+            android:text="@string/history_list_name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_17" />
+
+        <ImageView
+            android:id="@+id/iv_history_list_playing"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginVertical="@dimen/dp_7"
+            android:layout_marginStart="@dimen/dp_120"
+            android:background="@mipmap/ic_is_playing"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/ll_default_list"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_50"
-            android:background="@drawable/bg_music_list_view">
-
-            <ImageView
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_15"
-                android:background="@mipmap/media_list" />
-
-            <TextView
-                android:id="@+id/tv_default_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_20"
-                android:text="@string/default_list_name"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp_17" />
-
-            <ImageView
-                android:id="@+id/iv_default_list_playing"
-                android:layout_width="@dimen/dp_35"
-                android:layout_height="@dimen/dp_35"
-                android:layout_marginVertical="@dimen/dp_7"
-                android:layout_marginStart="@dimen/dp_120"
-                android:background="@mipmap/ic_is_playing"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_favorite_list"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_50"
-            android:layout_marginTop="@dimen/dp_3"
-            android:background="@drawable/bg_music_list_view"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_15"
-                android:background="@mipmap/ic_list_like_choose" />
-
-            <TextView
-                android:id="@+id/tv_favorite_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_20"
-                android:text="@string/favorite_list_name"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp_17" />
-
-            <ImageView
-                android:id="@+id/iv_favorite_list_playing"
-                android:layout_width="@dimen/dp_35"
-                android:layout_height="@dimen/dp_35"
-                android:layout_marginVertical="@dimen/dp_7"
-                android:layout_marginStart="@dimen/dp_120"
-                android:background="@mipmap/ic_is_playing"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_history_list"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_50"
-            android:layout_marginTop="@dimen/dp_3"
-            android:background="@drawable/bg_music_list_view"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_15"
-                android:background="@mipmap/ic_recently_green" />
-
-            <TextView
-                android:id="@+id/tv_history_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/dp_20"
-                android:text="@string/history_list_name"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp_17" />
-
-            <ImageView
-                android:id="@+id/iv_history_list_playing"
-                android:layout_width="@dimen/dp_35"
-                android:layout_height="@dimen/dp_35"
-                android:layout_marginVertical="@dimen/dp_7"
-                android:layout_marginStart="@dimen/dp_120"
-                android:background="@mipmap/ic_is_playing"
-                android:visibility="gone" />
-        </LinearLayout>
+        android:layout_marginTop="@dimen/dp_3">
 
         <RelativeLayout
+            android:id="@+id/rv_customs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_3"
+            android:layout_above="@+id/ll_first_line_tools"
             android:background="@drawable/bg_music_list_view">
 
-            <RelativeLayout
-                android:id="@+id/rv_customs"
+            <TextView
+                android:id="@+id/tv_customer_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="@dimen/dp_40"
+                android:layout_toStartOf="@+id/iv_add_list"
+                android:gravity="center"
+                android:text="@string/custom_list_name"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_19" />
 
-                <TextView
-                    android:id="@+id/tv_customer_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@+id/iv_add_list"
-                    android:gravity="center"
-                    android:text="@string/custom_list_name"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/sp_19" />
+            <ImageView
+                android:id="@+id/iv_add_list"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_marginEnd="@dimen/dp_20"
+                android:background="@drawable/add_list_style" />
 
-                <ImageView
-                    android:id="@+id/iv_add_list"
-                    android:layout_width="@dimen/dp_40"
-                    android:layout_height="@dimen/dp_40"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="@dimen/dp_5"
-                    android:layout_marginEnd="@dimen/dp_20"
-                    android:background="@drawable/add_list_style" />
-
-
-            </RelativeLayout>
 
             <View
                 android:id="@+id/view_line"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_1"
-                android:layout_below="@+id/rv_customs"
+                android:layout_below="@+id/tv_customer_list"
                 android:layout_marginTop="@dimen/dp_3"
                 android:background="@color/bg_line" />
 
             <ListView
                 android:id="@+id/lv_customer_list"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_210"
+                android:layout_height="match_parent"
                 android:layout_below="@+id/view_line"
                 android:clipToPadding="false"
                 android:divider="@null"
                 android:paddingTop="-8dp" />
-
         </RelativeLayout>
-    </LinearLayout>
 
+        <!--第一行-->
+        <LinearLayout
+            android:id="@+id/ll_first_line_tools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:paddingTop="@dimen/dp_5"
+            android:paddingBottom="@dimen/dp_5"
+            android:orientation="horizontal">
 
-</ScrollView>
+            <!--统计功能-->
+            <LinearLayout
+                android:id="@+id/ll_tools_statistics"
+                android:layout_width="@dimen/dp_0"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_music_list_view"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iv_tools_item"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:src="@mipmap/ic_tools_history_record_white"
+                    tools:ignore="RtlHardcoded" />
+
+                <TextView
+                    android:id="@+id/tv_tools_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/record"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_13" />
+            </LinearLayout>
+
+            <!--定时功能-->
+            <LinearLayout
+                android:id="@+id/ll_tools_time_off"
+                android:layout_width="@dimen/dp_0"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_music_list_view"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:src="@mipmap/ic_tools_timing_white"
+                    tools:ignore="RtlHardcoded" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/timing_off"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_13" />
+            </LinearLayout>
+
+            <!--切换语言-->
+            <LinearLayout
+                android:id="@+id/ll_tools_change_language"
+                android:layout_width="@dimen/dp_0"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_music_list_view"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:src="@mipmap/ic_tools_change_language_white"
+                    tools:ignore="RtlHardcoded" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/dp_5"
+                    android:text="@string/change_language"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_13" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</LinearLayout>
