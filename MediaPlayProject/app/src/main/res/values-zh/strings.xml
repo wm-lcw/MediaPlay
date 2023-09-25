@@ -50,5 +50,14 @@
     <string name="timing_off">定时关闭</string>
     <string name="change_language">设置语言</string>
 
+    <string-array name="tools_item_title">
+        <item>音乐记录</item>
+        <item>定时关闭</item>
+        <item>设置语言</item>
+        <item>电子木鱼</item>
+        <item>我的</item>
+        <item>设置</item>
+    </string-array>
+
 
 </resources>

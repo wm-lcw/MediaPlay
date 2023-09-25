@@ -50,6 +50,14 @@
     <string name="timing_off">Timing Off</string>
     <string name="change_language">Change Language</string>
 
+    <string-array name="tools_item_title">
+        <item>Record</item>
+        <item>Timing Off</item>
+        <item>Change Language</item>
+        <item>Wooden Fish</item>
+        <item>My</item>
+        <item>Settings</item>
+    </string-array>
 
 
     <string name="music_text" translatable="false"> music </string>
