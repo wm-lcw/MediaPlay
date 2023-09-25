@@ -23,10 +23,11 @@
 
             <ImageView
                 android:id="@+id/iv_tools_item"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_gravity="center"
-                android:src="@drawable/search_view_style"
+                android:src="@mipmap/ic_tools_history_record_blue"
                 tools:ignore="RtlHardcoded" />
 
             <TextView
@@ -49,10 +50,11 @@
             android:background="@drawable/bg_customer_edit_text">
 
             <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_gravity="center"
-                android:src="@drawable/search_view_style"
+                android:src="@mipmap/ic_tools_timing_blue"
                 tools:ignore="RtlHardcoded" />
 
             <TextView
@@ -74,10 +76,11 @@
             android:background="@drawable/bg_customer_edit_text" >
 
             <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_gravity="center"
-                android:src="@drawable/search_view_style"
+                android:src="@mipmap/ic_tools_change_language_blue"
                 tools:ignore="RtlHardcoded" />
 
             <TextView
