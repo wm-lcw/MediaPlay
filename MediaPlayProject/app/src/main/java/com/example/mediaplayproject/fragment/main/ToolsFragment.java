@@ -143,7 +143,6 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
         }
         if (allToolsBeanList.get(toolsId) != null){
             // shortcutToolsBeanList的对象必须从allToolsBeanList中获取才行
-            DebugLog.debug("exiet " + shortcutToolsBeanList.contains(allToolsBeanList.get(toolsId)));
             shortcutToolsBeanList.remove(allToolsBeanList.get(toolsId));
         }
         setShortcutToolsBeanList();

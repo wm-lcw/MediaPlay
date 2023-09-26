@@ -13,7 +13,8 @@
     <color name="text_pressed">#FF03DAC5</color><!-- 浅蓝色 -->
     <color name="text_choose">#D6F2E9</color>
 
-    <color name="bg_list_view">#BF1B2C42</color><!-- 列表背景 -->
+    <color name="bg_list_view">#00D5D9DE</color><!-- 列表背景 -->
+    <color name="stroke_list_view">#C7202E3F</color><!-- 列表边框 -->
     <color name="bg_transparent">#00000000</color><!-- 透明背景 -->
     <color name="bg_line">#7313242B</color><!-- 分割线背景 -->
     <color name="bg_customer_edit_text" tools:ignore="MissingDefaultResource">#2B91A2B7</color><!-- 自定义输入框背景 -->

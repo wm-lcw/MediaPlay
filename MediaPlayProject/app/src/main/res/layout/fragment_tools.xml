@@ -6,11 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".fragment.main.ToolsFragment">
 
-    <!--shortcut tools title-->
+    <!--所有工具标题-->
+    <LinearLayout
+        android:id="@+id/ll_all_tools_title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_30"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="@string/all_tools"
+            android:textSize="@dimen/sp_18"/>
+    </LinearLayout>
+
+    <!--所有工具-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_all_tools_item"
+        android:layout_below="@+id/ll_all_tools_title"
+        android:layout_marginTop="@dimen/dp_5"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_200" />
+
+    <!--快捷工具标题栏-->
     <LinearLayout
         android:id="@+id/ll_shortcut_tools_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_30"
+        android:layout_above="@+id/rv_shortcut_tools_item"
         android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"
@@ -24,42 +49,20 @@
     <!--快捷工具-->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_shortcut_tools_item"
-        android:layout_below="@+id/ll_shortcut_tools_title"
+        android:layout_above="@+id/ll_tools_bottom_view"
+
         android:layout_marginTop="@dimen/dp_20"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_100" />
 
-    <!--all tools title-->
-    <LinearLayout
-        android:id="@+id/ll_all_tools_title"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_30"
-        android:layout_below="@+id/rv_shortcut_tools_item"
-        android:layout_marginTop="@dimen/dp_20"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:text="@string/all_tools"
-            android:textSize="@dimen/sp_18"/>
-    </LinearLayout>
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_all_tools_item"
-        android:layout_below="@+id/ll_all_tools_title"
-        android:layout_marginTop="@dimen/dp_20"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_200" />
 
     <LinearLayout
         android:id="@+id/ll_tools_bottom_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rv_all_tools_item"
-        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginTop="@dimen/dp_5"
+        android:layout_above="@+id/empty_view"
         android:orientation="horizontal" >
 
         <Button
@@ -77,8 +80,14 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:text="@string/ok"/>
-
-
     </LinearLayout>
+
+    <View
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+    </View>
 
 </RelativeLayout>

@@ -43,7 +43,6 @@
         android:id="@+id/ll_favorite_list"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_50"
-        android:layout_marginTop="@dimen/dp_3"
         android:background="@drawable/bg_music_list_view"
         android:orientation="horizontal">
 
@@ -78,7 +77,6 @@
         android:id="@+id/ll_history_list"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_50"
-        android:layout_marginTop="@dimen/dp_3"
         android:background="@drawable/bg_music_list_view"
         android:orientation="horizontal">
 
@@ -111,8 +109,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_3">
+        android:layout_height="wrap_content">
 
         <RelativeLayout
             android:id="@+id/rv_customs"
@@ -147,7 +144,8 @@
                 android:layout_height="@dimen/dp_1"
                 android:layout_below="@+id/tv_customer_list"
                 android:layout_marginTop="@dimen/dp_3"
-                android:background="@color/bg_line" />
+                android:background="@color/bg_line"
+                android:visibility="gone"/>
 
             <ListView
                 android:id="@+id/lv_customer_list"
@@ -163,10 +161,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_shortcut_tools_in_personal"
             android:layout_above="@+id/other_view"
-            android:layout_marginTop="@dimen/dp_5"
             android:layout_marginBottom="@dimen/dp_5"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_100"
+            android:layout_height="@dimen/dp_90"
             android:background="@drawable/bg_music_list_view" />
         <ImageView
             android:id="@+id/other_view"
