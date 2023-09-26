@@ -1,8 +1,10 @@
 package com.example.mediaplayproject.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -36,10 +38,8 @@ public class ToolsUtils {
      */
     public void hideKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (view != null) {
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            view.clearFocus();
-        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        view.clearFocus();
     }
 
     /**
@@ -50,11 +50,17 @@ public class ToolsUtils {
      */
     public void showKeyBoard(View view){
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (view != null) {
-            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
-        }
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
     }
 
+    /**
+     *  切换语言
+     *  @author wm
+     *  @createTime 2023/9/26 16:08
+     * @param context: 上下文
+     * @param language: 语言
+     * @param country: 国家
+     */
     public final void changeLanguage(Context context, String language, String country) {
         if (context == null || TextUtils.isEmpty(language)) {
             return;
@@ -79,4 +85,33 @@ public class ToolsUtils {
             return (time / 1000 / 60) + ":" + time / 1000 % 60;
         }
     }
+
+    /**
+     *  根据传入小工具的ID，启动对应的小工具Fragment（若小工具的展示形式不是Fragment，则不能以这种方式启动）
+     *  这里的ID对应的是ToolsFragment.TOOLS_ITEM_ICON_LIST的下标，创建小工具Bean时默认使用下标作为Id
+     *  @author wm
+     *  @createTime 2023/9/26 16:12
+     * @param context: 上下文
+     * @param toolsId: 小工具的ItemID
+     */
+    public void startToolsFragmentById(Context context, int toolsId){
+        String fragmentName = "";
+        switch (toolsId){
+            case 0 :
+                fragmentName = Constant.STATISTICS_FRAGMENT_ACTION_FLAG;
+                break;
+            default:
+                break;
+
+        }
+        if ("".equals(fragmentName)){
+            return;
+        }
+        Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putString("fragment", fragmentName);
+        intent.putExtras(bundle);
+        context.sendBroadcast(intent);
+    }
+
 }

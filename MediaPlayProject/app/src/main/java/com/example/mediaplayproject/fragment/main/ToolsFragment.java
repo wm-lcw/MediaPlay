@@ -37,7 +37,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
     private final Context mContext;
     private View myView;
-    private static final  int[] TOOLS_ITEM_ICON_LIST = {
+    private static final int[] TOOLS_ITEM_ICON_LIST = {
       R.mipmap.ic_tools_history_record_blue, R.mipmap.ic_tools_timing_blue, R.mipmap.ic_tools_change_language_blue,
       R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
     };
@@ -98,49 +98,30 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     }
 
     private void initView() {
-        
-        try {
-            RecyclerView rvAllTools = myView.findViewById(R.id.rv_all_tools_item);
-            RecyclerView rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_item);
-            llSaveView = myView.findViewById(R.id.ll_tools_bottom_view);
-            btnCancel = myView.findViewById(R.id.btn_cancel_save_tools);
-            btnSave = myView.findViewById(R.id.btn_save_tools);
+        RecyclerView rvAllTools = myView.findViewById(R.id.rv_all_tools_item);
+        RecyclerView rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_item);
+        llSaveView = myView.findViewById(R.id.ll_tools_bottom_view);
+        btnCancel = myView.findViewById(R.id.btn_cancel_save_tools);
+        btnSave = myView.findViewById(R.id.btn_save_tools);
 
+        allToolsItemListAdapter = new AllToolsItemListAdapter(mContext, allToolsBeanList);
+        allToolsItemListAdapter.setAllToolsItemListAdapterListener(this);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
+        rvAllTools.setLayoutManager(gridLayoutManager);
+        rvAllTools.setAdapter(allToolsItemListAdapter);
 
-            allToolsItemListAdapter = new AllToolsItemListAdapter(mContext, allToolsBeanList);
-            allToolsItemListAdapter.setAllToolsItemListAdapterListener(this);
-            GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext,MAX_SHORTCUT_TOOLS_NUM);
-            rvAllTools.setLayoutManager(gridLayoutManager);
-            rvAllTools.setAdapter(allToolsItemListAdapter);
+        shortcutToolsItemListAdapter = new ShortcutToolsItemListAdapter(mContext, shortcutToolsBeanList);
+        shortcutToolsItemListAdapter.setShortcutToolsItemListAdapterListener(this);
+        // 这里的GridLayoutManager不能复用上面的，必须新建一个
+        GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
+        rvShortcutTools.setLayoutManager(gridLayoutManager2);
+        rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
+        setShortcutToolsBeanList();
 
-            shortcutToolsItemListAdapter = new ShortcutToolsItemListAdapter(mContext, shortcutToolsBeanList);
-            shortcutToolsItemListAdapter.setShortcutToolsItemListAdapterListener(this);
-            // 这里的GridLayoutManager不能复用上面的，必须新建一个
-            GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
-            rvShortcutTools.setLayoutManager(gridLayoutManager2);
-            rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
-            setShortcutToolsBeanList();
-
-            setEditMode(false);
-            btnSave.setOnClickListener(mListener);
-            btnCancel.setOnClickListener(mListener);
-
-        } catch (Exception exception){
-            DebugLog.debug(exception.getMessage());
-        }
+        setEditMode(false);
+        btnSave.setOnClickListener(mListener);
+        btnCancel.setOnClickListener(mListener);
     }
-
-
-
-//    private final View.OnClickListener mListener = view -> {
-//        if (view == llStatistics) {
-//            Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
-//            Bundle bundle = new Bundle();
-//            bundle.putString("fragment", Constant.STATISTICS_FRAGMENT_ACTION_FLAG);
-//            intent.putExtras(bundle);
-//            mContext.sendBroadcast(intent);
-//        }
-//    };
 
     @Override
     public void onDestroy() {
@@ -161,7 +142,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
     @Override
     public void onClickItemByAll(int toolsId) {
-
+        ToolsUtils.getInstance().startToolsFragmentById(mContext, toolsId);
     }
 
     @Override
@@ -180,6 +161,8 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     public void onClickItemByShortcut(int toolsId) {
         if (toolsId == -1){
             setEditMode(true);
+        } else {
+            ToolsUtils.getInstance().startToolsFragmentById(mContext, toolsId);
         }
     }
 
