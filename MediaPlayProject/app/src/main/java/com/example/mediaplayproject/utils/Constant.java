@@ -65,4 +65,6 @@ public class Constant {
     public static final String CURRENT_COUNTRY = "country";
 
     public static final String SWITCH_LANGUAGE = "switchLanguage";
+
+    public static final String SHORTCUT_TOOLS_LIST = "shortcutToolsList";
 }

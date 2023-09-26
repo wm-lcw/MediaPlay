@@ -54,4 +54,31 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_200" />
 
+    <LinearLayout
+        android:id="@+id/ll_tools_bottom_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rv_all_tools_item"
+        android:layout_marginTop="@dimen/dp_20"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btn_cancel_save_tools"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="@string/cancel"/>
+
+        <Button
+            android:id="@+id/btn_save_tools"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="@string/ok"/>
+
+
+    </LinearLayout>
+
 </RelativeLayout>
