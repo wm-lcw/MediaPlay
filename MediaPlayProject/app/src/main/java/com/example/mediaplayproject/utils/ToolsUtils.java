@@ -103,6 +103,9 @@ public class ToolsUtils {
     public void startToolsFragmentById(Context context, int toolsId){
         String fragmentName = "";
         switch (toolsId){
+            case -1 :
+                fragmentName = Constant.TOOLS_FRAGMENT_ACTION_FLAG;
+                break;
             case 0 :
                 fragmentName = Constant.STATISTICS_FRAGMENT_ACTION_FLAG;
                 break;

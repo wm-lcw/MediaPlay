@@ -540,4 +540,10 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
     }
 
+    public void changeToToolsFragment(){
+        if (musicListViewPager != null) {
+            musicListViewPager.setCurrentItem(2);
+        }
+    }
+
 }

@@ -5,13 +5,13 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,11 +36,15 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.AddToMusicListAdapter;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
 import com.example.mediaplayproject.adapter.musiclist.MainListAdapter;
+import com.example.mediaplayproject.adapter.tools.AllToolsItemListAdapter;
+import com.example.mediaplayproject.adapter.tools.ShortcutToolsItemListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
+import com.example.mediaplayproject.bean.ToolsBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
@@ -51,7 +55,8 @@ import java.util.Set;
 /**
  * @author wm
  */
-public class PersonalPageFragment extends Fragment implements CustomerMusicListAdapter.OnImageViewClickListener, MainListAdapter.MainListAdapterOnClickListener {
+public class PersonalPageFragment extends Fragment implements CustomerMusicListAdapter.OnImageViewClickListener,
+        MainListAdapter.MainListAdapterOnClickListener, ShortcutToolsItemListAdapter.ShortcutToolsItemListAdapterListener {
 
     private final Context mContext;
     private View myView;
@@ -80,6 +85,13 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
     private Set<Long> deleteMusicHelperSet = new HashSet<>();
     private int mPosition = 0;
 
+    private ShortcutToolsItemListAdapter.ShortcutToolsItemListAdapterListener shortcutToolsListener;
+    private List<ToolsBean> allToolsBeanList = new ArrayList<>();
+    private List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
+    private ShortcutToolsItemListAdapter shortcutToolsItemListAdapter;
+    private ToolsBean addToolsBean;
+
+    @SuppressLint("StaticFieldLeak")
     private static PersonalPageFragment instance;
 
     public PersonalPageFragment(Context context) {
@@ -118,6 +130,10 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         super.onResume();
         // 每次恢复页面都需要初始化，因为在MainActivity中是Fragment显示时才修改，若在后台则无法刷新
         refreshCustomerList();
+
+        // 因为小工具更改处于不同页面，更改完了再进入本页面时初始化数据即可，不需要动态监听数据的变化
+        refreshShortcutTools();
+        setShortcutToolsBeanList();
     }
 
     @Override
@@ -390,6 +406,16 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         llDefaultList.setOnClickListener(mListener);
         llFavoriteList.setOnClickListener(mListener);
         llHistoryList.setOnClickListener(mListener);
+
+
+        initItemBean();
+        RecyclerView rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_in_personal);
+        shortcutToolsItemListAdapter = new ShortcutToolsItemListAdapter(mContext, shortcutToolsBeanList);
+        shortcutToolsItemListAdapter.setShortcutToolsItemListAdapterListener(this);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext, Constant.MAX_SHORTCUT_TOOLS_NUM);
+        rvShortcutTools.setLayoutManager(gridLayoutManager);
+        rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
+        setShortcutToolsBeanList();
     }
 
 
@@ -556,7 +582,7 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
 
         builder.setIcon(R.mipmap.ic_launcher);
-        //点击对话框以外的区域是否让对话框消失
+        // 点击对话框以外的区域是否让对话框消失
         builder.setCancelable(true);
 
         // 设置正面按钮
@@ -714,4 +740,52 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         }
     };
 
+    /**
+     *  初始化toolsItemList数据
+     *  @author wm
+     *  @createTime 2023/9/26 17:31
+     */
+    private void initItemBean() {
+        allToolsBeanList = ToolsUtils.getInstance().getAllToolsList(mContext);
+        // 创建一个添加快捷工具的Item
+        addToolsBean = new ToolsBean(-1, "add", R.mipmap.ic_add_to_list_nor);
+        refreshShortcutTools();
+    }
+
+    /**
+     *  从SharedPreferencesU中获取快捷工具的集合，进入Fragment和小工具刷新时需要调用
+     *  @author wm
+     *  @createTime 2023/9/26 14:56
+     */
+    private void refreshShortcutTools(){
+        shortcutToolsBeanList = ToolsUtils.getInstance().getShortcutToolsList(mContext, allToolsBeanList);
+    }
+
+    /**
+     *  设置快捷工具的Adapter数据
+     *  @author wm
+     *  @createTime 2023/9/26 15:00
+     */
+    private void setShortcutToolsBeanList(){
+        if (!shortcutToolsBeanList.contains(addToolsBean) && shortcutToolsBeanList.size() < Constant.MAX_SHORTCUT_TOOLS_NUM) {
+            // 快捷工具未满3个，且未包含“添加按钮”，把添加Item加在最后
+            shortcutToolsBeanList.add(addToolsBean);
+        }
+        shortcutToolsItemListAdapter.setToolsBeanList(shortcutToolsBeanList);
+    }
+
+    @Override
+    public void toolsDeleteIconOnClick(int toolsId) {
+
+    }
+
+    @Override
+    public void onClickItemByShortcut(int toolsId) {
+        ToolsUtils.getInstance().startToolsFragmentById(mContext,toolsId);
+    }
+
+    @Override
+    public void onIntoEditModeByShort() {
+
+    }
 }

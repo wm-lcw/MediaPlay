@@ -639,6 +639,10 @@ public class MainActivity extends BasicActivity {
                     changeFragment(statisticsFragment);
                 } else if (Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     changeFragment(musicPlayFragment);
+                } else if (Constant.TOOLS_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
+                    if (mainViewFragment.isVisible()){
+                        mainViewFragment.changeToToolsFragment();
+                    }
                 }
                 handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_FRAGMENT,200);
             } else if(Constant.RETURN_MAIN_VIEW_ACTION.equals(intent.getAction())) {
