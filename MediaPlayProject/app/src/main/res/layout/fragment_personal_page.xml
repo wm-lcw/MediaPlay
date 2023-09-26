@@ -162,11 +162,16 @@
         <!--快捷工具-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_shortcut_tools_in_personal"
-            android:layout_alignParentBottom="true"
-            android:paddingTop="@dimen/dp_5"
-            android:paddingBottom="@dimen/dp_5"
+            android:layout_above="@+id/other_view"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_marginBottom="@dimen/dp_5"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_100" />
-
+            android:layout_height="@dimen/dp_100"
+            android:background="@drawable/bg_music_list_view" />
+        <ImageView
+            android:id="@+id/other_view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true" />
     </RelativeLayout>
 </LinearLayout>
