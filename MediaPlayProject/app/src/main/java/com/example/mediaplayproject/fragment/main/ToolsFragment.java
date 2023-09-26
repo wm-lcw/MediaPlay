@@ -27,7 +27,6 @@ import com.example.mediaplayproject.utils.ToolsUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -36,28 +35,23 @@ import java.util.Map;
 public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.AllToolsItemListAdapterListener,
         ShortcutToolsItemListAdapter.ShortcutToolsItemListAdapterListener {
 
-    private Context mContext;
+    private final Context mContext;
     private View myView;
-    private ArrayList<String> itemTitleList;
     private static final  int[] TOOLS_ITEM_ICON_LIST = {
       R.mipmap.ic_tools_history_record_blue, R.mipmap.ic_tools_timing_blue, R.mipmap.ic_tools_change_language_blue,
       R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
     };
 
     private static final int MAX_SHORTCUT_TOOLS_NUM = 3;
-    private RecyclerView rvShortcutTools, rvAllTools;
-    private List<ToolsBean> allToolsBeanList = new ArrayList<>();
+    private final List<ToolsBean> allToolsBeanList = new ArrayList<>();
     private List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
     private AllToolsItemListAdapter allToolsItemListAdapter;
     private ShortcutToolsItemListAdapter shortcutToolsItemListAdapter;
     private ToolsBean addToolsBean;
-
     private LinearLayout llSaveView;
     private Button btnSave, btnCancel;
 
-    public ToolsFragment(Context context){
-        mContext = context;
-    }
+    @SuppressLint("StaticFieldLeak")
     private static ToolsFragment instance;
     public static ToolsFragment getInstance(Context context) {
         if (instance == null) {
@@ -66,12 +60,13 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
         return instance;
     }
 
-
+    public ToolsFragment(Context context){
+        mContext = context;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -79,7 +74,6 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_tools, container, false);
-
         myView.setOnTouchListener((v, event) -> {
             ToolsUtils.getInstance().hideKeyboard(myView);
             return false;
@@ -90,7 +84,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     }
 
     private void initItemBean() {
-        itemTitleList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.tools_item_title)));
+        ArrayList<String> itemTitleList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.tools_item_title)));
         // 这里应该做数量判断，后续加上
         for (int i = 0; i < itemTitleList.size(); i++){
             ToolsBean toolsBean = new ToolsBean(i, itemTitleList.get(i), TOOLS_ITEM_ICON_LIST[i]);
@@ -106,8 +100,8 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     private void initView() {
         
         try {
-            rvAllTools = myView.findViewById(R.id.rv_all_tools_item);
-            rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_item);
+            RecyclerView rvAllTools = myView.findViewById(R.id.rv_all_tools_item);
+            RecyclerView rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_item);
             llSaveView = myView.findViewById(R.id.ll_tools_bottom_view);
             btnCancel = myView.findViewById(R.id.btn_cancel_save_tools);
             btnSave = myView.findViewById(R.id.btn_save_tools);
@@ -125,7 +119,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
             GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
             rvShortcutTools.setLayoutManager(gridLayoutManager2);
             rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
-            setShortcutToolsBeanList(shortcutToolsBeanList);
+            setShortcutToolsBeanList();
 
             setEditMode(false);
             btnSave.setOnClickListener(mListener);
@@ -134,24 +128,9 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
         } catch (Exception exception){
             DebugLog.debug(exception.getMessage());
         }
-
-
-
     }
 
-    /**
-     *  设置快捷工具的Adapter数据
-     *  @author wm
-     *  @createTime 2023/9/26 15:00
-     * @param list: 快捷工具列表，传进来的列表不带有“添加Item”
-     */
-    private void setShortcutToolsBeanList(List<ToolsBean> list){
-        if (list.size() < MAX_SHORTCUT_TOOLS_NUM) {
-             // 快捷工具未满3个时，把添加Item加在最后
-            list.add(addToolsBean);
-        }
-        shortcutToolsItemListAdapter.setToolsBeanList(list);
-    }
+
 
 //    private final View.OnClickListener mListener = view -> {
 //        if (view == llStatistics) {
@@ -170,13 +149,11 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
     @Override
     public void toolsAddIconOnClick(int toolsId) {
-        if (shortcutToolsBeanList.contains(addToolsBean)) {
-            shortcutToolsBeanList.remove(addToolsBean);
-        }
+        shortcutToolsBeanList.remove(addToolsBean);
         if (shortcutToolsBeanList.size() < MAX_SHORTCUT_TOOLS_NUM){
             // 列表未满，继续添加
             shortcutToolsBeanList.add(allToolsBeanList.get(toolsId));
-            setShortcutToolsBeanList(shortcutToolsBeanList);
+            setShortcutToolsBeanList();
         } else {
             Toast.makeText(mContext, "out of 3 shortcut tools!!!", Toast.LENGTH_SHORT).show();
         }
@@ -189,6 +166,13 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
     @Override
     public void toolsDeleteIconOnClick(int toolsId) {
+        if (toolsId == -1){
+            return;
+        }
+        if (allToolsBeanList.get(toolsId) != null){
+            shortcutToolsBeanList.remove(allToolsBeanList.get(toolsId));
+        }
+        setShortcutToolsBeanList();
 
     }
 
@@ -229,9 +213,22 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
         } else if (view == btnCancel){
             setEditMode(false);
             refreshShortcutTools();
-            setShortcutToolsBeanList(shortcutToolsBeanList);
+            setShortcutToolsBeanList();
         }
     };
+
+    /**
+     *  设置快捷工具的Adapter数据
+     *  @author wm
+     *  @createTime 2023/9/26 15:00
+     */
+    private void setShortcutToolsBeanList(){
+        if (!shortcutToolsBeanList.contains(addToolsBean) && shortcutToolsBeanList.size() < MAX_SHORTCUT_TOOLS_NUM) {
+            // 快捷工具未满3个，且未包含“添加按钮”，把添加Item加在最后
+            shortcutToolsBeanList.add(addToolsBean);
+        }
+        shortcutToolsItemListAdapter.setToolsBeanList(shortcutToolsBeanList);
+    }
 
     /**
      *  从SharedPreferencesU中获取快捷工具的集合，进入Fragment和退出编辑时需要调用
