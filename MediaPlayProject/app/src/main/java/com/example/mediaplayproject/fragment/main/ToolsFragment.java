@@ -123,7 +123,11 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     public void toolsAddIconOnClick(int toolsId) {
         shortcutToolsBeanList.remove(addToolsBean);
         if (shortcutToolsBeanList.size() < Constant.MAX_SHORTCUT_TOOLS_NUM){
-            // 列表未满，继续添加
+            if (shortcutToolsBeanList.contains(allToolsBeanList.get(toolsId))){
+                Toast.makeText(mContext, "Shortcut tools exist ! ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // 列表未满且表中还没存在该工具，继续添加
             shortcutToolsBeanList.add(allToolsBeanList.get(toolsId));
             setShortcutToolsBeanList();
         } else {
