@@ -10,6 +10,12 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.bean.ToolsBean;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -112,6 +118,47 @@ public class ToolsUtils {
         bundle.putString("fragment", fragmentName);
         intent.putExtras(bundle);
         context.sendBroadcast(intent);
+    }
+
+    private static final int[] TOOLS_ITEM_ICON_LIST = {
+            R.mipmap.ic_tools_history_record_blue, R.mipmap.ic_tools_timing_blue, R.mipmap.ic_tools_change_language_blue,
+            R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
+    };
+
+    /**
+     *  获取所有工具列表
+     *  @author wm
+     *  @createTime 2023/9/26 17:24
+     * @param mContext: 
+     * @return : java.util.List<com.example.mediaplayproject.bean.ToolsBean>
+     */
+    public List<ToolsBean> getAllToolsList(Context mContext){
+        List<ToolsBean> allToolsBeanList = new ArrayList<>();
+        ArrayList<String> itemTitleList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.tools_item_title)));
+        // 这里应该做数量判断，后续加上
+        for (int i = 0; i < itemTitleList.size(); i++){
+            ToolsBean toolsBean = new ToolsBean(i, itemTitleList.get(i), TOOLS_ITEM_ICON_LIST[i]);
+            allToolsBeanList.add(toolsBean);
+        }
+        return allToolsBeanList;
+    }
+
+
+    /**
+     *  获取快捷工具列表
+     *  这shortcutToolsBeanList的对象必须从allToolsBeanList中获取才行,否则两个列表里的对象并非同一对象，没办法删除
+     *  @author wm
+     *  @createTime 2023/9/26 17:45
+     * @param mContext:
+     * @return : java.util.List<com.example.mediaplayproject.bean.ToolsBean>
+     */
+    public List<ToolsBean> getShortcutToolsList(Context mContext, List<ToolsBean> allToolsList){
+        List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
+        List<Integer> saveList  = SharedPreferencesUtil.getListData(Constant.SHORTCUT_TOOLS_LIST, Integer.class);
+        for (int i = 0 ; i < saveList.size(); i++){
+            shortcutToolsBeanList.add(allToolsList.get(saveList.get(i)));
+        }
+        return shortcutToolsBeanList;
     }
 
 }

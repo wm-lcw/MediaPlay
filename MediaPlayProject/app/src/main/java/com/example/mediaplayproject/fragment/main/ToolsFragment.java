@@ -37,13 +37,8 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
     private final Context mContext;
     private View myView;
-    private static final int[] TOOLS_ITEM_ICON_LIST = {
-      R.mipmap.ic_tools_history_record_blue, R.mipmap.ic_tools_timing_blue, R.mipmap.ic_tools_change_language_blue,
-      R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
-    };
 
-    private static final int MAX_SHORTCUT_TOOLS_NUM = 3;
-    private final List<ToolsBean> allToolsBeanList = new ArrayList<>();
+    private List<ToolsBean> allToolsBeanList = new ArrayList<>();
     private List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
     private AllToolsItemListAdapter allToolsItemListAdapter;
     private ShortcutToolsItemListAdapter shortcutToolsItemListAdapter;
@@ -84,12 +79,8 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     }
 
     private void initItemBean() {
-        ArrayList<String> itemTitleList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.tools_item_title)));
-        // 这里应该做数量判断，后续加上
-        for (int i = 0; i < itemTitleList.size(); i++){
-            ToolsBean toolsBean = new ToolsBean(i, itemTitleList.get(i), TOOLS_ITEM_ICON_LIST[i]);
-            allToolsBeanList.add(toolsBean);
-        }
+		// 这里应该做数量判断，后续加上
+        allToolsBeanList = ToolsUtils.getInstance().getAllToolsList(mContext);
         // 创建一个添加快捷工具的Item
         addToolsBean = new ToolsBean(-1, "add", R.mipmap.ic_add_to_list_nor);
 
@@ -106,14 +97,14 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
 
         allToolsItemListAdapter = new AllToolsItemListAdapter(mContext, allToolsBeanList);
         allToolsItemListAdapter.setAllToolsItemListAdapterListener(this);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext, Constant.MAX_SHORTCUT_TOOLS_NUM);
         rvAllTools.setLayoutManager(gridLayoutManager);
         rvAllTools.setAdapter(allToolsItemListAdapter);
 
         shortcutToolsItemListAdapter = new ShortcutToolsItemListAdapter(mContext, shortcutToolsBeanList);
         shortcutToolsItemListAdapter.setShortcutToolsItemListAdapterListener(this);
         // 这里的GridLayoutManager不能复用上面的，必须新建一个
-        GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext, MAX_SHORTCUT_TOOLS_NUM);
+        GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext, Constant.MAX_SHORTCUT_TOOLS_NUM);
         rvShortcutTools.setLayoutManager(gridLayoutManager2);
         rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
         setShortcutToolsBeanList();
@@ -131,7 +122,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
     @Override
     public void toolsAddIconOnClick(int toolsId) {
         shortcutToolsBeanList.remove(addToolsBean);
-        if (shortcutToolsBeanList.size() < MAX_SHORTCUT_TOOLS_NUM){
+        if (shortcutToolsBeanList.size() < Constant.MAX_SHORTCUT_TOOLS_NUM){
             // 列表未满，继续添加
             shortcutToolsBeanList.add(allToolsBeanList.get(toolsId));
             setShortcutToolsBeanList();
@@ -151,6 +142,8 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
             return;
         }
         if (allToolsBeanList.get(toolsId) != null){
+            // shortcutToolsBeanList的对象必须从allToolsBeanList中获取才行
+            DebugLog.debug("exiet " + shortcutToolsBeanList.contains(allToolsBeanList.get(toolsId)));
             shortcutToolsBeanList.remove(allToolsBeanList.get(toolsId));
         }
         setShortcutToolsBeanList();
@@ -206,7 +199,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
      *  @createTime 2023/9/26 15:00
      */
     private void setShortcutToolsBeanList(){
-        if (!shortcutToolsBeanList.contains(addToolsBean) && shortcutToolsBeanList.size() < MAX_SHORTCUT_TOOLS_NUM) {
+        if (!shortcutToolsBeanList.contains(addToolsBean) && shortcutToolsBeanList.size() < Constant.MAX_SHORTCUT_TOOLS_NUM) {
             // 快捷工具未满3个，且未包含“添加按钮”，把添加Item加在最后
             shortcutToolsBeanList.add(addToolsBean);
         }
@@ -219,11 +212,7 @@ public class ToolsFragment extends Fragment implements AllToolsItemListAdapter.A
      *  @createTime 2023/9/26 14:56
      */
     private void refreshShortcutTools(){
-        List<Integer> saveList  = SharedPreferencesUtil.getListData(Constant.SHORTCUT_TOOLS_LIST, Integer.class);
-        shortcutToolsBeanList.clear();
-        for (int i = 0 ; i < saveList.size(); i++){
-            shortcutToolsBeanList.add(allToolsBeanList.get(saveList.get(i)));
-        }
+        shortcutToolsBeanList = ToolsUtils.getInstance().getShortcutToolsList(mContext, allToolsBeanList);
     }
 
     /**

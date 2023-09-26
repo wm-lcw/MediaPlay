@@ -67,4 +67,5 @@ public class Constant {
     public static final String SWITCH_LANGUAGE = "switchLanguage";
 
     public static final String SHORTCUT_TOOLS_LIST = "shortcutToolsList";
+    public static final int MAX_SHORTCUT_TOOLS_NUM = 3;
 }
