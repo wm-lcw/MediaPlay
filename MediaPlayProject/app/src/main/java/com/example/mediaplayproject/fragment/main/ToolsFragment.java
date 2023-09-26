@@ -2,26 +2,20 @@ package com.example.mediaplayproject.fragment.main;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
-import com.example.mediaplayproject.adapter.ToolsItemListAdapter;
+import com.example.mediaplayproject.adapter.tools.AllToolsItemListAdapter;
+import com.example.mediaplayproject.adapter.tools.ShortcutToolsItemListAdapter;
 import com.example.mediaplayproject.bean.ToolsBean;
-import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
 
@@ -43,9 +37,12 @@ public class ToolsFragment extends Fragment {
       R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
     };
 
-    private RecyclerView rvToolsItem;
-    private List<ToolsBean> toolsBeanList = new ArrayList<>();
-    private ToolsItemListAdapter toolsItemListAdapter;
+    private RecyclerView rvShortcutTools, rvAllTools;
+    private List<ToolsBean> allToolsBeanList = new ArrayList<>();
+    private List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
+    private List<ToolsBean> tempToolsBeanList = new ArrayList<>();
+    private AllToolsItemListAdapter allToolsItemListAdapter;
+    private ShortcutToolsItemListAdapter shortcutToolsItemListAdapter;
 
     public ToolsFragment(Context context){
         mContext = context;
@@ -86,23 +83,29 @@ public class ToolsFragment extends Fragment {
         // 这里应该做数量判断，后续加上
         for (int i = 0; i < itemTitleList.size(); i++){
             ToolsBean toolsBean = new ToolsBean(i, itemTitleList.get(i), TOOLS_ITEM_ICON_LIST[i]);
-            toolsBeanList.add(toolsBean);
+            allToolsBeanList.add(toolsBean);
         }
+
+        shortcutToolsBeanList.add(allToolsBeanList.get(0));
+        shortcutToolsBeanList.add(allToolsBeanList.get(1));
+
     }
 
     private void initView() {
-
-        for (int i = 0; i < toolsBeanList.size(); i++){
-            DebugLog.debug(toolsBeanList.get(i).getToolsName() + "; " + toolsBeanList.get(i).getToolsIconId());
-        }
-
+        
         try {
-            rvToolsItem = myView.findViewById(R.id.rv_tools_item);
-            DebugLog.debug("list " + toolsBeanList.size());
-            toolsItemListAdapter = new ToolsItemListAdapter(mContext, toolsBeanList);
-            rvToolsItem.setAdapter(toolsItemListAdapter);
+            rvAllTools = myView.findViewById(R.id.rv_all_tools_item);
+            rvShortcutTools = myView.findViewById(R.id.rv_shortcut_tools_item);
+
+            allToolsItemListAdapter = new AllToolsItemListAdapter(mContext, allToolsBeanList);
+            rvAllTools.setAdapter(allToolsItemListAdapter);
             GridLayoutManager gridLayoutManager = new GridLayoutManager(mContext,3);
-            rvToolsItem.setLayoutManager(gridLayoutManager);
+            rvAllTools.setLayoutManager(gridLayoutManager);
+
+            shortcutToolsItemListAdapter = new ShortcutToolsItemListAdapter(mContext, shortcutToolsBeanList);
+            rvShortcutTools.setAdapter(shortcutToolsItemListAdapter);
+            GridLayoutManager gridLayoutManager2 = new GridLayoutManager(mContext,3);
+            rvShortcutTools.setLayoutManager(gridLayoutManager2);
 
         } catch (Exception exception){
             DebugLog.debug(exception.getMessage());

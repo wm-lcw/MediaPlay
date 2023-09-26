@@ -1,4 +1,4 @@
-package com.example.mediaplayproject.adapter;
+package com.example.mediaplayproject.adapter.tools;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,26 +12,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.ToolsBean;
-import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
 
 /**
  * @author wm
- * @Classname ToolsItemListAdapter
+ * @Classname AllToolsItemListAdapter
  * @Description TODO
  * @Version 1.0.0
  * @Date 2023/9/25 20:07
  * @Created by wm
  */
-public class ToolsItemListAdapter extends RecyclerView.Adapter<ToolsItemListAdapter.ViewHolder>{
+public class ShortcutToolsItemListAdapter extends RecyclerView.Adapter<ShortcutToolsItemListAdapter.ViewHolder>{
 
     private Context mContext;
     private List<ToolsBean> toolsBeanList;
-    public ToolsItemListAdapter() {
+    public ShortcutToolsItemListAdapter() {
     }
 
-    public ToolsItemListAdapter(Context mContext, List<ToolsBean> toolsBeanList) {
+    public ShortcutToolsItemListAdapter(Context mContext, List<ToolsBean> toolsBeanList) {
         this.mContext = mContext;
         this.toolsBeanList = toolsBeanList;
     }

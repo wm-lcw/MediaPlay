@@ -22,97 +22,19 @@
     </LinearLayout>
 
     <!--快捷工具-->
-    <LinearLayout
-        android:id="@+id/ll_shortcut_tools_line"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_shortcut_tools_item"
         android:layout_below="@+id/ll_shortcut_tools_title"
+        android:layout_marginTop="@dimen/dp_20"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_10"
-        android:orientation="horizontal">
-
-        <!--统计功能-->
-        <LinearLayout
-            android:layout_width="@dimen/dp_0"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/bg_tools_item">
-
-            <ImageView
-                android:layout_marginTop="@dimen/dp_5"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:layout_gravity="center"
-                android:src="@mipmap/ic_tools_history_record_blue"
-                tools:ignore="RtlHardcoded" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="@dimen/dp_5"
-                android:textSize="@dimen/sp_13"
-                android:text="@string/record"/>
-        </LinearLayout>
-
-        <!--定时功能-->
-        <LinearLayout
-            android:layout_width="@dimen/dp_0"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/bg_tools_item">
-
-            <ImageView
-                android:layout_marginTop="@dimen/dp_5"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:layout_gravity="center"
-                android:src="@mipmap/ic_tools_timing_blue"
-                tools:ignore="RtlHardcoded" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="@dimen/dp_5"
-                android:textSize="@dimen/sp_13"
-                android:text="@string/timing_off"/>
-        </LinearLayout>
-
-        <!--切换语言-->
-        <LinearLayout
-            android:layout_width="@dimen/dp_0"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/bg_tools_item" >
-
-            <ImageView
-                android:layout_marginTop="@dimen/dp_5"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:layout_gravity="center"
-                android:src="@mipmap/ic_tools_change_language_blue"
-                tools:ignore="RtlHardcoded" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="@dimen/dp_5"
-                android:textSize="@dimen/sp_13"
-                android:text="@string/change_language"/>
-        </LinearLayout>
-
-    </LinearLayout>
+        android:layout_height="@dimen/dp_100" />
 
     <!--all tools title-->
     <LinearLayout
         android:id="@+id/ll_all_tools_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_30"
-        android:layout_below="@+id/ll_shortcut_tools_line"
+        android:layout_below="@+id/rv_shortcut_tools_item"
         android:layout_marginTop="@dimen/dp_20"
         android:orientation="vertical">
         <TextView
@@ -126,7 +48,7 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_tools_item"
+        android:id="@+id/rv_all_tools_item"
         android:layout_below="@+id/ll_all_tools_title"
         android:layout_marginTop="@dimen/dp_20"
         android:layout_width="match_parent"
