@@ -297,6 +297,25 @@ public class MainActivity extends BasicActivity {
         // 这里不能将初始化操作放到DataRefreshService的onCreate中操作，因为首次启动app时可能获取到的列表为空
         DataRefreshService.initResource();
 
+        // 获取播放相关的参数
+        initInfo();
+        // 创建悬浮窗视图
+        createFloatView();
+        // 创建Fragment
+        createFragment();
+
+        // 启动MusicPlayService服务
+        Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+        registerReceiver();
+    }
+
+    /**
+     *  初始化一些必要的参数
+     *  @author wm
+     *  @createTime 2023/9/27 0:25
+     */
+    private void initInfo(){
         // 从DataRefreshService中获取音乐列表，上次播放的信息等
         playMode = DataRefreshService.getLastPlayMode();
         musicListName = DataRefreshService.getLastPlayListName();
@@ -310,10 +329,14 @@ public class MainActivity extends BasicActivity {
         // seekbarProgress不需要初始化，默认就是0, currentPlayTime 默认是 "00:00";
         currentMusicInfo = musicInfo.get(mPosition).getTitle();
         mediaTime = ToolsUtils.getInstance().formatTime(musicInfo.get(mPosition).getDuration());
+    }
 
-        // 创建悬浮窗视图
-        createFloatView();
-
+    /**
+     *  创建Fragment，并初始化
+     *  @author wm
+     *  @createTime 2023/9/27 0:23
+     */
+    private void createFragment(){
         // 创建Fragment实例，并加载显示MainViewFragment
         SplashFragment splashFragment = SplashFragment.getInstance(mContext);
         mainViewFragment = MainViewFragment.getInstance(mContext);
@@ -324,11 +347,6 @@ public class MainActivity extends BasicActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.fl_main_view, splashFragment);
         transaction.commit();
-
-        // 启动MusicPlayService服务
-        Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
-        registerReceiver();
     }
 
     @Override
