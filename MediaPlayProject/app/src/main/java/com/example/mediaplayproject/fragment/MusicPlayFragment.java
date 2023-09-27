@@ -341,8 +341,7 @@ public class MusicPlayFragment extends Fragment {
         public void onClick(View view) {
             if (view == ivBack) {
                 // 返回主页
-                Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
-                mContext.sendBroadcast(intent);
+                ToolsUtils.getInstance().backToMainViewFragment(mContext);
             } else if (view == ivMore) {
                 DebugLog.debug("more");
             } else if (view == ivMute) {

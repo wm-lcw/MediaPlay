@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 /**
  * @author wm
@@ -75,8 +76,7 @@ public class SplashFragment extends Fragment {
                 public void onAnimationEnd(Animation animation) {
                     // 动画结束时跳转到主页面, musicService连接完成时已经调用setDataFromMainActivity设置参数了
                     // 直接切换Fragment即可，不需要重新设置MainViewFragment的参数
-                    Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
-                    mContext.sendBroadcast(intent);
+                    ToolsUtils.getInstance().backToMainViewFragment(mContext);
                 }
 
                 @Override

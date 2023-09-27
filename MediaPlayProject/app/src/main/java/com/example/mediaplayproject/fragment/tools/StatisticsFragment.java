@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,8 +123,7 @@ public class StatisticsFragment extends Fragment {
     private final View.OnClickListener mListener = view -> {
         if (view == ivBack) {
             // 返回主页
-            Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
-            mContext.sendBroadcast(intent);
+            ToolsUtils.getInstance().backToMainViewFragment(mContext);
         } else if (view == ivMore) {
             // 更多功能
 

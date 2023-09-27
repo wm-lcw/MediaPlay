@@ -167,4 +167,15 @@ public class ToolsUtils {
         return shortcutToolsBeanList;
     }
 
+    /**
+     *  返回主页的操作
+     *  @author wm
+     *  @createTime 2023/9/27 23:22
+     * @param mContext:
+     */
+    public void backToMainViewFragment(Context mContext) {
+        Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
+        mContext.sendBroadcast(intent);
+    }
+
 }

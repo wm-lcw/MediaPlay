@@ -24,6 +24,7 @@ import com.example.mediaplayproject.bean.ToolsBean;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,8 +102,8 @@ public class ChangeLanguageFragment extends Fragment implements LanguageChangeAd
 
     private final View.OnClickListener mListener = view -> {
         if (view == ivBack) {
-            Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
-            mContext.sendBroadcast(intent);
+            // 返回主页
+            ToolsUtils.getInstance().backToMainViewFragment(mContext);
         }
     };
 
