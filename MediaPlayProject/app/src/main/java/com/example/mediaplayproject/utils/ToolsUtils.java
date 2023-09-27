@@ -109,6 +109,9 @@ public class ToolsUtils {
             case 0 :
                 fragmentName = Constant.STATISTICS_FRAGMENT_ACTION_FLAG;
                 break;
+            case 2 :
+                fragmentName = Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG;
+                break;
             default:
                 break;
 

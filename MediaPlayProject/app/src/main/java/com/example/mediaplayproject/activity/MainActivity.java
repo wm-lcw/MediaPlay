@@ -49,6 +49,7 @@ import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
 import com.example.mediaplayproject.fragment.PlayListFragment;
 import com.example.mediaplayproject.fragment.SplashFragment;
+import com.example.mediaplayproject.fragment.tools.ChangeLanguageFragment;
 import com.example.mediaplayproject.fragment.tools.StatisticsFragment;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.service.MusicPlayService;
@@ -77,6 +78,7 @@ public class MainActivity extends BasicActivity {
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
     private StatisticsFragment statisticsFragment;
+    private ChangeLanguageFragment changeLanguageFragment;
     private ViewPager2 musicListViewPager;
 
     private boolean isPlaying = false, firstPlay = true;
@@ -342,6 +344,7 @@ public class MainActivity extends BasicActivity {
         mainViewFragment = MainViewFragment.getInstance(mContext);
         musicPlayFragment = MusicPlayFragment.getInstance(mContext);
         statisticsFragment = StatisticsFragment.getInstance(mContext);
+        changeLanguageFragment = ChangeLanguageFragment.getInstance(mContext);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -376,7 +379,8 @@ public class MainActivity extends BasicActivity {
             if (mainViewFragment.isVisible()) {
                 //调用双击退出函数
                 exitBy2Click();
-            } else if (musicPlayFragment.isVisible() || statisticsFragment.isVisible()) {
+            } else if (musicPlayFragment.isVisible() || statisticsFragment.isVisible()
+                    || changeLanguageFragment.isVisible()) {
                 returnMainFragment();
             }
         }
@@ -657,6 +661,8 @@ public class MainActivity extends BasicActivity {
                     changeFragment(statisticsFragment);
                 } else if (Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     changeFragment(musicPlayFragment);
+                } else if (Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
+                    changeFragment(changeLanguageFragment);
                 } else if (Constant.TOOLS_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     if (mainViewFragment.isVisible()){
                         mainViewFragment.changeToToolsFragment();
