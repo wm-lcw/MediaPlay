@@ -65,6 +65,7 @@ public class Constant {
 
     public static final String CURRENT_LANGUAGE = "language";
     public static final String CURRENT_COUNTRY = "country";
+    public static final String CURRENT_USE_LANGUAGE = "currentLanguage";
 
     public static final String SWITCH_LANGUAGE = "switchLanguage";
 

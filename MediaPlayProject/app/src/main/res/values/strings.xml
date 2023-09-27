@@ -59,6 +59,31 @@
         <item>Settings</item>
     </string-array>
 
+    <string-array name="language_name_item">
+        <item>English</item>
+        <item>简体中文</item>
+        <item>日本語</item>
+        <item>Français</item>
+        <item>Русский</item>
+    </string-array>
+
+    <string-array name="language_item">
+        <item>en</item>
+        <item>zh</item>
+        <item>ja</item>
+        <item>fr</item>
+        <item>ru</item>
+    </string-array>
+
+    <string-array name="county_item">
+        <item>US</item>
+        <item>CN</item>
+        <item>JP</item>
+        <item>FR</item>
+        <item>RU</item>
+    </string-array>
+
+
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>

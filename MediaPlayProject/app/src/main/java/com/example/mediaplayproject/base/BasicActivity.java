@@ -48,7 +48,6 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
         this.context = this;
         // Activity布局加载前的处理
         initBeforeView(savedInstanceState);
-        changeLanguage();
         EventBus.getDefault().register(this);
         Intent dataRefreshService = new Intent(context, DataRefreshService.class);
         startService(dataRefreshService);
@@ -143,6 +142,8 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
             String currentLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_LANGUAGE,"zh");
             String currentCountry = (String) SharedPreferencesUtil.getData(Constant.CURRENT_COUNTRY,"CN");
             ToolsUtils.getInstance().changeLanguage(context, currentLanguage, currentCountry);
+            // 保存当前的语言
+            SharedPreferencesUtil.putData(Constant.CURRENT_USE_LANGUAGE, "zh");
         } catch (Exception exception) {
             DebugLog.debug(exception.getMessage());
         }

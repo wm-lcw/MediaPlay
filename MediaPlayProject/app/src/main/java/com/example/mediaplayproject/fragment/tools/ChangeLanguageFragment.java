@@ -5,16 +5,27 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.adapter.tools.LanguageChangeAdapter;
+import com.example.mediaplayproject.bean.LanguageBean;
+import com.example.mediaplayproject.bean.ToolsBean;
 import com.example.mediaplayproject.utils.Constant;
+import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -25,6 +36,9 @@ public class ChangeLanguageFragment extends Fragment {
     private View myView;
     private Context mContext;
     private Button btnChangeEn, btnChangeZh;
+    private List<LanguageBean> languageBeans = new ArrayList<>();
+    private LanguageChangeAdapter languageChangeAdapter;
+    private RecyclerView rvLanguageList;
 
     public ChangeLanguageFragment() {
     }
@@ -52,15 +66,31 @@ public class ChangeLanguageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_change_language, container, false);
+        initDate();
         initView();
         return myView;
     }
 
+
+    private void initDate() {
+        languageBeans.clear();
+        ArrayList<String> languageNameList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.language_name_item)));
+        ArrayList<String> languageList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.language_item)));
+        ArrayList<String> countyList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.county_item)));
+        // 这里应该做数量判断，后续加上
+        for (int i = 0; i < languageList.size(); i++){
+            languageBeans.add(new LanguageBean(languageNameList.get(i), languageList.get(i)));
+        }
+        DebugLog.debug("size " + languageBeans.size());
+    }
+
     private void initView() {
-        btnChangeEn = myView.findViewById(R.id.btn_change_en);
-        btnChangeZh = myView.findViewById(R.id.btn_change_zh);
-        btnChangeEn.setOnClickListener(mListener);
-        btnChangeZh.setOnClickListener(mListener);
+        rvLanguageList = myView.findViewById(R.id.rv_change_language);
+        languageChangeAdapter = new LanguageChangeAdapter(mContext, languageBeans);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        rvLanguageList.setLayoutManager(linearLayoutManager);
+        rvLanguageList.setAdapter(languageChangeAdapter);
+
     }
 
     private final View.OnClickListener mListener = view -> {
