@@ -143,7 +143,7 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
             String currentCountry = (String) SharedPreferencesUtil.getData(Constant.CURRENT_COUNTRY,"CN");
             ToolsUtils.getInstance().changeLanguage(context, currentLanguage, currentCountry);
             // 保存当前的语言
-            SharedPreferencesUtil.putData(Constant.CURRENT_USE_LANGUAGE, "zh");
+            SharedPreferencesUtil.putData(Constant.CURRENT_USE_LANGUAGE, currentLanguage);
         } catch (Exception exception) {
             DebugLog.debug(exception.getMessage());
         }

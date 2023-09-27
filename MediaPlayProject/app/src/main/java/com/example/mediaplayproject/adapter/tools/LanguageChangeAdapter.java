@@ -31,7 +31,7 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
 
     private Context mContext;
     private List<LanguageBean> languageBeans;
-    private AllToolsItemListAdapterListener mListener;
+    private LanguageChangeAdapterListener mListener;
 
     private String currentSetLanguage, saveLanguage;
 
@@ -70,11 +70,8 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
             holder.languageTip.setText("");
         }
         holder.itemView.setOnClickListener(v -> {
-
+            mListener.onClickItem(position);
         });
-
-
-
     }
 
     @Override
@@ -94,37 +91,17 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
         }
     }
 
-
-
-
-
-    public interface AllToolsItemListAdapterListener {
+    public interface LanguageChangeAdapterListener {
         /**
-         *  tools点击添加按钮的回调
+         *  点击语言的回调方法
          *  @author wm
-         *  @createTime 2023/9/26 12:37
-         * @param toolsId: toolsItem的Id，在所有工具列表中，可以看作是position
+         *  @createTime 2023/9/27 23:15
+         * @param position: 选中语言的下标
          */
-        void toolsAddIconOnClick(int toolsId);
-
-
-        /**
-         *  普通模式下点击toolsItem的回调
-         *  @author wm
-         *  @createTime 2023/9/26 12:37
-         * @param toolsId:toolsItem的Id
-         */
-        void onClickItemByAll(int toolsId);
-
-        /**
-         *  进入编辑模式
-         *  @author wm
-         *  @createTime 2023/9/26 15:25
-         */
-        void onIntoEditModeByAll();
+        void onClickItem(int position);
     }
 
-    public void setAllToolsItemListAdapterListener(AllToolsItemListAdapterListener listener){
+    public void setLanguageChangeAdapterListener(LanguageChangeAdapterListener listener){
         mListener = listener;
     }
 }
