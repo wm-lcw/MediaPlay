@@ -256,18 +256,18 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 ToolsUtils.getInstance().hideKeyboard(mainView);
 
-                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
-                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_white);
-                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
+                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_nor);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_nor);
+                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_nor);
             }
 
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 ToolsUtils.getInstance().hideKeyboard(mainView);
-                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_white);
-                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_white);
-                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_white);
+                ivDiscovery.setImageResource(position == 0 ? R.mipmap.ic_discovery_pre : R.mipmap.ic_discovery_nor);
+                ivPersonal.setImageResource(position == 1 ? R.mipmap.ic_customer_pre : R.mipmap.ic_customer_nor);
+                ivTools.setImageResource(position == 2 ? R.mipmap.ic_tools_pre : R.mipmap.ic_tools_nor);
             }
 
             @Override
@@ -328,7 +328,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
      */
     private void getInfoFromService() {
         if (musicService != null) {
-            ivPlayMusic.setImageResource(musicService.isPlaying() ? R.mipmap.media_pause : R.mipmap.media_play);
+            ivPlayMusic.setImageResource(musicService.isPlaying() ? R.mipmap.ic_main_view_pause_grey : R.mipmap.ic_main_view_play_grey);
             firstPlay = musicService.getFirstPlay();
             mPosition = musicService.getPosition();
             playMode = musicService.getPlayMode();
@@ -355,7 +355,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             ivPlayMusic.setEnabled(false);
         }
 
-        ivPlayMusic.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
+        ivPlayMusic.setImageResource(isPlaying ? R.mipmap.ic_main_view_pause_grey : R.mipmap.ic_main_view_play_grey);
         // 设置旋转图标的状态
         if (isPlaying){
             ivPlayRevolve.startAnimation(animation);

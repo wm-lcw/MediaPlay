@@ -19,7 +19,6 @@
             android:singleLine="true"
             android:textColor="#0e0e0e"
             android:hint="@string/music_text"
-            android:textColorHint="@color/white"
             android:textSize="14sp" />
 
 

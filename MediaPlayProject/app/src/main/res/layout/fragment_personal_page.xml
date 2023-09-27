@@ -17,7 +17,7 @@
             android:layout_height="@dimen/dp_30"
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/dp_15"
-            android:background="@mipmap/media_list" />
+            android:background="@mipmap/media_list_press" />
 
         <TextView
             android:id="@+id/tv_default_list"
@@ -26,7 +26,6 @@
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/dp_20"
             android:text="@string/default_list_name"
-            android:textColor="@color/white"
             android:textSize="@dimen/sp_17" />
 
         <ImageView
@@ -60,7 +59,6 @@
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/dp_20"
             android:text="@string/favorite_list_name"
-            android:textColor="@color/white"
             android:textSize="@dimen/sp_17" />
 
         <ImageView
@@ -94,7 +92,6 @@
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/dp_20"
             android:text="@string/history_list_name"
-            android:textColor="@color/white"
             android:textSize="@dimen/sp_17" />
 
         <ImageView
@@ -125,7 +122,6 @@
                 android:layout_toStartOf="@+id/iv_add_list"
                 android:gravity="center"
                 android:text="@string/custom_list_name"
-                android:textColor="@color/white"
                 android:textSize="@dimen/sp_19" />
 
             <ImageView
@@ -135,7 +131,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="@dimen/dp_5"
                 android:layout_marginEnd="@dimen/dp_20"
-                android:background="@drawable/add_list_style" />
+                android:background="@drawable/add_list_style_grey" />
 
 
             <View
