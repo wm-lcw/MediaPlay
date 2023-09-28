@@ -59,9 +59,9 @@ public class TimingOffAdapter extends RecyclerView.Adapter<TimingOffAdapter.View
             holder.timingOffItemCheckState.setImageResource(R.mipmap.ic_language_black_nor);
         }
 
-//        holder.itemView.setOnClickListener(v -> {
-//            mListener.onClickItem(position);
-//        });
+        holder.itemView.setOnClickListener(v -> {
+            mListener.onClickItem(position);
+        });
     }
 
     @Override

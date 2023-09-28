@@ -1,5 +1,6 @@
 package com.example.mediaplayproject.fragment.tools;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -16,6 +17,10 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.tools.LanguageChangeAdapter;
 import com.example.mediaplayproject.adapter.tools.TimingOffAdapter;
 import com.example.mediaplayproject.bean.LanguageBean;
+import com.example.mediaplayproject.utils.Constant;
+import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +30,7 @@ import java.util.List;
 /**
  * @author wm
  */
-public class TimingOffFragment extends Fragment {
+public class TimingOffFragment extends Fragment implements TimingOffAdapter.TimingOffAdapterListener {
 
     private View myView;
     private Context mContext;
@@ -33,6 +38,7 @@ public class TimingOffFragment extends Fragment {
     private TimingOffAdapter timingOffAdapter;
     private RecyclerView rvTimingOff;
     private ArrayList<String> timingOffItemNameList;
+    private static final int[] timingOffItemTimeList = { 0, 10, 20, 30, 60 };
 
     public TimingOffFragment() {
     }
@@ -65,14 +71,36 @@ public class TimingOffFragment extends Fragment {
 
     private void initDate() {
         timingOffItemNameList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.timing_off_title_item)));
-
     }
 
     private void initView() {
+        ivBack = myView.findViewById(R.id.iv_timing_off_view_back);
+        ivBack.setOnClickListener(mListen);
         rvTimingOff = myView.findViewById(R.id.rv_timing_off);
         timingOffAdapter = new TimingOffAdapter(mContext, timingOffItemNameList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         rvTimingOff.setLayoutManager(linearLayoutManager);
         rvTimingOff.setAdapter(timingOffAdapter);
+        timingOffAdapter.setTimingOffAdapterListener(this);
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    public void onClickItem(int position) {
+        SharedPreferencesUtil.putData(Constant.TIMING_OFF_TYPE, timingOffItemNameList.get(position));
+        // 这里设定了第一项是关闭，最后一项是自定义时间
+        if (position == timingOffItemNameList.size()-1){
+            // 自定义时间,这里需要唤出TimePicker
+            SharedPreferencesUtil.putData(Constant.TIMING_OFF_TIME, 0);
+        } else {
+            SharedPreferencesUtil.putData(Constant.TIMING_OFF_TIME, timingOffItemTimeList[position]);
+        }
+        timingOffAdapter.notifyDataSetChanged();
+    }
+
+    private View.OnClickListener mListen = v -> {
+      if (v == ivBack){
+          ToolsUtils.getInstance().backToMainViewFragment(mContext);
+      }
+    };
 }
