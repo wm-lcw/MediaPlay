@@ -62,6 +62,7 @@ public class Constant {
     public static final String MUSIC_PLAY_FRAGMENT_ACTION_FLAG = "MusicPlayFragment";
     public static final String TOOLS_FRAGMENT_ACTION_FLAG = "ToolsFragment";
     public static final String CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG = "ChangeLanguageFragment";
+    public static final String TIMING_OFF_FRAGMENT_ACTION_FLAG = "TimingOffFragment";
 
     public static final String CURRENT_LANGUAGE = "language";
     public static final String CURRENT_COUNTRY = "country";

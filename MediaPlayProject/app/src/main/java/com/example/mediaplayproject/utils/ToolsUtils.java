@@ -27,6 +27,7 @@ import java.util.Locale;
 public class ToolsUtils {
 
     private static ToolsUtils instance;
+
     public static ToolsUtils getInstance() {
         if (instance == null) {
             instance = new ToolsUtils();
@@ -38,9 +39,10 @@ public class ToolsUtils {
     }
 
     /**
-     *  关闭键盘，因有多处地方调用，所以将其抽象出来作为工具类里面的方法
-     *  @author wm
-     *  @createTime 2023/9/11 17:40
+     * 关闭键盘，因有多处地方调用，所以将其抽象出来作为工具类里面的方法
+     *
+     * @author wm
+     * @createTime 2023/9/11 17:40
      */
     public void hideKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -49,23 +51,25 @@ public class ToolsUtils {
     }
 
     /**
-     *  开启键盘
-     *  @author wm
-     *  @createTime 2023/9/21 17:52
+     * 开启键盘
+     *
      * @param view:
+     * @author wm
+     * @createTime 2023/9/21 17:52
      */
-    public void showKeyBoard(View view){
+    public void showKeyBoard(View view) {
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
     }
 
     /**
-     *  切换语言
-     *  @author wm
-     *  @createTime 2023/9/26 16:08
-     * @param context: 上下文
+     * 切换语言
+     *
+     * @param context:  上下文
      * @param language: 语言
-     * @param country: 国家
+     * @param country:  国家
+     * @author wm
+     * @createTime 2023/9/26 16:08
      */
     public final void changeLanguage(Context context, String language, String country) {
         if (context == null || TextUtils.isEmpty(language)) {
@@ -93,30 +97,34 @@ public class ToolsUtils {
     }
 
     /**
-     *  根据传入小工具的ID，启动对应的小工具Fragment（若小工具的展示形式不是Fragment，则不能以这种方式启动）
-     *  这里的ID对应的是ToolsFragment.TOOLS_ITEM_ICON_LIST的下标，创建小工具Bean时默认使用下标作为Id
-     *  @author wm
-     *  @createTime 2023/9/26 16:12
+     * 根据传入小工具的ID，启动对应的小工具Fragment（若小工具的展示形式不是Fragment，则不能以这种方式启动）
+     * 这里的ID对应的是ToolsFragment.TOOLS_ITEM_ICON_LIST的下标，创建小工具Bean时默认使用下标作为Id
+     *
      * @param context: 上下文
      * @param toolsId: 小工具的ItemID
+     * @author wm
+     * @createTime 2023/9/26 16:12
      */
-    public void startToolsFragmentById(Context context, int toolsId){
+    public void startToolsFragmentById(Context context, int toolsId) {
         String fragmentName = "";
-        switch (toolsId){
-            case -1 :
+        switch (toolsId) {
+            case -1:
                 fragmentName = Constant.TOOLS_FRAGMENT_ACTION_FLAG;
                 break;
-            case 0 :
+            case 0:
                 fragmentName = Constant.STATISTICS_FRAGMENT_ACTION_FLAG;
                 break;
-            case 2 :
+            case 1:
+                fragmentName = Constant.TIMING_OFF_FRAGMENT_ACTION_FLAG;
+                break;
+            case 2:
                 fragmentName = Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG;
                 break;
             default:
                 break;
 
         }
-        if ("".equals(fragmentName)){
+        if ("".equals(fragmentName)) {
             return;
         }
         Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
@@ -132,17 +140,18 @@ public class ToolsUtils {
     };
 
     /**
-     *  获取所有工具列表
-     *  @author wm
-     *  @createTime 2023/9/26 17:24
-     * @param mContext: 
+     * 获取所有工具列表
+     *
+     * @param mContext:
      * @return : java.util.List<com.example.mediaplayproject.bean.ToolsBean>
+     * @author wm
+     * @createTime 2023/9/26 17:24
      */
-    public List<ToolsBean> getAllToolsList(Context mContext){
+    public List<ToolsBean> getAllToolsList(Context mContext) {
         List<ToolsBean> allToolsBeanList = new ArrayList<>();
         ArrayList<String> itemTitleList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.tools_item_title)));
         // 这里应该做数量判断，后续加上
-        for (int i = 0; i < itemTitleList.size(); i++){
+        for (int i = 0; i < itemTitleList.size(); i++) {
             ToolsBean toolsBean = new ToolsBean(i, itemTitleList.get(i), TOOLS_ITEM_ICON_LIST[i]);
             allToolsBeanList.add(toolsBean);
         }
@@ -151,27 +160,29 @@ public class ToolsUtils {
 
 
     /**
-     *  获取快捷工具列表
-     *  这shortcutToolsBeanList的对象必须从allToolsBeanList中获取才行,否则两个列表里的对象并非同一对象，没办法删除
-     *  @author wm
-     *  @createTime 2023/9/26 17:45
+     * 获取快捷工具列表
+     * 这shortcutToolsBeanList的对象必须从allToolsBeanList中获取才行,否则两个列表里的对象并非同一对象，没办法删除
+     *
      * @param mContext:
      * @return : java.util.List<com.example.mediaplayproject.bean.ToolsBean>
+     * @author wm
+     * @createTime 2023/9/26 17:45
      */
-    public List<ToolsBean> getShortcutToolsList(Context mContext, List<ToolsBean> allToolsList){
+    public List<ToolsBean> getShortcutToolsList(Context mContext, List<ToolsBean> allToolsList) {
         List<ToolsBean> shortcutToolsBeanList = new ArrayList<>();
-        List<Integer> saveList  = SharedPreferencesUtil.getListData(Constant.SHORTCUT_TOOLS_LIST, Integer.class);
-        for (int i = 0 ; i < saveList.size(); i++){
+        List<Integer> saveList = SharedPreferencesUtil.getListData(Constant.SHORTCUT_TOOLS_LIST, Integer.class);
+        for (int i = 0; i < saveList.size(); i++) {
             shortcutToolsBeanList.add(allToolsList.get(saveList.get(i)));
         }
         return shortcutToolsBeanList;
     }
 
     /**
-     *  返回主页的操作
-     *  @author wm
-     *  @createTime 2023/9/27 23:22
+     * 返回主页的操作
+     *
      * @param mContext:
+     * @author wm
+     * @createTime 2023/9/27 23:22
      */
     public void backToMainViewFragment(Context mContext) {
         Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
