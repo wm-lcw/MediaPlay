@@ -37,6 +37,7 @@ public class Constant {
     public static final int HANDLER_MESSAGE_DELAY_INIT_FRAGMENT = 6;
     public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 7;
     public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 8;
+    public static final int HANDLER_MESSAGE_DELAY_TIMING_OFF = 9;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
     public final static int CUSTOMER_LIST_OPERATOR_DELETE = 1;
@@ -51,6 +52,7 @@ public class Constant {
     public static final String REFRESH_SEARCH_RESULT_ACTION = "com.example.media.play.refresh.search.result.action";
     public static final String CHANGE_FRAGMENT_ACTION = "com.example.media.play.change.fragment.action";
     public static final String RETURN_MAIN_VIEW_ACTION = "com.example.media.play.return.main.view.action";
+    public static final String CHANGE_TIMING_OFF_TIME_ACTION = "com.example.media.play.change.timing.off.time.action";
 
     public static final int MAX_LENGTH_OF_LIST_NAME = 10;
     public static final int HISTORY_LIST_MAX_SIZE = 50;
