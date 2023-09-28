@@ -1,14 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragment.tools.TimingOffFragment"
     android:background="@drawable/ic_main">
 
-    <TextView
+    <!--顶部标题栏-返回键-功能键-->
+    <RelativeLayout
+        android:id="@+id/rl_timing_off_title"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="@dimen/dp_40"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="@dimen/dp_50">
+        <ImageView
+            android:id="@+id/iv_timing_off_view_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="@dimen/dp_20"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_back_nor"/>
+        <TextView
+            android:id="@+id/tv_timing_off_title"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="20sp"
+            android:text="@string/timing_off" />
+    </RelativeLayout>
 
-</FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_below="@+id/rl_timing_off_title"
+        android:layout_marginTop="@dimen/dp_50"
+        android:id="@+id/rv_timing_off"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_music_list_view"/>
+
+
+</RelativeLayout>

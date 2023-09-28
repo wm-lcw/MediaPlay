@@ -83,10 +83,17 @@
         <item>RU</item>
     </string-array>
 
+    <string-array name="timing_off_title_item">
+        <item>关闭</item>
+        <item>10分钟</item>
+        <item>20分钟</item>
+        <item>30分钟</item>
+        <item>60分钟</item>
+        <item>自定义</item>
+    </string-array>
+
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
     <string name="music_time" translatable="false"> 00:00 </string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

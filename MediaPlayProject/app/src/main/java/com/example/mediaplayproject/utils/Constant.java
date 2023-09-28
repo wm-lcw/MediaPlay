@@ -67,9 +67,11 @@ public class Constant {
     public static final String CURRENT_LANGUAGE = "language";
     public static final String CURRENT_COUNTRY = "country";
     public static final String CURRENT_USE_LANGUAGE = "currentLanguage";
-
     public static final String SWITCH_LANGUAGE = "switchLanguage";
-
     public static final String SHORTCUT_TOOLS_LIST = "shortcutToolsList";
+
+    public static final String TIMING_OFF_TYPE = "timingOffType";
+    public static final String TIMING_OFF_TIME = "timingOffTime";
+
     public static final int MAX_SHORTCUT_TOOLS_NUM = 3;
 }
