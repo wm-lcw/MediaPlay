@@ -181,6 +181,9 @@ public class MusicPlayService extends Service {
         isInitPlayHelper = true;
         // 初始化之后再显示通知栏
         showNotify();
+
+        // service起来的时候执行一次定时关闭的逻辑
+        changeTimingOffTime();
     }
 
     /**
@@ -494,12 +497,13 @@ public class MusicPlayService extends Service {
      *  @createTime 2023/9/28 14:38
      */
     private void changeTimingOffTime() {
+        DebugLog.debug("----");
         // 更新定时关闭时间之前，先将旧的handler消息清除
-        serviceHandler.removeMessages(Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF);
+        mHandler.removeMessages(Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF);
         int timingOffTime = (int) SharedPreferencesUtil.getData(Constant.TIMING_OFF_TIME,0);
         if (timingOffTime > 0){
             long delayTime = (long) timingOffTime * 60 * 1000;
-            serviceHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF, delayTime);
+            mHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF, delayTime);
         }
     }
 
@@ -575,18 +579,5 @@ public class MusicPlayService extends Service {
         rv.setBoolean(R.id.btn_play_prev,"setEnabled",enable);
         rv.setBoolean(R.id.btn_play_next,"setEnabled",enable);
     }
-
-
-    final Handler serviceHandler = new Handler(Looper.myLooper()) {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF) {
-                // 定时关闭
-                Toast.makeText(mContext,"关闭应用", Toast.LENGTH_SHORT).show();
-                closeApp();
-            }
-        }
-    };
 
 }

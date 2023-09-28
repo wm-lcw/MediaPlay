@@ -3,6 +3,7 @@ package com.example.mediaplayproject.activity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -17,6 +18,7 @@ import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -26,6 +28,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
@@ -453,6 +457,9 @@ public class MainActivity extends BasicActivity {
                     // 同步当前播放进度，解决在主页先播放然后暂停，进入播放页后进度条仍未0的问题
                     musicPlayFragment.refreshCurrentPlayInfo(seekbarProgress, currentMusicInfo, currentPlayTime, mediaTime);
                 }
+            } else if (msg.what == Constant.HANDLER_MESSAGE_DELAY_TIMING_OFF) {
+                // 定时关闭
+                showCloseDialog();
             }
         }
     };
@@ -830,4 +837,77 @@ public class MainActivity extends BasicActivity {
             DebugLog.debug(exception.getMessage());
         }
     }
+
+
+    private CountDownTimer countDownTimer;
+    /**
+     *  显示关闭应用的弹框
+     *  @author wm
+     *  @createTime 2023/9/28 20:06
+     */
+    private void showCloseDialog(){
+        // 创建自定义布局
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_countdown, null);
+        TextView countdownTextView = dialogView.findViewById(R.id.tv_countdownTextView);
+
+        // 创建 AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("定时关闭功能");
+        builder.setMessage("(取消后重新计时)");
+        // 设置自定义布局
+        builder.setView(dialogView);
+        // 获取弹框的布局视图
+        AlertDialog alertDialog = builder.create();
+
+        // 设置弹框上的确定按钮点击事件
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "确定", (dialog, which) -> {
+            // 停止倒计时并关闭弹框
+            stopCountdown();
+            dialog.dismiss();
+            closeApp();
+        });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 停止倒计时，关闭弹框，重新计时
+                stopCountdown();
+                dialog.dismiss();
+                Intent intent = new Intent(Constant.CHANGE_TIMING_OFF_TIME_ACTION);
+                mContext.sendBroadcast(intent);
+            }
+        });
+
+        // 倒计时总时间为10秒，每隔1秒触发一次
+        countDownTimer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                countdownTextView.setText("即将关闭应用 : " + millisUntilFinished / 1000 + "秒");
+                DebugLog.debug("count " + millisUntilFinished / 1000);
+            }
+
+            @Override
+            public void onFinish() {
+                // 倒计时结束时的操作
+                alertDialog.dismiss();
+                closeApp();
+            }
+        };
+        // 启动倒计时
+        countDownTimer.start();
+        // 显示弹框
+        alertDialog.show();
+    }
+
+    private void stopCountdown() {
+        if (countDownTimer != null) {
+            // 取消倒计时
+            countDownTimer.cancel();
+        }
+    }
+
+    private void closeApp() {
+        BasicApplication.getActivityManager().finishAll();
+    }
+
 }
