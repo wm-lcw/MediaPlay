@@ -120,6 +120,9 @@ public class ToolsUtils {
             case 2:
                 fragmentName = Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG;
                 break;
+            case 3:
+                fragmentName = Constant.WOODEN_FISH_FRAGMENT_ACTION_FLAG;
+                break;
             default:
                 break;
 

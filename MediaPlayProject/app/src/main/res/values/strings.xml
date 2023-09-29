@@ -49,6 +49,7 @@
     <string name="record">Record</string>
     <string name="timing_off">Timing Off</string>
     <string name="change_language">Change Language</string>
+    <string name="wooden_fish">Wooden Fish</string>
 
     <string-array name="tools_item_title">
         <item>Record</item>
@@ -96,4 +97,6 @@
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
     <string name="music_time" translatable="false"> 00:00 </string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
