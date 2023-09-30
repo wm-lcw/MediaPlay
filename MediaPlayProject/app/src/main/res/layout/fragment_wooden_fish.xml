@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragment.tools.WoodenFishFragment"
-    android:background="@drawable/ic_main">
+    android:background="@color/black"
+    android:id="@+id/rl_wooden_fish_root_view">
 
     <!--顶部标题栏-返回键-功能键-->
     <RelativeLayout
@@ -19,7 +20,7 @@
             android:layout_height="35dp"
             android:layout_marginStart="@dimen/dp_20"
             android:layout_centerVertical="true"
-            android:src="@mipmap/ic_back_nor"/>
+            android:src="@mipmap/ic_back_white"/>
         <TextView
             android:id="@+id/tv_wooden_fish"
             android:gravity="center"
@@ -28,6 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:textSize="20sp"
+            android:textColor="@color/white"
             android:text="@string/wooden_fish" />
     </RelativeLayout>
 
@@ -36,7 +38,7 @@
         android:layout_width="@dimen/dp_100"
         android:layout_height="@dimen/dp_100"
         android:layout_centerInParent="true"
-        android:background="@mipmap/ic_list_like_choose"/>
+        android:background="@mipmap/ic_wooden_fish"/>
 
 
 
