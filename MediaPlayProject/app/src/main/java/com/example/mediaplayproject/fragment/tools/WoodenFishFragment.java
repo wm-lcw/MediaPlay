@@ -150,7 +150,10 @@ public class WoodenFishFragment extends Fragment {
         // 开始播放属性动画
         animSet.start();
 
-//        ToolsUtils.getInstance().audioPlay(mContext);
+        // 播放点击音效
+        ToolsUtils.getInstance().audioPlay(mContext);
+
+        // 保存、刷新计数值
         woodenFishCount++;
         SharedPreferencesUtil.putData(Constant.WOODEN_FISH_COUNT, woodenFishCount);
         countText = mContext.getString(R.string.wooden_fish_count) + " " + woodenFishCount;

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -27,6 +30,9 @@ import java.util.Locale;
 public class ToolsUtils {
 
     private static ToolsUtils instance;
+    private SoundPool.Builder builder;
+    private SoundPool soundpool;
+    private int soundId;
 
     public static ToolsUtils getInstance() {
         if (instance == null) {
@@ -190,6 +196,28 @@ public class ToolsUtils {
     public void backToMainViewFragment(Context mContext) {
         Intent intent = new Intent(Constant.RETURN_MAIN_VIEW_ACTION);
         mContext.sendBroadcast(intent);
+    }
+
+
+    /**
+     *  播放音频的方法，这里用于电子木鱼的点击音效
+     *  @author wm
+     *  @createTime 2023/9/30 21:00
+     * @param context:上下文
+     */
+    public void audioPlay(Context context) {
+        builder = new SoundPool.Builder();
+        //AudioAttributes是一个封装音频各种属性的方法
+        AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
+        //设置音频流的合适的属性
+        attrBuilder.setLegacyStreamType(AudioManager.STREAM_SYSTEM);
+        soundpool = builder.build();
+        soundId = soundpool.load(context, R.raw.muyu, 1);
+        //是否加载完成的监听
+        soundpool.setOnLoadCompleteListener((soundPool, sampleId, status) -> {
+            //加载完毕后再播放
+            soundpool.play(soundId, 1f, 1f, 0, 0, 1);
+        });
     }
 
 }
