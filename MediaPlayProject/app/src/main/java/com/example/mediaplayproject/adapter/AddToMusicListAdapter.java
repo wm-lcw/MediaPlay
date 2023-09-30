@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MusicListBean;
-import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.Constant;
 
 import java.util.List;
 
@@ -21,11 +21,17 @@ import java.util.List;
 public class AddToMusicListAdapter extends BaseAdapter {
     private final Context mContext;
     private List<MusicListBean> musicInfoList;
+    private MusicListBean favoriteList;
 
     @SuppressLint("UseCompatLoadingForColorStateLists")
     public AddToMusicListAdapter(Context mContext, List<MusicListBean> musicList) {
         this.mContext = mContext;
         this.musicInfoList = musicList;
+        favoriteList = new MusicListBean(Constant.LIST_MODE_FAVORITE_NAME);
+        if (!musicInfoList.contains(favoriteList)) {
+            musicInfoList.add(favoriteList);
+        }
+
     }
 
     /**
@@ -36,6 +42,9 @@ public class AddToMusicListAdapter extends BaseAdapter {
      */
     public void changeCustomerList(List<MusicListBean> musicList){
         this.musicInfoList = musicList;
+        if (!musicInfoList.contains(favoriteList)) {
+            musicInfoList.add(favoriteList);
+        }
         notifyDataSetChanged();
     }
 
@@ -59,13 +68,10 @@ public class AddToMusicListAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.customer_music_list_item, null);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.add_to_music_list_item, null);
             holder = new ViewHolder();
-            holder.ivListIcon = convertView.findViewById(R.id.iv_current_list);
+            holder.ivListIcon = convertView.findViewById(R.id.iv_list_icon);
             holder.tvCustomerListName = convertView.findViewById(R.id.tv_list_name);
-            holder.tvCustomerListSize = convertView.findViewById(R.id.tv_list_size);
-            holder.ivListPlaying = convertView.findViewById(R.id.iv_is_playing);
-            holder.ivListSettings = convertView.findViewById(R.id.iv_customer_list_settings);
             // 将Holder存储到convertView中
             convertView.setTag(holder);
         } else {
@@ -74,16 +80,13 @@ public class AddToMusicListAdapter extends BaseAdapter {
         }
 
         holder.tvCustomerListName.setText(musicInfoList.get(position).getListName());
-        holder.tvCustomerListSize.setVisibility(View.GONE);
-        holder.ivListPlaying.setVisibility(View.GONE);
-        holder.ivListSettings.setVisibility(View.GONE);
         return convertView;
     }
 
 
     static class ViewHolder {
-        TextView tvCustomerListName, tvCustomerListSize;
-        ImageView ivListIcon, ivListPlaying, ivListSettings;
+        TextView tvCustomerListName;
+        ImageView ivListIcon;
     }
 
 

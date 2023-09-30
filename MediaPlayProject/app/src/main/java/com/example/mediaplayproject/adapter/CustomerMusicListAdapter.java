@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.MusicListBean;
-import com.example.mediaplayproject.utils.DebugLog;
 
 import java.util.List;
 

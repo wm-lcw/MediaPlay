@@ -36,7 +36,6 @@ import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.AddToMusicListAdapter;
 import com.example.mediaplayproject.adapter.CustomerMusicListAdapter;
 import com.example.mediaplayproject.adapter.musiclist.MainListAdapter;
-import com.example.mediaplayproject.adapter.tools.AllToolsItemListAdapter;
 import com.example.mediaplayproject.adapter.tools.ShortcutToolsItemListAdapter;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.MusicListBean;
@@ -44,7 +43,6 @@ import com.example.mediaplayproject.bean.ToolsBean;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
-import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
@@ -261,7 +259,11 @@ public class PersonalPageFragment extends Fragment implements CustomerMusicListA
         lvAddToList.setOnItemClickListener((parent, view, position, id) -> {
             try {
                 List<Long> insertList = getSelectMusicIdList();
-                DataRefreshService.insertCustomerMusic(customerLists.get(position).getListName(),insertList);
+                if (Constant.LIST_MODE_FAVORITE_NAME.equalsIgnoreCase(customerLists.get(position).getListName())){
+                    DataRefreshService.addMultipleFavoriteMusic(insertList);
+                } else {
+                    DataRefreshService.insertCustomerMusic(customerLists.get(position).getListName(),insertList);
+                }
                 Toast.makeText(mContext,R.string.add_success,Toast.LENGTH_SHORT).show();
             } catch (Exception exception){
                 Toast.makeText(mContext,R.string.add_failed,Toast.LENGTH_SHORT).show();
