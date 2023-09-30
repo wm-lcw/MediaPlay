@@ -991,6 +991,40 @@ public class DataRefreshService extends Service {
     }
 
     /**
+     *  插入多首收藏音乐
+     *  @author wm
+     *  @createTime 2023/9/30 21:28
+     * @param musicList: 需要添加的音乐
+     */
+    public static void addMultipleFavoriteMusic(List<Long> musicList) {
+        try {
+            THREAD_POOL.execute(() -> {
+                for (long musicId : musicList) {
+                    if (!favoriteListMap.containsKey(musicId) && defaultListMap.containsKey(musicId)) {
+                        defaultListMap.get(musicId).setLike(true);
+                        favoriteList.add(defaultListMap.get(musicId));
+                        favoriteListMap.put(musicId, defaultListMap.get(musicId));
+                        //添加信息到数据库中
+                        ContentValues values = new ContentValues();
+
+                        values.put("musicId", musicId);
+                        values.put("musicTitle", defaultListMap.get(musicId).getTitle());
+                        values.put("musicArtist", defaultListMap.get(musicId).getArtist());
+                        values.put("listName", Constant.LIST_MODE_FAVORITE_NAME);
+                        values.put("listMode", Constant.LIST_SAVE_LIST_MODE_FAVORITE);
+                        values.put("listId", favoriteListId);
+                        //参数依次是：表名，强行插入null值的数据列的列名，一行记录的数据
+                        db.insert(ALL_MUSIC_TABLE, null, values);
+                    }
+                }
+                sendMusicChangeBroadcast(Constant.LIST_MODE_FAVORITE_NAME, Constant.CUSTOMER_MUSIC_OPERATOR_DELETE, false, lastMusicId);
+            });
+        } catch (Exception exception) {
+            DebugLog.debug("error " + exception.getMessage());
+        }
+    }
+
+    /**
      *  增加历史播放歌曲
      *  @author wm
      *  @createTime 2023/9/11 20:36
