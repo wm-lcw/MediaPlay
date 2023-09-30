@@ -76,5 +76,7 @@ public class Constant {
     public static final String TIMING_OFF_TYPE = "timingOffType";
     public static final String TIMING_OFF_TIME = "timingOffTime";
 
+    public static final String WOODEN_FISH_COUNT = "woodenFishCount";
+
     public static final int MAX_SHORTCUT_TOOLS_NUM = 3;
 }

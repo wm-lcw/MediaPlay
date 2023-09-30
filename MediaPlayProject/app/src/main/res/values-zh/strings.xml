@@ -50,6 +50,8 @@
     <string name="timing_off">定时关闭</string>
     <string name="change_language">设置语言</string>
     <string name="wooden_fish">电子木鱼</string>
+    <string name="wooden_fish_Merit">功德+1</string>
+    <string name="wooden_fish_count">你当前的功德数为</string>
 
     <string-array name="tools_item_title">
         <item>音乐记录</item>

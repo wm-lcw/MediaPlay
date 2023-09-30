@@ -41,5 +41,15 @@
         android:background="@mipmap/ic_wooden_fish"/>
 
 
+    <TextView
+        android:id="@+id/tv_wooden_fish_count"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_50"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_50"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_20"
+        android:gravity="center_vertical"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

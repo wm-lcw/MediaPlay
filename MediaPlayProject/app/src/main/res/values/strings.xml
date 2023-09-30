@@ -50,6 +50,8 @@
     <string name="timing_off">Timing Off</string>
     <string name="change_language">Change Language</string>
     <string name="wooden_fish">Wooden Fish</string>
+    <string name="wooden_fish_Merit">Merit+1</string>
+    <string name="wooden_fish_count">Your current merit is</string>
 
     <string-array name="tools_item_title">
         <item>Record</item>
