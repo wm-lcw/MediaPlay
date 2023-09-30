@@ -40,6 +40,17 @@ public class WoodenFishFragment extends Fragment {
     private static int[] colorList = {Color.WHITE,Color.YELLOW,Color.GREEN,Color.RED,Color.GRAY,Color.BLUE};
     private long woodenFishCount = 0;
     String countText = "0";
+
+    /**
+     * 是否可点击的标志
+     * */
+    private boolean isClickable = true;
+    /**
+     * 限制点击的时间间隔
+     * */
+    private static final long CLICK_DELAY = 500;
+
+
     public WoodenFishFragment() {
     }
 
@@ -88,41 +99,62 @@ public class WoodenFishFragment extends Fragment {
 
         ivBack.setOnClickListener(mListen);
         animation = AnimationUtils.loadAnimation(mContext, R.anim.wooden_fish_icon_click_animation);
-        ivWoodenFish.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN){
-                    ivWoodenFish.startAnimation(animation);
-                    // 使用根布局addView添加一个TextView
-                    woodenFishRootView.addView(tvWoodenFishTip = new TextView(mContext));
-                    tvWoodenFishTip.setText(R.string.wooden_fish_Merit);
-                    tvWoodenFishTip.setTextSize(20);
-                    int color = (int)(Math.random()*colorList.length);
-                    tvWoodenFishTip.setTextColor(colorList[color]);
-                    //实现轨迹动画的代码
-                    AnimatorSet animSet = new AnimatorSet();
-                    // X轴的移动
-                    ObjectAnimator anim1 = ObjectAnimator.ofFloat(tvWoodenFishTip, "translationX", event.getRawX(), event.getRawX());
-                    // Y轴的移动
-                    ObjectAnimator anim2 = ObjectAnimator.ofFloat(tvWoodenFishTip, "translationY", event.getRawY(), 0f);
-                    //移动过程中逐渐透明
-                    ObjectAnimator anim3 = ObjectAnimator.ofFloat(tvWoodenFishTip, "alpha", 1f, 0f);
+        ivWoodenFish.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN){
+                if (isClickable) {
+                    // 执行按钮点击的操作
+                    doClickWoodenFish(event);
 
-                    AnimatorSet.Builder builder = animSet.play(anim2);
-                    builder.with(anim1).with(anim2).with(anim3);//三个动画一起执行
-                    animSet.setDuration(3500);//整个过程持续3.5s
-                    animSet.start(); // 开始播放属性动画
-
-                    woodenFishCount++;
-                    SharedPreferencesUtil.putData(Constant.WOODEN_FISH_COUNT, woodenFishCount);
-                    countText = mContext.getString(R.string.wooden_fish_count) + " " + woodenFishCount;
-                    tvWoodenFishCount.setText(countText);
-
-                    return true;
+                    // 设置为不可点击状态，并在一定时间后恢复可点击
+                    isClickable = false;
+                    ivWoodenFish.setEnabled(false);
+                    ivWoodenFish.postDelayed(() -> {
+                        isClickable = true;
+                        ivWoodenFish.setEnabled(true);
+                    }, CLICK_DELAY);
                 }
-                return false;
+                return true;
             }
+            return false;
         });
+    }
+
+    /**
+     *  处理点击木鱼图标的事件
+     *  @author wm
+     *  @createTime 2023/9/30 20:54
+     * @param event: 触摸事件，主要用于获取触摸的坐标
+     */
+    private void doClickWoodenFish(MotionEvent event) {
+        ivWoodenFish.startAnimation(animation);
+        // 使用根布局addView添加一个TextView
+        woodenFishRootView.addView(tvWoodenFishTip = new TextView(mContext));
+        tvWoodenFishTip.setText(R.string.wooden_fish_Merit);
+        tvWoodenFishTip.setTextSize(20);
+        int color = (int)(Math.random()*colorList.length);
+        tvWoodenFishTip.setTextColor(colorList[color]);
+        //实现轨迹动画的代码
+        AnimatorSet animSet = new AnimatorSet();
+        // X轴的移动
+        ObjectAnimator anim1 = ObjectAnimator.ofFloat(tvWoodenFishTip, "translationX", event.getRawX(), event.getRawX());
+        // Y轴的移动
+        ObjectAnimator anim2 = ObjectAnimator.ofFloat(tvWoodenFishTip, "translationY", event.getRawY(), 0f);
+        //移动过程中逐渐透明
+        ObjectAnimator anim3 = ObjectAnimator.ofFloat(tvWoodenFishTip, "alpha", 1f, 0f);
+
+        AnimatorSet.Builder builder = animSet.play(anim2);
+        //三个动画一起执行
+        builder.with(anim1).with(anim2).with(anim3);
+        //整个过程持续3.5s
+        animSet.setDuration(3500);
+        // 开始播放属性动画
+        animSet.start();
+
+//        ToolsUtils.getInstance().audioPlay(mContext);
+        woodenFishCount++;
+        SharedPreferencesUtil.putData(Constant.WOODEN_FISH_COUNT, woodenFishCount);
+        countText = mContext.getString(R.string.wooden_fish_count) + " " + woodenFishCount;
+        tvWoodenFishCount.setText(countText);
     }
 
     private View.OnClickListener mListen = v -> {
