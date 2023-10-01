@@ -12,14 +12,35 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk 30
         versionCode 1
-        versionName "2.9.4"
+        versionName "2.9.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+    signingConfigs {
+        release {
+            storeFile file('D:\\application\\AndroidStudioFiles\\AppKey\\mediaproject.jks')
+            storePassword '123456'
+            keyAlias 'key01'
+            keyPassword '123456'
+        }
+    }
+
+
     buildTypes {
         release {
-            minifyEnabled false
+            // 资源压缩，前提是代码压缩必须开启,否则资源压缩无效 ;
+            shrinkResources true
+            // 代码压缩
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // 包签名
+            signingConfig signingConfigs.release
+        }
+        debug {
+            shrinkResources false
+            minifyEnabled false
+            debuggable true
         }
     }
     compileOptions {

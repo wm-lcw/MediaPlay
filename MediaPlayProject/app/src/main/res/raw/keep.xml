@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:shrinkMode="strict" />
+
+<!--
+在 " res/raw " 目录下创建 " keep.xml " 文件中可以配置 保留 / 移除 的资源 ;
+使用 tools:keep 属性指定要保留的资源 ; 如果保留多个资源使用逗号隔开 ;
+使用 tools:discard 属性指定要移除的资源 ; 如果移除多个资源使用逗号隔开 ;
+-->
