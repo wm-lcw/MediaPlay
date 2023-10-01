@@ -12,7 +12,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk 30
         versionCode 1
-        versionName "2.9.3"
+        versionName "2.9.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,14 +35,13 @@ android {
     android.applicationVariants.all { variant ->
         variant.outputs.all {
             def date = new Date().format("yyyyMMdd" , TimeZone.getTimeZone("GMT+08"))
-            outputFileName = "MediaPlayProject_${date}_${versionName}.apk"
-//            def date = new Date().format("yyyyMMdd" , TimeZone.getTimeZone("GMT+08"))
-//            if(variant.buildType.name.equals('debug')){
-//                outputFileName = "311D2RadixTestApp_${date}.apk"
-//            }
-//            if(variant.buildType.name.equals('release')){
-//                outputFileName = "311D2RadixTestApp_${versionName}_release.apk"
-//            }
+//            outputFileName = "MediaPlayProject_${date}_${versionName}.apk"
+            if(variant.buildType.name == 'debug'){
+                outputFileName = "MediaPlay_${date}_${versionName}_debug.apk"
+            }
+            if(variant.buildType.name == 'release'){
+                outputFileName = "MediaPlay_${date}_${versionName}_release.apk"
+            }
         }
     }
 }
