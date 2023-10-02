@@ -19,22 +19,22 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-# Ôö¼Ó»ìÏı¹æÔò
--optimizationpasses 5                       # ´úÂë»ìÏıµÄÑ¹Ëõ±ÈÀı£¬Öµ½éÓÚ0-7£¬Ä¬ÈÏ5
--verbose                                    # »ìÏıÊ±¼ÇÂ¼ÈÕÖ¾
--dontoptimize                               # ²»ÓÅ»¯ÊäÈëµÄÀàÎÄ¼ş
--dontshrink                                 # ¹Ø±ÕÑ¹Ëõ
-#-dontpreverify                              # ¹Ø±ÕÔ¤Ğ£Ñé(×÷ÓÃÓÚJavaÆ½Ì¨£¬Android²»ĞèÒª£¬È¥µô¿É¼Ó¿ì»ìÏı)
--dontoptimize                               # ¹Ø±Õ´úÂëÓÅ»¯
--dontobfuscate                              # ¹Ø±Õ»ìÏı
--ignorewarnings                             # ºöÂÔ¾¯¸æ
--dontwarn com.squareup.okhttp.**            # Ö¸¶¨Àà²»Êä³ö¾¯¸æĞÅÏ¢
--dontusemixedcaseclassnames                 # »ìÏıºóÀàĞÍ¶¼ÎªĞ¡Ğ´
--dontskipnonpubliclibraryclasses            # ²»Ìø¹ı·Ç¹«¹²µÄ¿âµÄÀà
--printmapping mapping.txt                   # Éú³ÉÔ­ÀàÃûÓë»ìÏıºóÀàÃûµÄÓ³ÉäÎÄ¼şmapping.txt
--useuniqueclassmembernames                  # °Ñ»ìÏıÀàÖĞµÄ·½·¨ÃûÒ²»ìÏı
--allowaccessmodification                    # ÓÅ»¯Ê±ÔÊĞí·ÃÎÊ²¢ĞŞ¸ÄÓĞĞŞÊÎ·ûµÄÀà¼°ÀàµÄ³ÉÔ±
--renamesourcefileattribute SourceFile       # ½«Ô´ÂëÖĞÓĞÒâÒåµÄÀàÃû×ª»»³ÉSourceFile£¬ÓÃÓÚ»ìÏı¾ßÌå±ÀÀ£´úÂë
--keepattributes SourceFile,LineNumberTable  # ±£ÁôĞĞºÅ
--keepattributes *Annotation*,InnerClasses,Signature,EnclosingMethod # ±ÜÃâ»ìÏı×¢½â¡¢ÄÚ²¿Àà¡¢·ºĞÍ¡¢ÄäÃûÀà
--optimizations !code/simplification/cast,!field/ ,!class/merging/   # Ö¸¶¨»ìÏıÊ±²ÉÓÃµÄËã·¨
+# å¢åŠ æ··æ·†è§„åˆ™
+-optimizationpasses 5                       # ä»£ç æ··æ·†çš„å‹ç¼©æ¯”ä¾‹ï¼Œå€¼ä»‹äº0-7ï¼Œé»˜è®¤5
+-verbose                                    # æ··æ·†æ—¶è®°å½•æ—¥å¿—
+-dontoptimize                               # ä¸ä¼˜åŒ–è¾“å…¥çš„ç±»æ–‡ä»¶
+-dontshrink                                 # å…³é—­å‹ç¼©
+#-dontpreverify                              # å…³é—­é¢„æ ¡éªŒ(ä½œç”¨äºJavaå¹³å°ï¼ŒAndroidä¸éœ€è¦ï¼Œå»æ‰å¯åŠ å¿«æ··æ·†)
+-dontoptimize                               # å…³é—­ä»£ç ä¼˜åŒ–
+-dontobfuscate                              # å…³é—­æ··æ·†
+-ignorewarnings                             # å¿½ç•¥è­¦å‘Š
+-dontwarn com.squareup.okhttp.**            # æŒ‡å®šç±»ä¸è¾“å‡ºè­¦å‘Šä¿¡æ¯
+-dontusemixedcaseclassnames                 # æ··æ·†åç±»å‹éƒ½ä¸ºå°å†™
+-dontskipnonpubliclibraryclasses            # ä¸è·³è¿‡éå…¬å…±çš„åº“çš„ç±»
+-printmapping mapping.txt                   # ç”ŸæˆåŸç±»åä¸æ··æ·†åç±»åçš„æ˜ å°„æ–‡ä»¶mapping.txt
+-useuniqueclassmembernames                  # æŠŠæ··æ·†ç±»ä¸­çš„æ–¹æ³•åä¹Ÿæ··æ·†
+-allowaccessmodification                    # ä¼˜åŒ–æ—¶å…è®¸è®¿é—®å¹¶ä¿®æ”¹æœ‰ä¿®é¥°ç¬¦çš„ç±»åŠç±»çš„æˆå‘˜
+-renamesourcefileattribute SourceFile       # å°†æºç ä¸­æœ‰æ„ä¹‰çš„ç±»åè½¬æ¢æˆSourceFileï¼Œç”¨äºæ··æ·†å…·ä½“å´©æºƒä»£ç 
+-keepattributes SourceFile,LineNumberTable  # ä¿ç•™è¡Œå·
+-keepattributes *Annotation*,InnerClasses,Signature,EnclosingMethod # é¿å…æ··æ·†æ³¨è§£ã€å†…éƒ¨ç±»ã€æ³›å‹ã€åŒ¿åç±»
+-optimizations !code/simplification/cast,!field/ ,!class/merging/   # æŒ‡å®šæ··æ·†æ—¶é‡‡ç”¨çš„ç®—æ³•

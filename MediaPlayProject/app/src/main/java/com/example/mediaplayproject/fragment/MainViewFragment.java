@@ -38,10 +38,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.musiclist.SearchResultListAdapter;
 import com.example.mediaplayproject.adapter.viewpager.MainViewPagerAdapter;
+import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.bean.SearchMusicBean;
 import com.example.mediaplayproject.fragment.main.DiscoveryFragment;
@@ -76,6 +78,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private static final int FLING_MIN_VELOCITY = 0;
     private DrawerLayout drawerLayout;
     private GestureDetector mGestureDetector;
+    private NavigationView navView;
 
     private MainViewPagerAdapter mainViewPagerAdapter;
     private ViewPager2 musicListViewPager;
@@ -214,6 +217,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private void initData() {
         musicListViewPager = mainView.findViewById(R.id.main_view_pager);
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
+        navView = mainView.findViewById(R.id.nav_view);
         tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
         customizeEditText = mainView.findViewById(R.id.custom_edit_text);
         searchEditText = customizeEditText.getEditText();
@@ -232,8 +236,9 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivDiscovery.setOnClickListener(mListener);
         ivPersonal.setOnClickListener(mListener);
         ivTools.setOnClickListener(mListener);
-
         searchEditText.setOnClickListener(mListener);
+
+        navView.setNavigationItemSelectedListener(this);
 
         LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
@@ -445,8 +450,42 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     };
 
 
+    /**
+     *  Navigation侧滑栏的item点击事件监听
+     *  @author wm
+     *  @createTime 2023/10/2 21:02
+     * @param item:
+     * @return : boolean
+     */
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.nav_menu_my:
+                Toast.makeText(mContext,R.string.nav_my,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_menu_message:
+                Toast.makeText(mContext,R.string.nav_message,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_menu_timing_off:
+                Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
+                Bundle bundle = new Bundle();
+                bundle.putString("fragment", Constant.TIMING_OFF_FRAGMENT_ACTION_FLAG);
+                intent.putExtras(bundle);
+                mContext.sendBroadcast(intent);
+                break;
+            case R.id.nav_menu_setting:
+                Toast.makeText(mContext,R.string.nav_settings,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_menu_about:
+                Toast.makeText(mContext,R.string.nav_about,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_menu_exit:
+                BasicApplication.getActivityManager().finishAll();
+                break;
+            default:
+                break;
+        }
         return false;
     }
 
