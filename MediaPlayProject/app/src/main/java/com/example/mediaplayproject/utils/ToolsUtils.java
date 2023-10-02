@@ -136,6 +136,17 @@ public class ToolsUtils {
         if ("".equals(fragmentName)) {
             return;
         }
+        changeFragment(context, fragmentName);
+    }
+
+    /**
+     *  切换Fragment的广播处理
+     *  @author wm
+     *  @createTime 2023/10/2 22:46
+     * @param context: 上下文
+     * @param fragmentName: 要切换的fragment标识
+     */
+    public void changeFragment(Context context, String fragmentName){
         Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
         Bundle bundle = new Bundle();
         bundle.putString("fragment", fragmentName);

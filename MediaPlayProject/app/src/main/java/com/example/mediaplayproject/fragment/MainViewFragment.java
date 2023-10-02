@@ -451,11 +451,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         }
 
         // 点击到其他区域，就跳转进去MusicPlayFragment页面
-        Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
-        Bundle bundle = new Bundle();
-        bundle.putString("fragment", Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG);
-        intent.putExtras(bundle);
-        mContext.sendBroadcast(intent);
+        ToolsUtils.getInstance().changeFragment(mContext, Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG);
     };
 
 
@@ -477,18 +473,10 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 Toast.makeText(mContext,R.string.nav_message,Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_menu_timing_off:
-                Intent intent = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
-                Bundle bundle = new Bundle();
-                bundle.putString("fragment", Constant.TIMING_OFF_FRAGMENT_ACTION_FLAG);
-                intent.putExtras(bundle);
-                mContext.sendBroadcast(intent);
+                ToolsUtils.getInstance().changeFragment(mContext,Constant.TIMING_OFF_FRAGMENT_ACTION_FLAG);
                 break;
             case R.id.nav_menu_language:
-                Intent intent2 = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
-                Bundle bundle2 = new Bundle();
-                bundle2.putString("fragment", Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG);
-                intent2.putExtras(bundle2);
-                mContext.sendBroadcast(intent2);
+                ToolsUtils.getInstance().changeFragment(mContext,Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG);
                 break;
             case R.id.nav_menu_setting:
                 Toast.makeText(mContext,R.string.nav_settings,Toast.LENGTH_SHORT).show();
