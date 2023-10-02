@@ -14,6 +14,10 @@
             android:icon="@mipmap/ic_tools_timing_white"
             android:title="@string/nav_timing_off"/>
         <item
+            android:id="@+id/nav_menu_language"
+            android:icon="@mipmap/ic_tools_change_language_white"
+            android:title="@string/nav_language"/>
+        <item
             android:id="@+id/nav_menu_setting"
             android:icon="@mipmap/ic_setting_white"
             android:title="@string/nav_settings"/>

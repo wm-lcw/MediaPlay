@@ -483,6 +483,13 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 intent.putExtras(bundle);
                 mContext.sendBroadcast(intent);
                 break;
+            case R.id.nav_menu_language:
+                Intent intent2 = new Intent(Constant.CHANGE_FRAGMENT_ACTION);
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("fragment", Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG);
+                intent2.putExtras(bundle2);
+                mContext.sendBroadcast(intent2);
+                break;
             case R.id.nav_menu_setting:
                 Toast.makeText(mContext,R.string.nav_settings,Toast.LENGTH_SHORT).show();
                 break;

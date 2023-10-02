@@ -12,7 +12,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk 30
         versionCode 1
-        versionName "2.9.8"
+        versionName "2.9.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,7 +30,8 @@ android {
     buildTypes {
         release {
             // 资源压缩，前提是代码压缩必须开启,否则资源压缩无效 ;
-            shrinkResources true
+            /// 开启压缩资源后生成的apk有可能安装不上，暂时不压缩资源
+            shrinkResources false
             // 代码压缩
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
