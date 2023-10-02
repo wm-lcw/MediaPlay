@@ -62,5 +62,11 @@
         <item>设置</item>
     </string-array>
 
+    <string name="nav_my">我的</string>
+    <string name="nav_message">消息</string>
+    <string name="nav_timing_off">定时关闭</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_about">关于</string>
+    <string name="nav_exit">退出</string>
 
 </resources>

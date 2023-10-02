@@ -2,25 +2,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_menu_friends"
+            android:id="@+id/nav_menu_my"
             android:icon="@mipmap/ic_friend_white"
-            android:title="Friends" />
+            android:title="@string/nav_my" />
         <item
-            android:id="@+id/nav_menu_location"
-            android:icon="@mipmap/ic_local_white"
-            android:title="Location"/>
-        <item
-            android:id="@+id/nav_menu_mail"
+            android:id="@+id/nav_menu_message"
             android:icon="@mipmap/ic_email_white"
-            android:title="Mail"/>
+            android:title="@string/nav_message"/>
+        <item
+            android:id="@+id/nav_menu_timing_off"
+            android:icon="@mipmap/ic_tools_timing_white"
+            android:title="@string/nav_timing_off"/>
         <item
             android:id="@+id/nav_menu_setting"
             android:icon="@mipmap/ic_setting_white"
-            android:title="setting"/>
+            android:title="@string/nav_settings"/>
+        <item
+            android:id="@+id/nav_menu_about"
+            android:icon="@mipmap/ic_about_white"
+            android:title="@string/nav_about"/>
         <item
             android:id="@+id/nav_menu_exit"
             android:icon="@mipmap/ic_exit_white"
-            android:title="Exit"/>
+            android:title="@string/nav_exit"/>
     </group>
 
 </menu>

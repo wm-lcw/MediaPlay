@@ -95,10 +95,14 @@
         <item>自定义</item>
     </string-array>
 
+    <string name="nav_my">My</string>
+    <string name="nav_message">Message</string>
+    <string name="nav_timing_off">TimingOff</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_about">About</string>
+    <string name="nav_exit">Exit</string>
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
     <string name="music_time" translatable="false"> 00:00 </string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
