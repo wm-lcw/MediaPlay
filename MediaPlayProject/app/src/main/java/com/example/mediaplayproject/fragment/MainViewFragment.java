@@ -6,6 +6,8 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
@@ -239,6 +241,13 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         searchEditText.setOnClickListener(mListener);
 
         navView.setNavigationItemSelectedListener(this);
+        // 设定侧滑栏导航菜单Item的字体颜色
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            ColorStateList csl = mContext.getResources().getColorStateList(R.color.navigation_menu_item_color,null);
+            navView.setItemTextColor(csl);
+            /// 设置MenuItem默认选中项
+//        navView.getMenu().getItem(0).setChecked(true);
+        }
 
         LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
         llSimplePlayView.setOnClickListener(simplePlayViewListener);
