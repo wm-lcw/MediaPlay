@@ -31,4 +31,86 @@
             android:text="@string/nav_about" />
     </RelativeLayout>
 
+
+
+
+    <RelativeLayout
+        android:id="@+id/rl_about_version"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_100"
+        android:layout_below="@+id/rl_about_title"
+        android:layout_marginTop="@dimen/dp_20">
+
+        <ImageView
+            android:id="@+id/iv_about_icon"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:layout_centerHorizontal="true"
+            android:background="@mipmap/media" />
+        <TextView
+            android:id="@+id/tv_about_version"
+            android:layout_below="@+id/iv_about_icon"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textSize="@dimen/sp_20" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_about_update"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:layout_below="@+id/rl_about_version"
+        android:layout_marginTop="@dimen/dp_20">
+
+        <TextView
+            android:id="@+id/tv_about_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/sp_20"
+            android:text="Update"
+            android:textSize="@dimen/sp_20" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_about_score"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:layout_below="@+id/rl_about_update"
+        android:layout_marginTop="@dimen/dp_20">
+
+        <TextView
+            android:id="@+id/tv_about_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/sp_20"
+            android:text="Score"
+            android:textSize="@dimen/sp_20" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/rl_about_contact"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:layout_below="@+id/rl_about_score"
+        android:layout_marginTop="@dimen/dp_20">
+
+        <TextView
+            android:id="@+id/tv_about_contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/sp_20"
+            android:text="Contact us"
+            android:textSize="@dimen/sp_20" />
+
+    </RelativeLayout>
+
 </RelativeLayout>

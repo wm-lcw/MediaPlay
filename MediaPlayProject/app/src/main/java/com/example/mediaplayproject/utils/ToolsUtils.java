@@ -2,6 +2,7 @@ package com.example.mediaplayproject.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioAttributes;
@@ -229,6 +230,39 @@ public class ToolsUtils {
             //加载完毕后再播放
             soundpool.play(soundId, 1f, 1f, 0, 0, 1);
         });
+    }
+
+
+    /**
+     * 获取当前本地apk的版本
+     * @param mContext: 上下文
+     */
+    public int getVersionCode(Context mContext) {
+        int versionCode = 0;
+        try {
+            //获取软件版本号，对应AndroidManifest.xml下android:versionCode
+            versionCode = mContext.getPackageManager().
+                    getPackageInfo(mContext.getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
+
+    /**
+     * 获取版本号名称
+     *
+     * @param context 上下文
+     */
+    public String getVerName(Context context) {
+        String verName = "";
+        try {
+            verName = context.getPackageManager().
+                    getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return verName;
     }
 
 }
