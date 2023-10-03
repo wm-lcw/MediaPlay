@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.tools.AboutFragment"
+    android:background="@drawable/ic_main">
+
+    <!--顶部标题栏-返回键-功能键-->
+    <RelativeLayout
+        android:id="@+id/rl_about_title"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50">
+        <ImageView
+            android:id="@+id/iv_about_view_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="@dimen/dp_20"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_back_nor"/>
+        <TextView
+            android:id="@+id/tv_about_title"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="20sp"
+            android:text="@string/nav_about" />
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -66,6 +66,7 @@ public class Constant {
     public static final String CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG = "ChangeLanguageFragment";
     public static final String TIMING_OFF_FRAGMENT_ACTION_FLAG = "TimingOffFragment";
     public static final String WOODEN_FISH_FRAGMENT_ACTION_FLAG = "WoodenFishFragment";
+    public static final String ABOUT_FRAGMENT_ACTION_FLAG = "AboutFragment";
 
     public static final String CURRENT_LANGUAGE = "language";
     public static final String CURRENT_COUNTRY = "country";

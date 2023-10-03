@@ -482,7 +482,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 Toast.makeText(mContext,R.string.nav_settings,Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_menu_about:
-                Toast.makeText(mContext,R.string.nav_about,Toast.LENGTH_SHORT).show();
+                ToolsUtils.getInstance().changeFragment(mContext,Constant.ABOUT_FRAGMENT_ACTION_FLAG);
                 break;
             case R.id.nav_menu_exit:
                 BasicApplication.getActivityManager().finishAll();

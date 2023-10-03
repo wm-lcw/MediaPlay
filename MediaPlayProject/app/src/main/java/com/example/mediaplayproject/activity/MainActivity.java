@@ -53,6 +53,7 @@ import com.example.mediaplayproject.fragment.MainViewFragment;
 import com.example.mediaplayproject.fragment.MusicPlayFragment;
 import com.example.mediaplayproject.fragment.PlayListFragment;
 import com.example.mediaplayproject.fragment.SplashFragment;
+import com.example.mediaplayproject.fragment.tools.AboutFragment;
 import com.example.mediaplayproject.fragment.tools.ChangeLanguageFragment;
 import com.example.mediaplayproject.fragment.tools.StatisticsFragment;
 import com.example.mediaplayproject.fragment.tools.TimingOffFragment;
@@ -87,6 +88,7 @@ public class MainActivity extends BasicActivity {
     private ChangeLanguageFragment changeLanguageFragment;
     private TimingOffFragment timingOffFragment;
     private WoodenFishFragment woodenFishFragment;
+    private AboutFragment aboutFragment;
     private ViewPager2 musicListViewPager;
 
     private boolean isPlaying = false, firstPlay = true;
@@ -355,6 +357,7 @@ public class MainActivity extends BasicActivity {
         changeLanguageFragment = ChangeLanguageFragment.getInstance(mContext);
         timingOffFragment = TimingOffFragment.getInstance(mContext);
         woodenFishFragment = WoodenFishFragment.getInstance(mContext);
+        aboutFragment = AboutFragment.getInstance(mContext);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -391,7 +394,7 @@ public class MainActivity extends BasicActivity {
                 exitBy2Click();
             } else if (musicPlayFragment.isVisible() || statisticsFragment.isVisible()
                     || changeLanguageFragment.isVisible() || timingOffFragment.isVisible()
-                    || woodenFishFragment.isVisible()) {
+                    || woodenFishFragment.isVisible() || aboutFragment.isVisible()) {
                 returnMainFragment();
             }
         }
@@ -681,6 +684,8 @@ public class MainActivity extends BasicActivity {
                     changeFragment(timingOffFragment);
                 } else if (Constant.WOODEN_FISH_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     changeFragment(woodenFishFragment);
+                } else if (Constant.ABOUT_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
+                    changeFragment(aboutFragment);
                 } else if (Constant.TOOLS_FRAGMENT_ACTION_FLAG.equals(fragmentName)) {
                     if (mainViewFragment.isVisible()){
                         mainViewFragment.changeToToolsFragment();
