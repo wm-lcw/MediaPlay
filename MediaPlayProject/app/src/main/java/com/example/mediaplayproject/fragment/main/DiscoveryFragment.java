@@ -27,7 +27,6 @@ public class DiscoveryFragment extends Fragment {
 
     private Context mContext;
     private View myView;
-    private Button btnChangeEn, btnChangeZh;
 
     public DiscoveryFragment() {
     }
@@ -63,24 +62,9 @@ public class DiscoveryFragment extends Fragment {
     }
 
     private void initView() {
-        btnChangeEn = myView.findViewById(R.id.btn_change_en);
-        btnChangeZh = myView.findViewById(R.id.btn_change_zh);
-        btnChangeEn.setOnClickListener(mListener);
-        btnChangeZh.setOnClickListener(mListener);
     }
 
     private final View.OnClickListener mListener = view -> {
-        if (view == btnChangeEn) {
-            SharedPreferencesUtil.putData(Constant.CURRENT_LANGUAGE, "en");
-            SharedPreferencesUtil.putData(Constant.CURRENT_COUNTRY, "");
-        } else if (view == btnChangeZh){
-            SharedPreferencesUtil.putData(Constant.CURRENT_LANGUAGE, "zh");
-            SharedPreferencesUtil.putData(Constant.CURRENT_COUNTRY, "CN");
-        }
-        Toast.makeText(mContext, R.string.change_language_tip,Toast.LENGTH_SHORT).show();
-        // 这里调用Activity的recreate方法不可行，Fragment数据保存等工作太复杂
-        // 暂时解法时切换语言后提示用户下次启动应用生效
-//        EventBus.getDefault().post(Constant.SWITCH_LANGUAGE);
     };
 
 

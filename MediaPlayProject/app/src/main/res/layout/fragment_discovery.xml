@@ -8,25 +8,16 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:text="DiscoveryFragment" />
+
 
         <Button
             android:id="@+id/btn_change_en"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="change_en"/>
+            android:layout_centerInParent="true"
+            android:text="To be developed"/>
 
-        <Button
-            android:id="@+id/btn_change_zh"
-            android:layout_below="@+id/btn_change_en"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="change_zh"/>
+
     </RelativeLayout>
 
 </FrameLayout>
