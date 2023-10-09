@@ -71,4 +71,6 @@
     <string name="nav_exit">退出</string>
 
     <string name="about_version_tip">当前版本号为:</string>
+
+    <string name="follow_system_language">跟随系统</string>
 </resources>

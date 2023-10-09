@@ -104,6 +104,7 @@
     <string name="nav_exit">Exit</string>
 
     <string name="about_version_tip">The current version number is:</string>
+    <string name="follow_system_language">Follow System Language</string>
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>

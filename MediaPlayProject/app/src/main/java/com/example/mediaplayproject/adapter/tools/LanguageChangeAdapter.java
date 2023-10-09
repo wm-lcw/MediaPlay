@@ -41,7 +41,7 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
     public LanguageChangeAdapter(Context mContext, List<LanguageBean> languageBeans) {
         this.mContext = mContext;
         this.languageBeans = languageBeans;
-        currentSetLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_USE_LANGUAGE,"zh");
+        currentSetLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_USE_LANGUAGE,"");
     }
 
     @NonNull
@@ -53,7 +53,7 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        saveLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_LANGUAGE,"zh");
+        saveLanguage = (String) SharedPreferencesUtil.getData(Constant.CURRENT_LANGUAGE,"");
         holder.languageName.setText(languageBeans.get(position).getLanguage());
 
         if (saveLanguage.equals(languageBeans.get(position).getLanguageTag())) {

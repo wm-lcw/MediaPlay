@@ -17,17 +17,13 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.activity.MainActivity;
 import com.example.mediaplayproject.adapter.tools.LanguageChangeAdapter;
 import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.LanguageBean;
-import com.example.mediaplayproject.bean.ToolsBean;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MultiLanguageUtil;
@@ -91,6 +87,9 @@ public class ChangeLanguageFragment extends Fragment implements LanguageChangeAd
         languageList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.language_item)));
         countyList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.county_item)));
         languageBeans.clear();
+        String followSystem = mContext.getString(R.string.follow_system_language);
+        // 添加一个跟随系统的选项
+        languageBeans.add(new LanguageBean(followSystem, ""));
         // 这里应该做数量判断，后续加上
         for (int i = 0; i < languageList.size(); i++){
             languageBeans.add(new LanguageBean(languageNameList.get(i), languageList.get(i)));
@@ -120,10 +119,13 @@ public class ChangeLanguageFragment extends Fragment implements LanguageChangeAd
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClickItem(int position) {
-        String saveLanguage = languageList.get(position);
-        String saveCounty = countyList.get(position);
-//        SharedPreferencesUtil.putData(Constant.CURRENT_LANGUAGE, saveLanguage);
-//        SharedPreferencesUtil.putData(Constant.CURRENT_COUNTRY, saveCounty);
+        // 第一项默认为跟随系统，直接设为空值即可
+        String saveLanguage = "";
+        String saveCounty = "";
+        if (position > 0){
+            saveLanguage = languageList.get(position-1);
+            saveCounty = countyList.get(position-1);
+        }
         changeLanguage(saveLanguage, saveCounty);
         languageChangeAdapter.notifyDataSetChanged();
     }
