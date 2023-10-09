@@ -62,13 +62,8 @@ public class LanguageChangeAdapter extends RecyclerView.Adapter<LanguageChangeAd
             holder.languageCheckState.setImageResource(R.mipmap.ic_language_black_nor);
         }
 
-        if (currentSetLanguage.equals(languageBeans.get(position).getLanguageTag())){
-            holder.languageTip.setText("(当前语言)");
-        } else if (!saveLanguage.equals(currentSetLanguage) && saveLanguage.equals(languageBeans.get(position).getLanguageTag())) {
-            holder.languageTip.setText("(已更改语言，重启APP生效)");
-        } else {
-            holder.languageTip.setText("");
-        }
+        holder.languageTip.setText("");
+
         holder.itemView.setOnClickListener(v -> {
             mListener.onClickItem(position);
         });
