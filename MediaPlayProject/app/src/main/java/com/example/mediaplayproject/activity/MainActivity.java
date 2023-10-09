@@ -146,7 +146,7 @@ public class MainActivity extends BasicActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        //设置颜色为透明
+        // 设置颜色为透明
         StatusBar statusBar = new StatusBar(MainActivity.this);
         statusBar.setColor(R.color.transparent);
 

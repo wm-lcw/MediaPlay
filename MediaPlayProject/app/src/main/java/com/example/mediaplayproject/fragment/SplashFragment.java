@@ -59,7 +59,7 @@ public class SplashFragment extends Fragment {
         TextView tvTranslate = splashView.findViewById(R.id.tv_translate);
 
         tvTranslate.post(() -> {
-            // 通过post拿到的tvTranslate.getWidth()不会为0。
+            // 通过post拿到的tvTranslate.getWidth()不会为0
             translateAnimation = new TranslateAnimation(0, tvTranslate.getWidth(), 0, 0);
             translateAnimation.setDuration(1500);
             translateAnimation.setFillAfter(true);
