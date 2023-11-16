@@ -56,28 +56,28 @@ public class DebugLog {
     }
 
     /**
-     * Â·¾¶ "/storage/emulated/0/mediaPlayLog"
-     * @param msg ĞèÒª´òÓ¡µÄÄÚÈİ
+     * è·¯å¾„ "/storage/emulated/0/mediaPlayLog"
+     * @param msg éœ€è¦æ‰“å°çš„å†…å®¹
      */
     public static void writerLog(int logLevel, String msg) {
         if (LEVEL_FILE == logLevel) {
-            //±£´æµ½µÄÎÄ¼şÂ·¾¶
+            //ä¿å­˜åˆ°çš„æ–‡ä»¶è·¯å¾„
             final String filePath = Environment.getExternalStorageDirectory().getAbsolutePath();
             FileWriter fileWriter;
             BufferedWriter bufferedWriter = null;
 
             try {
-                //´´½¨ÎÄ¼ş¼Ğ
+                //åˆ›å»ºæ–‡ä»¶å¤¹
                 File dir = new File(filePath, "mediaPlayLog");
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
-                //´´½¨ÎÄ¼ş
+                //åˆ›å»ºæ–‡ä»¶
                 File file = new File(dir, "mediaPlayLog.txt");
                 if (!file.exists()) {
                     file.createNewFile();
                 }
-                //Ğ´ÈëÈÕÖ¾ÎÄ¼ş
+                //å†™å…¥æ—¥å¿—æ–‡ä»¶
                 fileWriter = new FileWriter(file, true);
                 bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(  getCurrentTime() + "---" + msg  + "\n");
@@ -100,7 +100,7 @@ public class DebugLog {
     }
 
     /**
-     *  »ñÈ¡µ±Ç°Ê±¼ä
+     *  è·å–å½“å‰æ—¶é—´
      *  @author wm
      *  @createTime 2023/10/9 20:27
      * @return : java.lang.String

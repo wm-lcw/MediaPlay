@@ -84,7 +84,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
 
     /**
      * @createTime 2023/2/3 18:33
-     * @description 歌曲准备播放
+     * @description 歌曲准备好之后开始播放
      */
     @Override
     public void onPrepared(MediaPlayer mp) {

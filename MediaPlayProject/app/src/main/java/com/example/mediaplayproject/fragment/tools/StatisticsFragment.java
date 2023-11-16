@@ -2,7 +2,6 @@ package com.example.mediaplayproject.fragment.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -39,6 +38,8 @@ public class StatisticsFragment extends Fragment {
     private List<Map.Entry<String, Integer>> playTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> artistTotalList = new ArrayList<>();
     private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
+    private String musicName, artistName, artistMusic;
+    private int musicPlayCount,  artistPlayCount,  artistMusicCount;
 
     public StatisticsFragment() {
     }
@@ -66,7 +67,7 @@ public class StatisticsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        myView = inflater.inflate(R.layout.fragment_statistics, container, false);;
+        myView = inflater.inflate(R.layout.fragment_statistics, container, false);
         initView();
         return myView;
     }
@@ -90,9 +91,28 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void refreshDataFromService(){
+        int flag = 0;
         playTotalList = DataRefreshService.getPlayTotalList();
         artistTotalList = DataRefreshService.getArtistTotalList();
-        mostPlayFromArtistTotalList = DataRefreshService.getMostPlayFromArtistTotalList(artistTotalList.get(0));
+
+        musicName = playTotalList.get(0).getKey();
+        musicPlayCount = playTotalList.get(0).getValue();
+        for (int i = 0 ; i< artistTotalList.size();i++){
+            if ("<unknown>".equals(artistTotalList.get(i).getKey())){
+                continue;
+            }
+            artistName = artistTotalList.get(i).getKey();
+            artistPlayCount = artistTotalList.get(i).getValue();
+            flag = i;
+            break;
+        }
+
+        mostPlayFromArtistTotalList = DataRefreshService.getMostPlayFromArtistTotalList(artistTotalList.get(flag));
+        if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0) {
+            artistMusic = mostPlayFromArtistTotalList.get(0).getKey();
+            artistMusicCount = mostPlayFromArtistTotalList.get(0).getValue();
+        }
+
         toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
     }
 
@@ -102,15 +122,13 @@ public class StatisticsFragment extends Fragment {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
-                tvPlayTotal.setText("你播放最多的歌曲是 " + playTotalList.get(0).getKey()
-                        + " ,\n\t    共播放了 " + playTotalList.get(0).getValue() + "次");
-                tvArtistTotal.setText("你最喜欢的歌手是 " + artistTotalList.get(0).getKey()
-                        + " ,\n\t    共播放了 " + artistTotalList.get(0).getValue() + "首TA的音乐");
-                if (mostPlayFromArtistTotalList != null && mostPlayFromArtistTotalList.size() > 0) {
-                    tvPlayFromArtist.setText("在" + artistTotalList.get(0).getKey() + "的歌曲中你最喜欢 "
-                        + mostPlayFromArtistTotalList.get(0).getKey() + " ,\n\t    共播放了 "
-                        + mostPlayFromArtistTotalList.get(0).getValue() + "次");
-                }
+                tvPlayTotal.setText("你播放最多的歌曲是 " + musicName
+                        + " ,\n\t    共播放了 " + musicPlayCount + "次");
+                tvArtistTotal.setText("你最喜欢的歌手是 " + artistName
+                        + " ,\n\t    共播放了 " + artistPlayCount + "首TA的音乐");
+                tvPlayFromArtist.setText("在" + artistName + "的歌曲中你最喜欢 "
+                        + artistMusic + " ,\n\t    共播放了 " + artistMusicCount + "次");
+
                 long count = DataRefreshService.getTotalPlayTime()/240;
                 tvPlayTime.setText("你一共听了 " + DataRefreshService.getTotalPlayTime() + " 秒的音乐"
                         + " ,\n\t    约等于听了 " + count + " 首音乐");
