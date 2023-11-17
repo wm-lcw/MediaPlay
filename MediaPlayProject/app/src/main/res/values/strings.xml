@@ -106,6 +106,10 @@
     <string name="about_version_tip">The current version number is:</string>
     <string name="follow_system_language">Follow System Language</string>
 
+    <string name="share_statistics_view">Share</string>
+    <string name="edit_statistics">Edit</string>
+    <string name="edit_statistics_tip">Edit the statistics text</string>
+
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>
     <string name="music_time" translatable="false"> 00:00 </string>

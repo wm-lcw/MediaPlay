@@ -73,4 +73,7 @@
     <string name="about_version_tip">当前版本号为:</string>
 
     <string name="follow_system_language">跟随系统</string>
+    <string name="share_statistics_view">分享</string>
+    <string name="edit_statistics">自定义</string>
+    <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
 </resources>

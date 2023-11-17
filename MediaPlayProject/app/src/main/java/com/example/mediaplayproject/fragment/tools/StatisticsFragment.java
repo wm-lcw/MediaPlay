@@ -2,6 +2,7 @@ package com.example.mediaplayproject.fragment.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,7 +11,10 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,6 +23,7 @@ import android.widget.TextView;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
+import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
@@ -82,6 +87,7 @@ public class StatisticsFragment extends Fragment {
 
         ivBack.setOnClickListener(mListener);
         ivMore.setOnClickListener(mListener);
+        registerForContextMenu(ivMore);
     }
 
     @Override
@@ -144,9 +150,43 @@ public class StatisticsFragment extends Fragment {
             ToolsUtils.getInstance().backToMainViewFragment(mContext);
         } else if (view == ivMore) {
             // 更多功能
+            DebugLog.debug("more---");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                // 绘制的位置，以当前ivMore的位置偏移
+                ivMore.showContextMenu(-120,150);
+            }
 
         }
     };
+
+    @Override
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(mContext).inflate(R.menu.statistics_view_menu, menu);
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    /**
+     *  “更多”按钮被点击时触发该方法
+     *  @author wm
+     *  @createTime 2023/9/4 11:40
+     *  @param item: 菜单子项
+     */
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.share_statistics:
+                DebugLog.debug("share");
+                break;
+            case R.id.edit_statistics:
+                DebugLog.debug("edit");
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
 
 
 }
