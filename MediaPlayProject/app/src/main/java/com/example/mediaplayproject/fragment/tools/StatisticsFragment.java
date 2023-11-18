@@ -1,32 +1,43 @@
 package com.example.mediaplayproject.fragment.tools;
 
+import static com.example.mediaplayproject.base.BasicApplication.getApplication;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.adapter.tools.StatisticsEditAdapter;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
+import com.example.mediaplayproject.view.StatisticsFloatView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +45,7 @@ import java.util.Map;
  * @Description: java类作用描述
  * @author: wm
  */
-public class StatisticsFragment extends Fragment {
+public class StatisticsFragment extends Fragment implements StatisticsEditAdapter.StatisticsEditCallBack{
 
     private View myView;
     private Context mContext;
@@ -45,6 +56,16 @@ public class StatisticsFragment extends Fragment {
     private List<Map.Entry<String, Integer>> mostPlayFromArtistTotalList = new ArrayList<>();
     private String musicName, artistName, artistMusic;
     private int musicPlayCount,  artistPlayCount,  artistMusicCount;
+
+    private StatisticsFloatView mFloatLayout;
+    private WindowManager mWindowManager;
+    private WindowManager.LayoutParams wmParams;
+    private RecyclerView rvStatisticsItem;
+    private LinearLayout llCustomerEditInput;
+    private EditText etText,etTime;
+    private Button btnOk, btnCancel;
+    private StatisticsEditAdapter mEditAdapter;
+    private ArrayList<String> statisticsItemList;
 
     public StatisticsFragment() {
     }
@@ -74,7 +95,14 @@ public class StatisticsFragment extends Fragment {
                              Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_statistics, container, false);
         initView();
+        createFloatView();
         return myView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshDataFromService();
     }
 
     private void initView() {
@@ -88,14 +116,17 @@ public class StatisticsFragment extends Fragment {
         ivBack.setOnClickListener(mListener);
         ivMore.setOnClickListener(mListener);
         registerForContextMenu(ivMore);
+
+        statisticsItemList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.statistics_text_item)));
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshDataFromService();
-    }
 
+
+    /**
+     *  刷新统计信息
+     *  @author wm
+     *  @createTime 2023/11/18 9:02
+     */
     private void refreshDataFromService(){
         int flag = 0;
         playTotalList = DataRefreshService.getPlayTotalList();
@@ -119,7 +150,68 @@ public class StatisticsFragment extends Fragment {
             artistMusicCount = mostPlayFromArtistTotalList.get(0).getValue();
         }
 
+        // 使用Handler更新UI
         toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
+    }
+
+    /**
+     *  创建悬浮窗
+     *  @author wm
+     *  @createTime 2023/11/18 9:07
+     */
+    private void createFloatView() {
+        wmParams = new WindowManager.LayoutParams();
+        // 获取的是WindowManagerImpl.CompatModeWrapper
+        mWindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+        // 设置window type
+        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // 设置背景为透明，否则滑动ListView会出现残影
+        wmParams.format = PixelFormat.TRANSPARENT;
+        // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口,不设置这个flag的话，home页的划屏会有问题
+        // FLAG_WATCH_OUTSIDE_TOUCH : 使窗口可以接受窗口之外的触摸事件
+        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+        // 调整悬浮窗显示的停靠位置为居中顶部
+        wmParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
+        wmParams.x = 0;
+        wmParams.y = 300;
+
+        // 设置悬浮窗口长宽数据
+        wmParams.width = 800;
+        wmParams.height = 1200;
+        initFloatView();
+    }
+
+    /**
+     *  初始化悬浮窗
+     *  @author wm
+     *  @createTime 2023/11/18 9:06
+     */
+    private void initFloatView() {
+        //获取浮动窗口视图所在布局
+        mFloatLayout = new StatisticsFloatView(mContext);
+        mFloatLayout.setFloatViewCallback(() -> {
+            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mFloatLayout);
+            }
+        });
+        DebugLog.debug("list " + statisticsItemList.get(0));
+        mEditAdapter = new StatisticsEditAdapter(mContext,statisticsItemList);
+        mEditAdapter.setEditCallBack(this);
+        rvStatisticsItem = mFloatLayout.findViewById(R.id.rv_statistics_edit);
+        llCustomerEditInput = mFloatLayout.findViewById(R.id.ll_statistics_input);
+        etText = mFloatLayout.findViewById(R.id.et_statistics_text);
+        etTime = mFloatLayout.findViewById(R.id.et_statistics_time);
+        btnOk = mFloatLayout.findViewById(R.id.btn_statistics_ok);
+        btnCancel = mFloatLayout.findViewById(R.id.btn_statistics_cancel);
+
+        btnOk.setOnClickListener(mListener);
+        btnCancel.setOnClickListener(mListener);
+
+        rvStatisticsItem.setAdapter(mEditAdapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        rvStatisticsItem.setLayoutManager(linearLayoutManager);
+
     }
 
     final Handler toolsViewHandler = new Handler(Looper.myLooper()) {
@@ -138,8 +230,6 @@ public class StatisticsFragment extends Fragment {
                 long count = DataRefreshService.getTotalPlayTime()/240;
                 tvPlayTime.setText("你一共听了 " + DataRefreshService.getTotalPlayTime() + " 秒的音乐"
                         + " ,\n\t    约等于听了 " + count + " 首音乐");
-
-
             }
         }
     };
@@ -162,6 +252,7 @@ public class StatisticsFragment extends Fragment {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 //        menu.setHeaderTitle("Select an Action");
         menu.add("Edit").setOnMenuItemClickListener(item -> {
+            mWindowManager.addView(mFloatLayout, wmParams);
             return false;
         });
         menu.add("Share").setOnMenuItemClickListener(item -> {
@@ -170,6 +261,23 @@ public class StatisticsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onClickItem(int position) {
+       DebugLog.debug("statistics check " + position
+               + " : " + statisticsItemList.get(position));
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
+            mWindowManager.removeView(mFloatLayout);
+        }
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+    }
 }

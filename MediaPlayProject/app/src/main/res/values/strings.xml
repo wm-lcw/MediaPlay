@@ -95,6 +95,15 @@
         <item>自定义</item>
     </string-array>
 
+    <string-array name="statistics_text_item">
+        <item>abc</item>
+        <item>111</item>
+        <item>222</item>
+        <item>333</item>
+        <item>444</item>
+        <item>自定义</item>
+    </string-array>
+
     <string name="nav_my">My</string>
     <string name="nav_message">Message</string>
     <string name="nav_timing_off">TimingOff</string>
