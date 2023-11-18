@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MediaPlay</string>
+    <string name="app_name">音乐播放器</string>
 
     <string name="default_list_name">默认列表</string>
     <string name="favorite_list_name">收藏列表</string>
@@ -10,40 +10,30 @@
     <string name="cancel_select_all">取消全选</string>
     <string name="add_to">添加</string>
     <string name="delete">删除</string>
-
     <string name="add_to_list">添加到</string>
-
     <string name="share_list">分享</string>
     <string name="edit_list">编辑列表信息</string>
     <string name="delete_list">删除列表</string>
-
     <string name="search_result_title">搜索结果</string>
-
     <string name="create_custom_list">创建自定义列表</string>
     <string name="input_custom_list_name">请输入列表名</string>
     <string name="delete_custom_list">是否要删除 </string>
-    <string name="list">列表 </string>
+    <string name="list">列表？ </string>
     <string name="delete_custom_list_tip">该列表正在播放，是否删除?</string>
-
     <string name="create_list_repeat">不能重复创建已存在的列表！ </string>
     <string name="list_name_limit">列表名超过支持的最大长度(</string>
-
     <string name="delete_music">是否删除选中的音乐 ? </string>
     <string name="delete_music_tip">选中的音乐正在播放，是否要删除?</string>
-
     <string name="create_success">创建成功!</string>
     <string name="create_failed">创建失败!</string>
     <string name="add_success">添加成功!</string>
     <string name="add_failed">添加失败!</string>
     <string name="delete_success">删除成功!</string>
     <string name="delete_failed">删除失败!</string>
-
     <string name="ok">确认</string>
     <string name="cancel">取消</string>
-
     <string name="change_language_tip">设置成功，下次启应用生效.</string>
     <string name="singer">原唱：</string>
-
     <string name="all_tools">所有工具</string>
     <string name="shortcut_tools">快捷工具</string>
     <string name="record">音乐记录</string>
@@ -52,6 +42,31 @@
     <string name="wooden_fish">电子木鱼</string>
     <string name="wooden_fish_Merit">功德+1</string>
     <string name="wooden_fish_count">你当前的功德数为</string>
+    <string name="nav_my">我的</string>
+    <string name="nav_message">消息</string>
+    <string name="nav_timing_off">定时关闭</string>
+    <string name="nav_language">切换语言</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_about">关于</string>
+    <string name="nav_exit">退出</string>
+    <string name="about_version_tip">当前版本号为:</string>
+    <string name="follow_system_language">跟随系统</string>
+    <string name="share_statistics_view">分享</string>
+    <string name="edit_statistics">自定义</string>
+    <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
+
+    <string name="favorite_music">您播放最多的歌曲是 %1$s ,\n\t\t 共播放了 %2$d 次</string>
+    <string name="favorite_artist">您最喜欢的歌手是 %1$s ,\n\t\t 共播放了 %2$d 首TA的音乐</string>
+    <string name="favorite_artist_and_music">在 %1$s 的歌曲中您最喜欢 %2$s ,\n\t\t 共播放了 %3$d 次</string>
+
+
+    <string name="immersive_meditation">您已经在音乐冥想中度过了 %1$2.2f 小时 ，您的耳朵已经拥有了冥想的力量，继续在音乐的海洋中寻找宁静吧</string>
+    <string name="time_traveler">恭喜！您刚刚完成了一次时光旅行，您在时光隧道中度过了 %1$2.2f 个小时，每一个时代的音符都留下了您的足迹</string>
+    <string name="music_marathon">您已经完成了一场 %1$2.2f 小时的音乐马拉松，您的音乐马拉松成绩令人瞩目，继续保持良好的音律健康</string>
+    <string name="dream_explorer">每一次播放都是一场音律冒险，您已经在音乐梦境中探索了 %1$2.2f 小时，保持好奇心，发现更多音乐奇妙梦境</string>
+    <string name="musical_genius">学无止境，您已经在音乐课堂里花费了 %1$2.2f 个小时，您对音符和旋律已经了如指掌，音乐天才！ </string>
+    <string name="default_statistics_text1">您一共听了 %1$s 秒的音乐, 约等于听了 %2$d 首音乐</string>
+    <string name="default_statistics_text2">您一共听了 %1$s 秒的音乐, 约等于 </string>
 
     <string-array name="tools_item_title">
         <item>音乐记录</item>
@@ -62,18 +77,24 @@
         <item>设置</item>
     </string-array>
 
-    <string name="nav_my">我的</string>
-    <string name="nav_message">消息</string>
-    <string name="nav_timing_off">定时关闭</string>
-    <string name="nav_language">切换语言</string>
-    <string name="nav_settings">设置</string>
-    <string name="nav_about">关于</string>
-    <string name="nav_exit">退出</string>
+    <string-array name="timing_off_title_item">
+        <item>关闭</item>
+        <item>10分钟</item>
+        <item>20分钟</item>
+        <item>30分钟</item>
+        <item>60分钟</item>
+        <item>自定义</item>
+    </string-array>
 
-    <string name="about_version_tip">当前版本号为:</string>
+    <string-array name="statistics_title_item">
+        <item>沉浸式冥想</item>
+        <item>时空旅行者</item>
+        <item>音乐马拉松</item>
+        <item>梦境探险家</item>
+        <item>音乐天才</item>
+        <item>自定义</item>
+    </string-array>
 
-    <string name="follow_system_language">跟随系统</string>
-    <string name="share_statistics_view">分享</string>
-    <string name="edit_statistics">自定义</string>
-    <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
+
+
 </resources>

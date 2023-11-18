@@ -12,9 +12,6 @@ import com.example.mediaplayproject.utils.DebugLog;
 
 /**
  * @author wm
- * @Classname StatisticsFloatView
- * @Description TODO
- * @Version 1.0.0
  * @Date 2023/11/18 9:19
  * @Created by wm
  */

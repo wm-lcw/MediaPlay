@@ -27,12 +27,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.adapter.tools.StatisticsEditAdapter;
 import com.example.mediaplayproject.service.DataRefreshService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 import com.example.mediaplayproject.utils.ToolsUtils;
 import com.example.mediaplayproject.view.StatisticsFloatView;
 
@@ -66,6 +68,11 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     private Button btnOk, btnCancel;
     private StatisticsEditAdapter mEditAdapter;
     private ArrayList<String> statisticsItemList;
+
+    /**
+     * 用于记录编辑页面中选中的状态，并非全局使用的下标
+     * */
+    private int statisticsTextSub = 0;
 
     public StatisticsFragment() {
     }
@@ -117,7 +124,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         ivMore.setOnClickListener(mListener);
         registerForContextMenu(ivMore);
 
-        statisticsItemList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.statistics_text_item)));
+        statisticsItemList = new ArrayList<>(Arrays.asList(mContext.getResources().getStringArray(R.array.statistics_title_item)));
     }
 
 
@@ -150,8 +157,9 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             artistMusicCount = mostPlayFromArtistTotalList.get(0).getValue();
         }
 
+        statisticsTextSub = (Integer) SharedPreferencesUtil.getData(Constant.STATISTICS_SUB,0);
         // 使用Handler更新UI
-        toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA,300);
+        toolsViewHandler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_REFRESH_STATISTICS_DATA,300);
     }
 
     /**
@@ -178,7 +186,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
 
         // 设置悬浮窗口长宽数据
         wmParams.width = 800;
-        wmParams.height = 1200;
+        wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         initFloatView();
     }
 
@@ -219,17 +227,45 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if (msg.what == Constant.HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA) {
-                tvPlayTotal.setText("你播放最多的歌曲是 " + musicName
-                        + " ,\n\t    共播放了 " + musicPlayCount + "次");
-                tvArtistTotal.setText("你最喜欢的歌手是 " + artistName
-                        + " ,\n\t    共播放了 " + artistPlayCount + "首TA的音乐");
-                tvPlayFromArtist.setText("在" + artistName + "的歌曲中你最喜欢 "
-                        + artistMusic + " ,\n\t    共播放了 " + artistMusicCount + "次");
+            if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_STATISTICS_DATA) {
+                tvPlayTotal.setText(mContext.getString(R.string.favorite_music, musicName, musicPlayCount));
+                tvArtistTotal.setText(mContext.getString(R.string.favorite_artist, artistName, artistPlayCount));
+                tvPlayFromArtist.setText(mContext.getString(R.string.favorite_artist_and_music, artistName, artistMusic, artistPlayCount));
 
-                long count = DataRefreshService.getTotalPlayTime()/240;
-                tvPlayTime.setText("你一共听了 " + DataRefreshService.getTotalPlayTime() + " 秒的音乐"
-                        + " ,\n\t    约等于听了 " + count + " 首音乐");
+                double totalTime = (double) DataRefreshService.getTotalPlayTime() / 3600;
+                switch (statisticsTextSub){
+                    case 0 :
+                        tvPlayTime.setText(mContext.getString(R.string.immersive_meditation, totalTime));
+                        break;
+                    case 1 :
+                        tvPlayTime.setText(mContext.getString(R.string.time_traveler, totalTime));
+                        break;
+                    case 2 :
+                        tvPlayTime.setText(mContext.getString(R.string.music_marathon, totalTime));
+                        break;
+                    case 3 :
+                        tvPlayTime.setText(mContext.getString(R.string.dream_explorer, totalTime));
+                        break;
+                    case 4 :
+                        tvPlayTime.setText(mContext.getString(R.string.musical_genius, totalTime));
+                        break;
+                    case 5 :
+                        String text = (String) SharedPreferencesUtil.getData(Constant.STATISTICS_TEXT, "");
+                        int time = (int) SharedPreferencesUtil.getData(Constant.STATISTICS_TIME, 0);
+                        if ("".equals(text) || time == 0) {
+                            long count = DataRefreshService.getTotalPlayTime() / 240;
+                            tvPlayTime.setText(mContext.getString(R.string.default_statistics_text1, ""+DataRefreshService.getTotalPlayTime(), count));
+                        } else {
+                            long count = DataRefreshService.getTotalPlayTime() / time;
+                            String combineText = mContext.getString(R.string.default_statistics_text2, ""+DataRefreshService.getTotalPlayTime())
+                                    + count + " " + text;
+                            tvPlayTime.setText(combineText);
+                        }
+                        break;
+                    default:
+                        tvPlayTime.setText("");
+                        break;
+                }
             }
         }
     };
@@ -245,13 +281,50 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
                 ivMore.showContextMenu(-130,150);
             }
 
+        } else if (view == btnOk){
+            SharedPreferencesUtil.putData(Constant.STATISTICS_SUB, statisticsTextSub);
+            refreshDataFromService();
+
+            if (statisticsTextSub == statisticsItemList.size()-1){
+                try {
+                    String text = etText.getText().toString().trim();
+                    int min = Integer.parseInt(etTime.getText().toString().trim());
+                    DebugLog.debug("text/time " + text + "/" + min);
+                    if ("".equals(text) || min < 0){
+                        Toast.makeText(mContext,"please input text and time(min)!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    SharedPreferencesUtil.putData(Constant.STATISTICS_TEXT, text);
+                    SharedPreferencesUtil.putData(Constant.STATISTICS_TIME, min);
+                } catch (Exception e){
+                    Toast.makeText(mContext,"please input text and time(min)!", Toast.LENGTH_LONG).show();
+                    DebugLog.error("error " + e.getMessage());
+                    return;
+                }
+
+            }
+
+            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mFloatLayout);
+            }
+        } else if (view == btnCancel){
+            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mFloatLayout);
+            }
         }
     };
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        menu.setHeaderTitle("Select an Action");
         menu.add("Edit").setOnMenuItemClickListener(item -> {
+
+            mEditAdapter.setCheckItemSub(statisticsTextSub);
+            if (statisticsTextSub == statisticsItemList.size()-1){
+                llCustomerEditInput.setVisibility(View.VISIBLE);
+            } else {
+                llCustomerEditInput.setVisibility(View.GONE);
+            }
+
             mWindowManager.addView(mFloatLayout, wmParams);
             return false;
         });
@@ -265,6 +338,12 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     public void onClickItem(int position) {
        DebugLog.debug("statistics check " + position
                + " : " + statisticsItemList.get(position));
+       statisticsTextSub = position;
+       if (position == statisticsItemList.size()-1){
+           llCustomerEditInput.setVisibility(View.VISIBLE);
+       } else {
+           llCustomerEditInput.setVisibility(View.GONE);
+       }
     }
 
     @Override

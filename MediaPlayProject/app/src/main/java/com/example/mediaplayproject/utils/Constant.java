@@ -36,7 +36,7 @@ public class Constant {
     public static final int HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY = 5;
     public static final int HANDLER_MESSAGE_DELAY_INIT_FRAGMENT = 6;
     public static final int HANDLER_MESSAGE_DELAY_OPEN_KEYBOARD = 7;
-    public static final int HANDLER_MESSAGE_DELAY_REFRESH_PLAY_TOTAL_DATA = 8;
+    public static final int HANDLER_MESSAGE_REFRESH_STATISTICS_DATA = 8;
     public static final int HANDLER_MESSAGE_DELAY_TIMING_OFF = 9;
 
     public final static int CUSTOMER_LIST_OPERATOR_CREATE = 0;
@@ -80,4 +80,8 @@ public class Constant {
     public static final String WOODEN_FISH_COUNT = "woodenFishCount";
 
     public static final int MAX_SHORTCUT_TOOLS_NUM = 3;
+
+    public static final String STATISTICS_SUB = "statisticsSub";
+    public static final String STATISTICS_TEXT = "statisticsText";
+    public static final String STATISTICS_TIME = "statisticsTime";
 }
