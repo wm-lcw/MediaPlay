@@ -150,43 +150,26 @@ public class StatisticsFragment extends Fragment {
             ToolsUtils.getInstance().backToMainViewFragment(mContext);
         } else if (view == ivMore) {
             // 更多功能
-            DebugLog.debug("more---");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 // 绘制的位置，以当前ivMore的位置偏移
-                ivMore.showContextMenu(-120,150);
+                ivMore.showContextMenu(-130,150);
             }
 
         }
     };
 
     @Override
-    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        new MenuInflater(mContext).inflate(R.menu.statistics_view_menu, menu);
-        super.onCreateContextMenu(menu, v, menuInfo);
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//        menu.setHeaderTitle("Select an Action");
+        menu.add("Edit").setOnMenuItemClickListener(item -> {
+            return false;
+        });
+        menu.add("Share").setOnMenuItemClickListener(item -> {
+            DebugLog.debug("share");
+            return false;
+        });
     }
 
-    /**
-     *  “更多”按钮被点击时触发该方法
-     *  @author wm
-     *  @createTime 2023/9/4 11:40
-     *  @param item: 菜单子项
-     */
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.share_statistics:
-                DebugLog.debug("share");
-                break;
-            case R.id.edit_statistics:
-                DebugLog.debug("edit");
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
 
 
 }
