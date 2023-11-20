@@ -66,7 +66,7 @@
     <string name="dream_explorer">Every play is a musical adventure, you have explored the musical dream for %1$2.2f hours, stay curious, discover more musical wonders </string>
     <string name="musical_genius">You\'ve spent %1$2.2f hours in a music class, you know the notes and melodies like the back of your hand, musical genius！ </string>
     <string name="default_statistics_text1">You listened to a total of %1$s seconds of music, which is about the same amount of time as listening to %2$d pieces of music</string>
-    <string name="default_statistics_text2">You listened to a total of %1$s seconds of music, which is about the same amount of time as </string>
+    <string name="default_statistics_text2">You listened to a total of %1$s seconds of music, which is about the same amount of time as %2$s %3$s times</string>
 
     <string name="music_text" translatable="false"> music </string>
     <string name="music_artist" translatable="false"> artist </string>

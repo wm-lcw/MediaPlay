@@ -253,13 +253,13 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
                         String text = (String) SharedPreferencesUtil.getData(Constant.STATISTICS_TEXT, "");
                         int time = (int) SharedPreferencesUtil.getData(Constant.STATISTICS_TIME, 0);
                         if ("".equals(text) || time == 0) {
-                            long count = DataRefreshService.getTotalPlayTime() / 240;
-                            tvPlayTime.setText(mContext.getString(R.string.default_statistics_text1, ""+DataRefreshService.getTotalPlayTime(), count));
+                            long count = DataRefreshService.getTotalPlayTime() / 240L;
+                            tvPlayTime.setText(mContext.getString(R.string.default_statistics_text1,
+                                    ""+DataRefreshService.getTotalPlayTime(), count));
                         } else {
-                            long count = DataRefreshService.getTotalPlayTime() / time;
-                            String combineText = mContext.getString(R.string.default_statistics_text2, ""+DataRefreshService.getTotalPlayTime())
-                                    + count + " " + text;
-                            tvPlayTime.setText(combineText);
+                            long count = DataRefreshService.getTotalPlayTime() / (time * 60L);
+                            tvPlayTime.setText(mContext.getString(R.string.default_statistics_text2,
+                                    ""+DataRefreshService.getTotalPlayTime(), ""+count , text));
                         }
                         break;
                     default:
@@ -314,12 +314,18 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         }
     };
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         menu.add("Edit").setOnMenuItemClickListener(item -> {
 
             mEditAdapter.setCheckItemSub(statisticsTextSub);
             if (statisticsTextSub == statisticsItemList.size()-1){
+                int sub = (Integer) SharedPreferencesUtil.getData(Constant.STATISTICS_SUB,0);
+                if (sub == statisticsTextSub){
+                    etText.setText((String) SharedPreferencesUtil.getData(Constant.STATISTICS_TEXT, ""));
+                    etTime.setText("" + (Integer) SharedPreferencesUtil.getData(Constant.STATISTICS_TIME, 0));
+                }
                 llCustomerEditInput.setVisibility(View.VISIBLE);
             } else {
                 llCustomerEditInput.setVisibility(View.GONE);
@@ -334,12 +340,18 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         });
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onClickItem(int position) {
        DebugLog.debug("statistics check " + position
                + " : " + statisticsItemList.get(position));
        statisticsTextSub = position;
        if (position == statisticsItemList.size()-1){
+           int sub = (Integer) SharedPreferencesUtil.getData(Constant.STATISTICS_SUB,0);
+           if (sub == statisticsTextSub){
+               etText.setText((String) SharedPreferencesUtil.getData(Constant.STATISTICS_TEXT, ""));
+               etTime.setText("" + (Integer) SharedPreferencesUtil.getData(Constant.STATISTICS_TIME, 0));
+           }
            llCustomerEditInput.setVisibility(View.VISIBLE);
        } else {
            llCustomerEditInput.setVisibility(View.GONE);

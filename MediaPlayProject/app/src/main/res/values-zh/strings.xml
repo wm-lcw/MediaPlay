@@ -66,7 +66,7 @@
     <string name="dream_explorer">每一次播放都是一场音律冒险，您已经在音乐梦境中探索了 %1$2.2f 小时，保持好奇心，发现更多音乐奇妙梦境</string>
     <string name="musical_genius">学无止境，您已经在音乐课堂里花费了 %1$2.2f 个小时，您对音符和旋律已经了如指掌，音乐天才！ </string>
     <string name="default_statistics_text1">您一共听了 %1$s 秒的音乐, 约等于听了 %2$d 首音乐</string>
-    <string name="default_statistics_text2">您一共听了 %1$s 秒的音乐, 约等于 </string>
+    <string name="default_statistics_text2">您一共听了 %1$s 秒的音乐, 约等于 %2$s 次 %3$s 的时间</string>
 
     <string-array name="tools_item_title">
         <item>音乐记录</item>
