@@ -55,9 +55,9 @@
     <string name="edit_statistics">自定义</string>
     <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
 
-    <string name="favorite_music">您播放最多的歌曲是 %1$s ,\n\t\t 共播放了 %2$d 次</string>
-    <string name="favorite_artist">您最喜欢的歌手是 %1$s ,\n\t\t 共播放了 %2$d 首TA的音乐</string>
-    <string name="favorite_artist_and_music">在 %1$s 的歌曲中您最喜欢 %2$s ,\n\t\t 共播放了 %3$d 次</string>
+    <string name="favorite_music">您播放最多的歌曲是 %1$s , 共播放了 %2$d 次</string>
+    <string name="favorite_artist">您最喜欢的歌手是 %1$s , 共播放了 %2$d 首TA的音乐</string>
+    <string name="favorite_artist_and_music">在 %1$s 的歌曲中您最喜欢 %2$s , 共播放了 %3$d 次</string>
 
 
     <string name="immersive_meditation">您已经在音乐冥想中度过了 %1$2.2f 小时 ，您的耳朵已经拥有了冥想的力量，继续在音乐的海洋中寻找宁静吧</string>

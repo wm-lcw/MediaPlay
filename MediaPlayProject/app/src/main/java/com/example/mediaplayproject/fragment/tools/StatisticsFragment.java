@@ -230,7 +230,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_STATISTICS_DATA) {
                 tvPlayTotal.setText(mContext.getString(R.string.favorite_music, musicName, musicPlayCount));
                 tvArtistTotal.setText(mContext.getString(R.string.favorite_artist, artistName, artistPlayCount));
-                tvPlayFromArtist.setText(mContext.getString(R.string.favorite_artist_and_music, artistName, artistMusic, artistPlayCount));
+                tvPlayFromArtist.setText(mContext.getString(R.string.favorite_artist_and_music, artistName, artistMusic, artistMusicCount));
 
                 double totalTime = (double) DataRefreshService.getTotalPlayTime() / 3600;
                 switch (statisticsTextSub){
