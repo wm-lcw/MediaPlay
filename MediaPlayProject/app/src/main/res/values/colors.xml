@@ -29,4 +29,6 @@
     <color name="transparent">#00000000</color>
     <!--半透明-->
     <color name="translucent">#22050505</color>
+    <!--截图分享页面半透明背景-->
+    <color name="capture_share_bg">#E0D0CCCC</color>
 </resources>

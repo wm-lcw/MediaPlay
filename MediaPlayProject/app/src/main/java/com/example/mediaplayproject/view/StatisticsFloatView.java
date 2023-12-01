@@ -7,7 +7,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
-import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.utils.DebugLog;
 
 /**
@@ -23,9 +22,9 @@ public class StatisticsFloatView extends LinearLayout {
         mFloatViewCallback = floatViewCallback;
     }
 
-    public StatisticsFloatView(Context context) {
+    public StatisticsFloatView(Context context, int layoutId) {
         super(context);
-        inflate(context, R.layout.statistics_edit_view, this);
+        inflate(context, layoutId, this);
     }
 
     /**

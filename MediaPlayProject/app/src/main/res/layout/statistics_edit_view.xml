@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/teal_200">
+    android:layout_width="@dimen/dp_380"
+    android:layout_height="430dp"
+    android:background="@drawable/ic_main">
 
     <TextView
         android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_30"
+        android:layout_height="@dimen/dp_45"
         android:text="@string/edit_statistics_tip"
         android:textSize="@dimen/sp_20"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginTop="@dimen/dp_3"
         android:background="@color/black"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -33,12 +34,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="statistics text"
+            android:singleLine="true"
             android:textAllCaps="false"/>
         <EditText
             android:id="@+id/et_statistics_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="time(min)"
+            android:singleLine="true"
             android:textAllCaps="false"/>
 
     </LinearLayout>

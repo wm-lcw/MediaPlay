@@ -93,12 +93,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_top_title"
         android:layout_margin="@dimen/dp_100">
+
         <ImageView
             android:id="@+id/iv_music_pic"
             android:layout_width="@dimen/dp_200"
             android:layout_height="@dimen/dp_200"
             android:layout_centerInParent="true"
-            android:background="@drawable/music"/>
+            android:background="@drawable/music" />
     </RelativeLayout>
 
 

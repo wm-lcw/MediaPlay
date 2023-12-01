@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -40,6 +42,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -363,6 +366,9 @@ public class MainActivity extends BasicActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.fl_main_view, splashFragment);
         transaction.commit();
+
+        // 注册截图接口回调
+        statisticsFragment.setCaptureCallback(() -> toCapture());
     }
 
     @Override
@@ -920,5 +926,25 @@ public class MainActivity extends BasicActivity {
     private void closeApp() {
         BasicApplication.getActivityManager().finishAll();
     }
+    
+    /**
+     *  截图功能：通过画布将当前页面变成bitmap，直接加载到ImageView中就能看到效果
+     *  优点：实现简单、无权限要求
+     *  缺点：
+     *     只能截应用页面，状态栏不会被截进去，对于全屏截图的需求不适用
+     *     因为getWindow()是Activity中的方法，所以只能在Activity中调用（无法后台截屏）
+     *  @author wm
+     *  @createTime 2023/11/24 14:48
+     */
+    private void toCapture(){
+        View v = getWindow().getDecorView();
+        Bitmap bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas();
+        canvas.setBitmap(bitmap);
+        v.draw(canvas);
+        // 将截图结果传给分享页面
+        statisticsFragment.setCaptureImage(bitmap);
+    }
+
 
 }

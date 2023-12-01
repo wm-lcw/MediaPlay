@@ -4,11 +4,13 @@ import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,7 +61,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     private String musicName, artistName, artistMusic;
     private int musicPlayCount,  artistPlayCount,  artistMusicCount;
 
-    private StatisticsFloatView mFloatLayout;
+    private StatisticsFloatView mEditFloatLayout, mShareFloatLayout;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams wmParams;
     private RecyclerView rvStatisticsItem;
@@ -68,6 +70,10 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     private Button btnOk, btnCancel;
     private StatisticsEditAdapter mEditAdapter;
     private ArrayList<String> statisticsItemList;
+    private CaptureCallback mCaptureCallback;
+
+    private ImageView ivCapture;
+    private Button btnSaveCapture;
 
     /**
      * 用于记录编辑页面中选中的状态，并非全局使用的下标
@@ -91,6 +97,9 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         return instance;
     }
 
+    public void setCaptureCallback(CaptureCallback captureCallback) {
+        mCaptureCallback = captureCallback;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -102,7 +111,9 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
                              Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_statistics, container, false);
         initView();
-        createFloatView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createFloatView();
+        }
         return myView;
     }
 
@@ -167,6 +178,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
      *  @author wm
      *  @createTime 2023/11/18 9:07
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void createFloatView() {
         wmParams = new WindowManager.LayoutParams();
         // 获取的是WindowManagerImpl.CompatModeWrapper
@@ -180,46 +192,58 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         // 调整悬浮窗显示的停靠位置为居中顶部
         wmParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-        // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        wmParams.x = 0;
-        wmParams.y = 300;
 
         // 设置悬浮窗口长宽数据
-        wmParams.width = 800;
+        wmParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        initFloatView();
+        initEditFloatView();
+        initShareFloatView();
     }
 
     /**
-     *  初始化悬浮窗
+     *  初始化Edit界面悬浮窗
      *  @author wm
      *  @createTime 2023/11/18 9:06
      */
-    private void initFloatView() {
-        //获取浮动窗口视图所在布局
-        mFloatLayout = new StatisticsFloatView(mContext);
-        mFloatLayout.setFloatViewCallback(() -> {
-            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
-                mWindowManager.removeView(mFloatLayout);
+    private void initEditFloatView() {
+        // 获取编辑页面浮动窗口视图所在布局
+        mEditFloatLayout = new StatisticsFloatView(mContext, R.layout.statistics_edit_view);
+        mEditFloatLayout.setFloatViewCallback(() -> {
+            if (mWindowManager != null && mEditFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mEditFloatLayout);
             }
         });
         DebugLog.debug("list " + statisticsItemList.get(0));
         mEditAdapter = new StatisticsEditAdapter(mContext,statisticsItemList);
         mEditAdapter.setEditCallBack(this);
-        rvStatisticsItem = mFloatLayout.findViewById(R.id.rv_statistics_edit);
-        llCustomerEditInput = mFloatLayout.findViewById(R.id.ll_statistics_input);
-        etText = mFloatLayout.findViewById(R.id.et_statistics_text);
-        etTime = mFloatLayout.findViewById(R.id.et_statistics_time);
-        btnOk = mFloatLayout.findViewById(R.id.btn_statistics_ok);
-        btnCancel = mFloatLayout.findViewById(R.id.btn_statistics_cancel);
-
+        rvStatisticsItem = mEditFloatLayout.findViewById(R.id.rv_statistics_edit);
+        llCustomerEditInput = mEditFloatLayout.findViewById(R.id.ll_statistics_input);
+        etText = mEditFloatLayout.findViewById(R.id.et_statistics_text);
+        etTime = mEditFloatLayout.findViewById(R.id.et_statistics_time);
+        btnOk = mEditFloatLayout.findViewById(R.id.btn_statistics_ok);
+        btnCancel = mEditFloatLayout.findViewById(R.id.btn_statistics_cancel);
         btnOk.setOnClickListener(mListener);
         btnCancel.setOnClickListener(mListener);
-
         rvStatisticsItem.setAdapter(mEditAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         rvStatisticsItem.setLayoutManager(linearLayoutManager);
+    }
 
+    /**
+     *  初始化分享页面的UI悬浮窗
+     *  @author wm
+     *  @createTime 2023/11/24 14:30
+     */
+    private void initShareFloatView(){
+        mShareFloatLayout = new StatisticsFloatView(mContext, R.layout.statistics_share_view);
+        mShareFloatLayout.setFloatViewCallback(() -> {
+            if (mWindowManager != null && mShareFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mShareFloatLayout);
+            }
+        });
+        ivCapture = mShareFloatLayout.findViewById(R.id.iv_capture);
+        btnSaveCapture = mShareFloatLayout.findViewById(R.id.btn_save_capture);
+        btnSaveCapture.setOnClickListener(mListener);
     }
 
     final Handler toolsViewHandler = new Handler(Looper.myLooper()) {
@@ -304,13 +328,16 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
 
             }
 
-            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
-                mWindowManager.removeView(mFloatLayout);
+            if (mWindowManager != null && mEditFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mEditFloatLayout);
             }
         } else if (view == btnCancel){
-            if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
-                mWindowManager.removeView(mFloatLayout);
+            if (mWindowManager != null && mEditFloatLayout.isAttachedToWindow()){
+                mWindowManager.removeView(mEditFloatLayout);
             }
+        } else if(view == btnSaveCapture) {
+            // save capture
+            DebugLog.debug("save capture");
         }
     };
 
@@ -331,11 +358,16 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
                 llCustomerEditInput.setVisibility(View.GONE);
             }
 
-            mWindowManager.addView(mFloatLayout, wmParams);
+            wmParams.x = 0;
+            wmParams.y = 300;
+            mWindowManager.addView(mEditFloatLayout, wmParams);
             return false;
         });
         menu.add("Share").setOnMenuItemClickListener(item -> {
             DebugLog.debug("share");
+            if (mCaptureCallback != null){
+                mCaptureCallback.startCapture();
+            }
             return false;
         });
     }
@@ -361,14 +393,39 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     @Override
     public void onPause() {
         super.onPause();
-        if (mWindowManager != null && mFloatLayout.isAttachedToWindow()){
-            mWindowManager.removeView(mFloatLayout);
+        if (mWindowManager != null && mEditFloatLayout.isAttachedToWindow()){
+            mWindowManager.removeView(mEditFloatLayout);
+        }
+        if (mWindowManager != null && mShareFloatLayout.isAttachedToWindow()){
+            mWindowManager.removeView(mShareFloatLayout);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+    }
+
+    public interface CaptureCallback{
+
+        /**
+         *  截图回调接口
+         *  @author wm
+         *  @createTime 2023/11/24 14:37
+         */
+        void startCapture();
+    }
+
+    public void setCaptureImage(Bitmap bitmap){
+        DebugLog.debug("bitmap " + bitmap);
+        if (ivCapture!=null && bitmap != null){
+            ivCapture.setImageBitmap(bitmap);
+        }
+        DebugLog.debug("width " + ivCapture.getWidth() + "; height " + ivCapture.getHeight());
+        wmParams.x = 0;
+        wmParams.y = 0;
+        mWindowManager.addView(mShareFloatLayout, wmParams);
 
     }
 }
