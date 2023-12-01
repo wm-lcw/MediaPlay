@@ -54,7 +54,7 @@
             android:text="share to" />
 
         <Button
-            android:id="@+id/btn_cancel_save"
+            android:id="@+id/btn_cancel_capture"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"

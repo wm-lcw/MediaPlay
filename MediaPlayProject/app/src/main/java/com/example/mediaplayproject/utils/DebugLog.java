@@ -68,19 +68,24 @@ public class DebugLog {
 
             try {
                 //创建文件夹
-                File dir = new File(filePath, "mediaPlayLog");
+                File dir = new File(filePath , "MediaPlay");
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
+                //创建文件夹
+                File dir2 = new File(dir, "Log");
+                if (!dir2.exists()) {
+                    dir2.mkdir();
+                }
                 //创建文件
-                File file = new File(dir, "mediaPlayLog.txt");
+                File file = new File(dir2, "mediaPlayLog.txt");
                 if (!file.exists()) {
                     file.createNewFile();
                 }
                 //写入日志文件
                 fileWriter = new FileWriter(file, true);
                 bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write(  getCurrentTime() + "---" + msg  + "\n");
+                bufferedWriter.write(  ToolsUtils.getCurrentTime() + "---" + msg  + "\n");
                 bufferedWriter.close();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -97,18 +102,5 @@ public class DebugLog {
             Log.d("mediaPlayLog", msg+"");
         }
 
-    }
-
-    /**
-     *  获取当前时间
-     *  @author wm
-     *  @createTime 2023/10/9 20:27
-     * @return : java.lang.String
-     */
-    private static String getCurrentTime() {
-        Calendar calendar = Calendar.getInstance();
-        @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(calendar.getTime());
     }
 }

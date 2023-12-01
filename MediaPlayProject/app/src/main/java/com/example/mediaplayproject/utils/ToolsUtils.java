@@ -1,5 +1,6 @@
 package com.example.mediaplayproject.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,8 +18,10 @@ import android.view.inputmethod.InputMethodManager;
 import com.example.mediaplayproject.R;
 import com.example.mediaplayproject.bean.ToolsBean;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -263,6 +266,32 @@ public class ToolsUtils {
             e.printStackTrace();
         }
         return verName;
+    }
+
+    /**
+     *  获取当前时间，格式 yyyy-MM-dd HH:mm:ss
+     *  @author wm
+     *  @createTime 2023/10/9 20:27
+     * @return : java.lang.String
+     */
+    public static String getCurrentTime() {
+        Calendar calendar = Calendar.getInstance();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(calendar.getTime());
+    }
+
+    /**
+     *  获取当前时间，格式为 yyyyMMddHHmmss，不带空格，用于创建文件名
+     *  @author wm
+     *  @createTime 2023/12/1 16:45
+     * @return : java.lang.String
+     */
+    public static String getCurrentTime2() {
+        Calendar calendar = Calendar.getInstance();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        return sdf.format(calendar.getTime());
     }
 
 }
