@@ -35,7 +35,8 @@ public class BasicApplication extends Application {
         // 初始化打印
         boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
         int logLevel = (Integer) SharedPreferencesUtil.getData(Constant.LOG_LEVEL,1);
-        DebugLog.init(this, isOpenLog, logLevel);
+        boolean writeToFile = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_WRITE,true);
+        DebugLog.init(this, isOpenLog, logLevel, writeToFile);
         //声明Activity管理
         activityManager = new ActivityManager();
         context = getApplicationContext();

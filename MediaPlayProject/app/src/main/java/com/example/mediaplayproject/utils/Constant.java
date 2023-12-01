@@ -87,4 +87,5 @@ public class Constant {
 
     public static final String LOG_SWITCH = "logSwitch";
     public static final String LOG_LEVEL = "logLevel";
+    public static final String LOG_WRITE = "logWrite";
 }

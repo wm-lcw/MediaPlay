@@ -19,12 +19,15 @@ import java.io.IOException;
  * 全局都可以使用这个打印工具类，普通日志使用inform，调试信息使用debug，错误信息使用error
  */
 public class DebugLog {
+    /**
+     * 打印开关
+     * */
     private static boolean LOCAL_DBG_SWITCH = true;
     private static String TAG = "MediaProjectLog";
     /**
-     *  写入文件的log等级
+     *  log写入文件的开关
      * */
-    private static int LEVEL_FILE = 1;
+    private static boolean WRITE_LOG_SWITCH = true;
     /**
      * 当前设定的打印等级
      * */
@@ -35,6 +38,7 @@ public class DebugLog {
     private static final int LEVEL_WARNING = 4;
     private static final int LEVEL_ERROR = 5;
 
+
     /**
      *  初始化打印的信息
      *  @author wm
@@ -43,11 +47,30 @@ public class DebugLog {
      * @param isOpenLog:  是否开启打印
      * @param logLevel: 打印等级, 当前设置等级小于设定的等级才能打印
      */
-    public static void init(Context context, boolean isOpenLog,int logLevel){
+    public static void init(Context context, boolean isOpenLog, int logLevel, boolean writeToFile){
         TAG = getAppName(context);
         LOCAL_DBG_SWITCH = isOpenLog;
+        WRITE_LOG_SWITCH = writeToFile;
         LOG_LEVEL = logLevel;
-        Log.d(TAG, "init: isOpenLog " + isOpenLog + "; logLevel " + logLevel);
+        Log.d(TAG, "init: isOpenLog " + isOpenLog + "; logLevel " + logLevel + "; writeToFile " + writeToFile);
+    }
+
+    /**
+     *  普通日志
+     *  @author wm
+     *  @createTime 2023/12/1 16:59
+     * @param log:
+     */
+    public static void verbose(String log) {
+        if (LOCAL_DBG_SWITCH && LOG_LEVEL <= LEVEL_VERBOSE) {
+            StackTraceElement[] stacks = new Throwable().getStackTrace();
+            StackTraceElement currentStack = stacks[1];
+
+            String strMsg = currentStack.getFileName() + "(" + currentStack.getLineNumber() + ")::"
+                    + currentStack.getMethodName() + " - " + log;
+            android.util.Log.d(TAG, strMsg);
+            writerLog(strMsg);
+        }
     }
 
     /**
@@ -64,12 +87,12 @@ public class DebugLog {
             String strMsg = currentStack.getFileName() + "(" + currentStack.getLineNumber() + ")::"
                     + currentStack.getMethodName() + " - " + log;
             android.util.Log.d(TAG, strMsg);
-            writerLog(LEVEL_FILE, strMsg);
+            writerLog(strMsg);
         }
     }
 
     /**
-     *  普通日志打印，如：不频繁的操作日志，开始、结束、重要过程等
+     *  提示信息  如：不频繁的操作日志，开始、结束、重要过程等
      *  @author wm
      *  @createTime 2023/12/1 16:59
      * @param log:
@@ -83,11 +106,28 @@ public class DebugLog {
             String strMsg = currentStack.getFileName() + "(" + currentStack.getLineNumber() + ")::"
                     + currentStack.getMethodName() + " - " + log;
             android.util.Log.i(TAG, strMsg);
-            writerLog(LEVEL_FILE, strMsg);
+            writerLog(strMsg);
         }
     }
 
-
+    /**
+     *  警告信息
+     *  @author wm
+     *  @createTime 2023/12/1 16:59
+     * @param log:
+     */
+    public static void warning(String log) {
+        if (LOCAL_DBG_SWITCH && LOG_LEVEL <= LEVEL_WARNING) {
+            // currentStack不要抽离成单独的方法，否则会导致只打印原本的堆栈信息
+            StackTraceElement[] stacks = new Throwable().getStackTrace();
+            StackTraceElement currentStack = stacks[1];
+            // 添加类名、方法名和对应行数
+            String strMsg = currentStack.getFileName() + "(" + currentStack.getLineNumber() + ")::"
+                    + currentStack.getMethodName() + " - " + log;
+            android.util.Log.i(TAG, strMsg);
+            writerLog(strMsg);
+        }
+    }
 
     /**
      *  异常日志打印
@@ -103,7 +143,7 @@ public class DebugLog {
             String strMsg = currentStack.getFileName() + "(" + currentStack.getLineNumber() + ")::"
                     + currentStack.getMethodName() + " - " + log;
             android.util.Log.e(TAG, strMsg);
-            writerLog(LEVEL_FILE, strMsg);
+            writerLog(strMsg);
         }
     }
 
@@ -112,8 +152,8 @@ public class DebugLog {
      * 路径 "/storage/emulated/0/mediaPlayLog"
      * @param msg 需要打印的内容
      */
-    public static void writerLog(int logLevel, String msg) {
-        if (LEVEL_FILE == logLevel) {
+    public static void writerLog(String msg) {
+        if (WRITE_LOG_SWITCH) {
             //保存到的文件路径
             final String filePath = Environment.getExternalStorageDirectory().getAbsolutePath();
             FileWriter fileWriter;
@@ -142,6 +182,7 @@ public class DebugLog {
                 bufferedWriter.close();
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e(TAG, "writerLog: ", e);
             } finally {
                 if (bufferedWriter != null) {
                     try {
@@ -151,8 +192,6 @@ public class DebugLog {
                     }
                 }
             }
-        } else {
-            Log.d("mediaPlayLog", msg+"");
         }
     }
 
