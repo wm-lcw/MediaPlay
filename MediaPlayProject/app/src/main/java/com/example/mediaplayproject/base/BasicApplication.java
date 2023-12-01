@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.mediaplayproject.utils.Constant;
+import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MultiLanguageUtil;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 
@@ -31,6 +32,10 @@ public class BasicApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // 初始化打印
+        boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
+        int logLevel = (Integer) SharedPreferencesUtil.getData(Constant.LOG_LEVEL,1);
+        DebugLog.init(this, isOpenLog, logLevel);
         //声明Activity管理
         activityManager = new ActivityManager();
         context = getApplicationContext();
@@ -109,11 +114,11 @@ public class BasicApplication extends Application {
         // attachBaseContext是在onCreate之前执行的，所以要将SharedPreferencesUtil的初始化放到这里执行
         SharedPreferencesUtil.getInstance(base,"mediaPlay");
         // 系统语言等设置发生改变时会调用此方法，需要要重置app语言
-        // super.attachBaseContext(MultiLanguageUtil.attachBaseContext(base));
+         super.attachBaseContext(MultiLanguageUtil.attachBaseContext(base));
 
         /// MultiLanguageUtil.attachBaseContext(base)的作用与前面onActivityCreated()方法的作用似乎有些重合
         /// 实测不调用MultiLanguageUtil.attachBaseContext(base) 也能正常执行
-        super.attachBaseContext(base);
+//        super.attachBaseContext(base);
     }
 }
 

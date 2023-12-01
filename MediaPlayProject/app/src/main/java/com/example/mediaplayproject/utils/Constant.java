@@ -84,4 +84,7 @@ public class Constant {
     public static final String STATISTICS_SUB = "statisticsSub";
     public static final String STATISTICS_TEXT = "statisticsText";
     public static final String STATISTICS_TIME = "statisticsTime";
+
+    public static final String LOG_SWITCH = "logSwitch";
+    public static final String LOG_LEVEL = "logLevel";
 }

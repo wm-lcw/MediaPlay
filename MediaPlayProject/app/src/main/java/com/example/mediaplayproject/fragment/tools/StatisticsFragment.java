@@ -358,6 +358,9 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             }
         } else if (view == btnShareCapture) {
             DebugLog.debug("share capture");
+            boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
+            DebugLog.debug("isOpenLog " + isOpenLog);
+            boolean result = SharedPreferencesUtil.putData(Constant.LOG_SWITCH, !isOpenLog);
         } else if (view == btnCancelCapture) {
             DebugLog.debug("cancel save capture");
             if (mWindowManager != null && mShareFloatLayout.isAttachedToWindow()) {
