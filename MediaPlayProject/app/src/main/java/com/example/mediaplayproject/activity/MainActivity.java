@@ -947,4 +947,17 @@ public class MainActivity extends BasicActivity {
     }
 
 
+    /*
+    暂存
+    *   打印控制逻辑
+//            boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
+//            DebugLog.debug("isOpenLog " + isOpenLog);
+//            boolean result = SharedPreferencesUtil.putData(Constant.LOG_SWITCH, !isOpenLog);
+
+//            boolean writeToFile = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_WRITE, true);
+//            DebugLog.debug("isOpenLog " + writeToFile);
+//            boolean result = SharedPreferencesUtil.putData(Constant.LOG_WRITE, !writeToFile);
+    *
+    * */
+
 }

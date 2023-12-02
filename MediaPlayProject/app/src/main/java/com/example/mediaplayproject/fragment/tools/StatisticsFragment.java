@@ -3,6 +3,7 @@ package com.example.mediaplayproject.fragment.tools;
 import static com.example.mediaplayproject.base.BasicApplication.getApplication;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -21,6 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -358,13 +360,10 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             }
         } else if (view == btnShareCapture) {
             DebugLog.debug("share capture");
-//            boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
-//            DebugLog.debug("isOpenLog " + isOpenLog);
-//            boolean result = SharedPreferencesUtil.putData(Constant.LOG_SWITCH, !isOpenLog);
-
-            boolean writeToFile = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_WRITE,true);
-            DebugLog.debug("isOpenLog " + writeToFile);
-            boolean result = SharedPreferencesUtil.putData(Constant.LOG_WRITE, !writeToFile);
+            if (mBitmap != null) {
+                shareImage(mBitmap);
+                // 不需要移除悬浮窗，系统的弹框会把悬浮窗顶掉
+            }
         } else if (view == btnCancelCapture) {
             DebugLog.debug("cancel save capture");
             if (mWindowManager != null && mShareFloatLayout.isAttachedToWindow()) {
@@ -513,6 +512,62 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     *  分享截图，分享之前需要先保存
+     *  @author wm
+     *  @createTime 2023/12/2 9:53
+     * @param bitmap:
+     */
+    private void shareImage(Bitmap bitmap) {
+        // 保存到的文件路径
+        final String filePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        try {
+            //创建文件夹
+            File dir = new File(filePath, "MediaPlay");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            //创建文件夹
+            File dir2 = new File(dir, "Capture");
+            if (!dir2.exists()) {
+                dir2.mkdir();
+            }
+            // 创建文件
+            File file = new File(dir2, "mediaPlay_" + ToolsUtils.getCurrentTime2() + ".png");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            DebugLog.debug("path " + file);
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            // compress-压缩  将bitmap保存到本地文件中
+            bitmap.compress(Bitmap.CompressFormat.PNG, 80, fileOutputStream);
+            // 存储完成后需要清除相关的进程
+            fileOutputStream.flush();
+            fileOutputStream.close();
+
+            // 创建一个 Intent，使用 ACTION_SEND
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            // 设置 Intent 的类型为图片
+            shareIntent.setType("image/*");
+            // 获取要分享的图片的 Uri
+            ContentValues contentValues = new ContentValues(1);
+            contentValues.put(MediaStore.Images.Media.DATA,
+                    file.getAbsolutePath());
+            Uri uri= mContext.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues);
+            mContext.grantUriPermission(mContext.getPackageName(),uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            // 安卓8之后不能直接使用file当作uri
+//            Uri imageUri = Uri.fromFile(file);
+            // 将图片的 Uri 放入 Intent 中
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            // 启动分享 Intent
+            startActivity(Intent.createChooser(shareIntent, "分享图片"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            DebugLog.error(e.getMessage());
+        }
+
     }
 
     /**
