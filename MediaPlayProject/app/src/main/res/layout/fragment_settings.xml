@@ -72,13 +72,21 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="@dimen/dp_50"
                 android:gravity="left|center"
                 tools:ignore="RtlHardcoded"
                 android:textSize="@dimen/sp_18"
-                android:text="log switch"/>
+                android:text="Log"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="@dimen/dp_50"
+                android:gravity="center"
+                tools:ignore="RtlHardcoded"
+                android:textSize="@dimen/sp_13"
+                android:text="为了排查错误，请保持开启状态"/>
 
             <Switch
                 android:id="@+id/sw_log"
