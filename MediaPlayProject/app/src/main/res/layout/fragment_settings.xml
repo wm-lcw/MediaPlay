@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.SettingsFragment"
+    android:background="@drawable/ic_main">
+
+    <!--顶部功能栏-->
+    <RelativeLayout
+        android:id="@+id/rl_settings_top_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_60">
+        <ImageView
+            android:id="@+id/iv_settings_back"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="@dimen/dp_20"
+            android:src="@drawable/back_view_style_grey"/>
+
+        <TextView
+            android:id="@+id/tv_settings_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/nav_settings"
+            android:textSize="@dimen/sp_20" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_below="@id/rl_settings_top_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/dp_20"
+        android:padding="@dimen/dp_15">
+
+        <TextView
+            android:id="@+id/tv_settings_account"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:text="Personal account"
+            android:gravity="left|center"
+            tools:ignore="RtlHardcoded"
+            android:textSize="@dimen/sp_18"/>
+
+        <TextView
+            android:id="@+id/tv_settings_remote_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_below="@+id/tv_settings_account"
+            android:text="remote view"
+            android:gravity="left|center"
+            tools:ignore="RtlHardcoded"
+            android:textSize="@dimen/sp_18" />
+
+        <TextView
+            android:id="@+id/tv_settings_storage"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_below="@+id/tv_settings_remote_view"
+            android:text="Storage management"
+            android:gravity="left|center"
+            tools:ignore="RtlHardcoded"
+            android:textSize="@dimen/sp_18"/>
+
+        <LinearLayout
+            android:id="@+id/ll_settings_remote_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_below="@+id/tv_settings_storage"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="@dimen/dp_50"
+                android:gravity="left|center"
+                tools:ignore="RtlHardcoded"
+                android:textSize="@dimen/sp_18"
+                android:text="log switch"/>
+
+            <Switch
+                android:id="@+id/sw_log"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dp_50"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_settings_lock_screen"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_below="@+id/ll_settings_remote_view"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="@dimen/dp_50"
+                android:gravity="left|center"
+                tools:ignore="RtlHardcoded"
+                android:textSize="@dimen/sp_18"
+                android:text="Lock screen display switch"/>
+
+            <Switch
+                android:id="@+id/sw_screen"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dp_50"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

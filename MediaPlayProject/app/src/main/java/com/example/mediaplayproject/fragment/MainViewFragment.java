@@ -479,7 +479,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 ToolsUtils.getInstance().changeFragment(mContext,Constant.CHANGE_LANGUAGE_FRAGMENT_ACTION_FLAG);
                 break;
             case R.id.nav_menu_setting:
-                Toast.makeText(mContext,R.string.nav_settings,Toast.LENGTH_SHORT).show();
+                ToolsUtils.getInstance().changeFragment(mContext,Constant.SETTINGS_FRAGMENT_ACTION_FLAG);
                 break;
             case R.id.nav_menu_about:
                 ToolsUtils.getInstance().changeFragment(mContext,Constant.ABOUT_FRAGMENT_ACTION_FLAG);
