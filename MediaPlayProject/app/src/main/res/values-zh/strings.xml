@@ -51,9 +51,12 @@
     <string name="nav_exit">退出</string>
     <string name="about_version_tip">当前版本号为:</string>
     <string name="follow_system_language">跟随系统</string>
+    <string name="statistics_view_title">统计</string>
     <string name="share_statistics_view">分享</string>
     <string name="edit_statistics">自定义</string>
     <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
+    <string name="save_statistics_capture">保存</string>
+    <string name="save_statistics_capture_tip">保存成功!</string>
 
     <string name="favorite_music">您播放最多的歌曲是 %1$s , 共播放了 %2$d 次</string>
     <string name="favorite_artist">您最喜欢的歌手是 %1$s , 共播放了 %2$d 首TA的音乐</string>

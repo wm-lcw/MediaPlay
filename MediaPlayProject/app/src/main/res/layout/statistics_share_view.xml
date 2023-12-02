@@ -43,7 +43,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:text="save"
+            android:text="@string/save_statistics_capture"
             tools:ignore="NestedWeights" />
 
         <Button
@@ -51,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:text="share to" />
+            android:text="@string/share_statistics_view" />
 
         <Button
             android:id="@+id/btn_cancel_capture"

@@ -374,8 +374,8 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        menu.add("Edit").setOnMenuItemClickListener(item -> {
+    public void onCreateContextMenu(ContextMenu menu, @NonNull View v, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.add(mContext.getString(R.string.edit_statistics)).setOnMenuItemClickListener(item -> {
 
             mEditAdapter.setCheckItemSub(statisticsTextSub);
             if (statisticsTextSub == statisticsItemList.size() - 1) {
@@ -394,7 +394,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             mWindowManager.addView(mEditFloatLayout, wmParams);
             return false;
         });
-        menu.add("Share").setOnMenuItemClickListener(item -> {
+        menu.add(mContext.getString(R.string.share_statistics_view)).setOnMenuItemClickListener(item -> {
             DebugLog.debug("share");
             if (mCaptureCallback != null) {
                 mCaptureCallback.startCapture();
@@ -462,7 +462,6 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             ivCapture.setImageBitmap(bitmap);
             mBitmap = bitmap;
         }
-        DebugLog.debug("width " + ivCapture.getWidth() + "; height " + ivCapture.getHeight());
         wmParams.x = 0;
         wmParams.y = 0;
         mWindowManager.addView(mShareFloatLayout, wmParams);
@@ -508,7 +507,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
             Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
             intent.setData(uri);
             mContext.sendBroadcast(intent);
-            Toast.makeText(mContext, file.getPath() + "保存成功", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, file.getPath() + mContext.getString(R.string.save_statistics_capture_tip), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
         }

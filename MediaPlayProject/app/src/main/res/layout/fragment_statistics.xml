@@ -26,8 +26,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="统计页面"
-                android:textSize="@dimen/sp_18"/>
+                android:text="@string/statistics_view_title"
+                android:textSize="@dimen/sp_18" />
             <ImageView
                 android:id="@+id/iv_statistics_more"
                 android:layout_width="@dimen/dp_40"
