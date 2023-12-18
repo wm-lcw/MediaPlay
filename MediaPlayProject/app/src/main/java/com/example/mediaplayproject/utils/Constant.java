@@ -89,4 +89,6 @@ public class Constant {
     public static final String LOG_SWITCH = "logSwitch";
     public static final String LOG_LEVEL = "logLevel";
     public static final String LOG_WRITE = "logWrite";
+
+    public static final int REQUEST_CODE_OPEN_DIRECTORY = 123;
 }

@@ -42,7 +42,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,6 +85,8 @@ public class MainActivity extends BasicActivity {
     private static boolean isFloatWindowPermissionRequested = false;
     private Context mContext;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+
+    private ActivityResultLauncher<Intent> openFileManagerIntent;
     private MainViewFragment mainViewFragment;
     private MusicPlayFragment musicPlayFragment;
     private StatisticsFragment statisticsFragment;
@@ -180,6 +181,32 @@ public class MainActivity extends BasicActivity {
                     }
                 }
         );
+
+            /**
+             * 这个Intent可以作为选择文件的返回操作逻辑
+             * Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+             * openFileManagerIntent.launch(intent);
+             * startActivity(intent);
+             * */
+            openFileManagerIntent = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null){
+                        // 获取用户选择的文件夹的 Uri
+                        Uri treeUri = result.getData().getData();
+
+                        // 构建打开文件夹的 Intent
+                        Intent openFolderIntent = new Intent(Intent.ACTION_VIEW);
+                        openFolderIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        openFolderIntent.setData(treeUri);
+
+                        // 启动文件管理器并打开指定文件夹
+//                        startActivity(openFolderIntent);
+                    }
+                }
+        );
+
+
         requestPermission();
     }
 
@@ -890,15 +917,12 @@ public class MainActivity extends BasicActivity {
             dialog.dismiss();
             closeApp();
         });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // 停止倒计时，关闭弹框，重新计时
-                stopCountdown();
-                dialog.dismiss();
-                Intent intent = new Intent(Constant.CHANGE_TIMING_OFF_TIME_ACTION);
-                mContext.sendBroadcast(intent);
-            }
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "取消", (dialog, which) -> {
+            // 停止倒计时，关闭弹框，重新计时
+            stopCountdown();
+            dialog.dismiss();
+            Intent intent = new Intent(Constant.CHANGE_TIMING_OFF_TIME_ACTION);
+            mContext.sendBroadcast(intent);
         });
 
         // 倒计时总时间为10秒，每隔1秒触发一次

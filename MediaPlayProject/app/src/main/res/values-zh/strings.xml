@@ -57,6 +57,9 @@
     <string name="edit_statistics_tip">修改播放时长统计的文本内容</string>
     <string name="save_statistics_capture">保存</string>
     <string name="save_statistics_capture_tip">保存成功!</string>
+    <string name="clear_capture_tip">(删除MediaPlay/Capture目录下所有的截图文件)</string>
+    <string name="clear_log_tip">(若log的开关为打开状态，当前log文件不会被删除)</string>
+    <string name="log_switch_tip">(请保持开启状态，以便于工程师排查错误)</string>
 
     <string name="favorite_music">您播放最多的歌曲是 %1$s , 共播放了 %2$d 次</string>
     <string name="favorite_artist">您最喜欢的歌手是 %1$s , 共播放了 %2$d 首TA的音乐</string>

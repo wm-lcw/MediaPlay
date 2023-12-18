@@ -1,116 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/ic_main"
     tools:context=".fragment.SettingsFragment"
-    android:background="@drawable/ic_main">
+    tools:ignore="ScrollViewCount">
 
-    <!--顶部功能栏-->
-    <RelativeLayout
-        android:id="@+id/rl_settings_top_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_60">
-        <ImageView
-            android:id="@+id/iv_settings_back"
-            android:layout_width="@dimen/dp_40"
-            android:layout_height="@dimen/dp_40"
-            android:layout_marginStart="@dimen/dp_20"
-            android:src="@drawable/back_view_style_grey"/>
-
-        <TextView
-            android:id="@+id/tv_settings_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/nav_settings"
-            android:textSize="@dimen/sp_20" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_below="@id/rl_settings_top_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/dp_20"
-        android:padding="@dimen/dp_15">
+        android:orientation="vertical"
+        android:padding="@dimen/sp_10">
+        <!--顶部功能栏-->
+        <LinearLayout
+            android:id="@+id/rl_settings_top_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_60"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_settings_account"
+            <ImageView
+                android:id="@+id/iv_settings_back"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginStart="@dimen/dp_10"
+                android:src="@drawable/back_view_style_grey" />
+
+            <TextView
+                android:id="@+id/tv_settings_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nav_settings"
+                android:textSize="@dimen/sp_22"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"/>
+
+            <ImageView
+                android:layout_marginEnd="@dimen/dp_10"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"/>
+
+        </LinearLayout>
+
+        <!--个人账户-->
+        <LinearLayout
+            android:id="@+id/ll_settings_account"
+            android:layout_marginTop="@dimen/dp_20"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_50"
-            android:text="Personal account"
-            android:gravity="left|center"
-            tools:ignore="RtlHardcoded"
-            android:textSize="@dimen/sp_18"/>
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_settings_remote_view"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dp_50"
+                android:layout_weight="1"
+                android:gravity="left|center"
+                android:text="Personal account"
+                android:textSize="@dimen/sp_18"
+                tools:ignore="RtlHardcoded" />
+
+            <ImageView
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/dp_15"
+                android:background="@mipmap/ic_arrow_right_grew" />
+        </LinearLayout>
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_50"
-            android:layout_below="@+id/tv_settings_account"
-            android:text="remote view"
-            android:gravity="left|center"
-            tools:ignore="RtlHardcoded"
-            android:textSize="@dimen/sp_18" />
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/black"/>
 
-        <TextView
-            android:id="@+id/tv_settings_storage"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_50"
-            android:layout_below="@+id/tv_settings_remote_view"
-            android:text="Storage management"
-            android:gravity="left|center"
-            tools:ignore="RtlHardcoded"
-            android:textSize="@dimen/sp_18"/>
-
+        <!--窗口小部件-->
         <LinearLayout
             android:id="@+id/ll_settings_remote_view"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_50"
-            android:layout_below="@+id/tv_settings_storage"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/dp_50"
+                android:layout_weight="1"
                 android:gravity="left|center"
-                tools:ignore="RtlHardcoded"
+                android:text="remote view"
                 android:textSize="@dimen/sp_18"
-                android:text="Log"/>
+                tools:ignore="RtlHardcoded" />
+
+            <ImageView
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/dp_15"
+                android:background="@mipmap/ic_arrow_right_grew" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/black"/>
+
+        <!--清理缓存-->
+        <LinearLayout
+            android:id="@+id/ll_clear_storage"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_settings_storage"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dp_50"
+                android:layout_weight="1"
+                android:gravity="left|center"
+                android:text="Storage management"
+                android:textSize="@dimen/sp_18"
+                tools:ignore="RtlHardcoded" />
+
+            <ImageView
+                android:id="@+id/iv_storage_arrow"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/dp_15"
+                android:background="@mipmap/ic_arrow_right_grew" />
+        </LinearLayout>
+
+        <!--清理缓存子项-->
+        <LinearLayout
+            android:id="@+id/ll_clear_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_15"
+            android:layout_marginEnd="@dimen/dp_15"
+            android:orientation="vertical"
+            android:background="@drawable/bg_settings_item"
+            android:padding="@dimen/dp_5">
+
+            <LinearLayout
+                android:id="@+id/ll_clear_capture"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tv_clear_capture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="Clear Capture"
+                    android:textSize="@dimen/sp_17"
+                    android:textAllCaps="false" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|left"
+                    android:text="@string/clear_capture_tip"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/sp_15"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_clear_log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_10"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tv_clear_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="Clear Log"
+                    android:textSize="@dimen/sp_17"
+                    android:textAllCaps="false" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|left"
+                    android:text="@string/clear_log_tip"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/sp_15"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_clear_record"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dp_30"
+                android:gravity="center_vertical"
+                android:text="Clear Record"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <View
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/black"/>
+
+        <!--log开关-->
+        <LinearLayout
+            android:id="@+id/ll_settings_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/dp_5">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="left|center"
+                    android:text="Log Switch"
+                    android:textSize="@dimen/sp_18"
+                    tools:ignore="RtlHardcoded" />
+
+                <Switch
+                    android:id="@+id/sw_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dp_50"
+                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:layout_height="@dimen/dp_50"
-                android:gravity="center"
-                tools:ignore="RtlHardcoded"
-                android:textSize="@dimen/sp_13"
-                android:text="为了排查错误，请保持开启状态"/>
-
-            <Switch
-                android:id="@+id/sw_log"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/dp_50"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
-
+                android:layout_height="wrap_content"
+                android:gravity="center|left"
+                android:text="@string/log_switch_tip"
+                android:textSize="@dimen/sp_15"
+                tools:ignore="RtlHardcoded" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/black"/>
+
+        <!--锁屏-->
         <LinearLayout
             android:id="@+id/ll_settings_lock_screen"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_50"
-            android:layout_below="@+id/ll_settings_remote_view"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_weight="1"
                 android:layout_height="@dimen/dp_50"
+                android:layout_weight="1"
                 android:gravity="left|center"
-                tools:ignore="RtlHardcoded"
+                android:text="Lock screen display switch"
                 android:textSize="@dimen/sp_18"
-                android:text="Lock screen display switch"/>
+                tools:ignore="RtlHardcoded" />
 
             <Switch
                 android:id="@+id/sw_screen"
@@ -119,6 +270,5 @@
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         </LinearLayout>
-    </RelativeLayout>
-
-</RelativeLayout>
+    </LinearLayout>
+</ScrollView>
