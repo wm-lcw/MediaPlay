@@ -133,6 +133,9 @@ public class ToolsUtils {
             case 3:
                 fragmentName = Constant.WOODEN_FISH_FRAGMENT_ACTION_FLAG;
                 break;
+            case 5:
+                fragmentName = Constant.SETTINGS_FRAGMENT_ACTION_FLAG;
+                break;
             default:
                 break;
 
@@ -158,6 +161,12 @@ public class ToolsUtils {
         context.sendBroadcast(intent);
     }
 
+    /**
+     *  所有小工具的图标，打开对应的Fragment需要用到下标，所以下标要跟string.xml中定义的tools_item_title一一对应
+     *  后续增删小工具、调换小工具的位置时，都要核对各个下标以及Fragment的启动id。
+     *  @author wm
+     *  @createTime 2023/12/18 16:22
+     */
     private static final int[] TOOLS_ITEM_ICON_LIST = {
             R.mipmap.ic_tools_history_record_blue, R.mipmap.ic_tools_timing_blue, R.mipmap.ic_tools_change_language_blue,
             R.mipmap.ic_tools_wooden_blue, R.mipmap.ic_tools_my_blue, R.mipmap.ic_tools_settings_blue,
