@@ -43,7 +43,7 @@ import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 import com.example.mediaplayproject.utils.ToolsUtils;
-import com.example.mediaplayproject.view.StatisticsFloatView;
+import com.example.mediaplayproject.view.FloatView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +68,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
     private String musicName, artistName, artistMusic;
     private int musicPlayCount, artistPlayCount, artistMusicCount;
 
-    private StatisticsFloatView mEditFloatLayout, mShareFloatLayout;
+    private FloatView mEditFloatLayout, mShareFloatLayout;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams wmParams;
     private RecyclerView rvStatisticsItem;
@@ -217,7 +217,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
      */
     private void initEditFloatView() {
         // 获取编辑页面浮动窗口视图所在布局
-        mEditFloatLayout = new StatisticsFloatView(mContext, R.layout.statistics_edit_view);
+        mEditFloatLayout = new FloatView(mContext, R.layout.statistics_edit_view);
         mEditFloatLayout.setFloatViewCallback(() -> {
             if (mWindowManager != null && mEditFloatLayout.isAttachedToWindow()) {
                 mWindowManager.removeView(mEditFloatLayout);
@@ -246,7 +246,7 @@ public class StatisticsFragment extends Fragment implements StatisticsEditAdapte
      * @createTime 2023/11/24 14:30
      */
     private void initShareFloatView() {
-        mShareFloatLayout = new StatisticsFloatView(mContext, R.layout.statistics_share_view);
+        mShareFloatLayout = new FloatView(mContext, R.layout.statistics_share_view);
         mShareFloatLayout.setFloatViewCallback(() -> {
             if (mWindowManager != null && mShareFloatLayout.isAttachedToWindow()) {
                 mWindowManager.removeView(mShareFloatLayout);

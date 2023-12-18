@@ -68,7 +68,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initData() {
-            //   打印控制逻辑
+            // 鎵撳嵃鎺у埗閫昏緫
             boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH,true);
             DebugLog.debug("isOpenLog " + isOpenLog);
             swLog.setChecked(isOpenLog);
@@ -85,7 +85,7 @@ public class SettingsFragment extends Fragment {
             boolean result = SharedPreferencesUtil.putData(Constant.LOG_SWITCH, isChecked);
             DebugLog.debug("set log switch " + isChecked  + "; result: " + result);
             if (result){
-                Toast.makeText(mContext,"设置成功，重启生效！", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext,"璁剧疆鎴愬姛锛岄噸鍚敓鏁堬紒", Toast.LENGTH_LONG).show();
             }
         }
     };

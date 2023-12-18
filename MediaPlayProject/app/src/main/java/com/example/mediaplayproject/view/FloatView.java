@@ -14,15 +14,15 @@ import com.example.mediaplayproject.utils.DebugLog;
  * @Date 2023/11/18 9:19
  * @Created by wm
  */
-public class StatisticsFloatView extends LinearLayout {
+public class FloatView extends LinearLayout {
 
-    private StatisticsFloatViewCallback mFloatViewCallback;
+    private FloatViewCallback mFloatViewCallback;
 
-    public void setFloatViewCallback(StatisticsFloatViewCallback floatViewCallback) {
+    public void setFloatViewCallback(FloatViewCallback floatViewCallback) {
         mFloatViewCallback = floatViewCallback;
     }
 
-    public StatisticsFloatView(Context context, int layoutId) {
+    public FloatView(Context context, int layoutId) {
         super(context);
         inflate(context, layoutId, this);
     }
@@ -30,14 +30,14 @@ public class StatisticsFloatView extends LinearLayout {
     /**
      * 这个构造方法要加上，否则可能会出错
      * */
-    public StatisticsFloatView(Context context, @Nullable AttributeSet attrs) {
+    public FloatView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
     /**
      * 这个构造方法要加上，否则可能会出错
      * */
-    public StatisticsFloatView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public FloatView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -52,7 +52,7 @@ public class StatisticsFloatView extends LinearLayout {
         return super.dispatchTouchEvent(ev);
     }
 
-    public interface StatisticsFloatViewCallback{
+    public interface FloatViewCallback{
         /**
          *  悬浮窗点击外部回调事件
          *  @author wm
