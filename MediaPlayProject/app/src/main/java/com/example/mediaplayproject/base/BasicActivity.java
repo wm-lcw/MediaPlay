@@ -49,8 +49,6 @@ public abstract class BasicActivity extends AppCompatActivity implements UiCallB
         // Activity布局加载前的处理
         initBeforeView(savedInstanceState);
         EventBus.getDefault().register(this);
-        Intent dataRefreshService = new Intent(context, DataRefreshService.class);
-        startService(dataRefreshService);
         // 添加继承这个BaseActivity的Activity
         BasicApplication.getActivityManager().addActivity(this);
 

@@ -224,10 +224,6 @@ public class MainActivity extends BasicActivity {
     protected void onDestroy() {
         super.onDestroy();
         DebugLog.debug("");
-        // 解绑服务
-        if (null != connection) {
-            unbindService(connection);
-        }
         unregisterReceiver();
         // 需要添加下面的强制退出逻辑；否则在主页点返回退出app时，关闭不彻底，导致某些资源（ViewPager、MediaPlayer等）未能释放，重启app会闪退报错
         System.exit(0);
@@ -326,8 +322,11 @@ public class MainActivity extends BasicActivity {
     }
 
     private void initData(){
-        // 判断完权限后可能DataRefreshService还没有完全起来，所以需要延迟一会再继续初始化
-        handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY,500);
+        // 判断完权限后再启动DataRefreshService
+        Intent dataRefreshService = new Intent(context, DataRefreshService.class);
+        startService(dataRefreshService);
+        // DataRefreshService还没有完全起来，需要延迟一会再继续初始化
+        handler.sendEmptyMessageDelayed(Constant.HANDLER_MESSAGE_DELAY_INIT_MAIN_ACTIVITY,600);
     }
 
     /**
@@ -337,7 +336,7 @@ public class MainActivity extends BasicActivity {
      */
     @SuppressLint("ClickableViewAccessibility")
     private void initDataDelay() {
-        // 初始化音乐列表资源,
+        // 初始化音乐列表资源
         // 这里不能将初始化操作放到DataRefreshService的onCreate中操作，因为首次启动app时可能获取到的列表为空
         DataRefreshService.initResource();
 
@@ -348,9 +347,20 @@ public class MainActivity extends BasicActivity {
         // 创建Fragment
         createFragment();
 
-        // 启动MusicPlayService服务
-        Intent bindIntent = new Intent(MainActivity.this, MusicPlayService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+        // MusicPlayService服务的启动不受权限影响，交由Application启动，验证完权限这些之后初始化即可
+        musicService = BasicApplication.getMusicService();
+        if (musicService != null) {
+            // service创建成功的时候立即初始化
+            musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
+            musicService.initPlayHelper(handler);
+            // 需要等musicService起来之后再给Fragment传参数
+            mainViewFragment.setDataFromMainActivity(musicService, handler);
+            musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
+        } else {
+            // musicService初始化失败，退出app
+            Toast.makeText(context,"启动过程中遇到了异常，即将退出！", Toast.LENGTH_LONG).show();
+            closeApp();
+        }
         registerReceiver();
     }
 

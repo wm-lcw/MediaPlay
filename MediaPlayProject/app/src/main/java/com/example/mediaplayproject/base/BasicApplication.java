@@ -3,12 +3,16 @@ package com.example.mediaplayproject.base;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MultiLanguageUtil;
@@ -28,6 +32,7 @@ public class BasicApplication extends Application {
     private static BasicApplication application;
     @SuppressLint("StaticFieldLeak")
     private static Context context;
+    private static MusicPlayService musicService;
 
     @Override
     public void onCreate() {
@@ -44,6 +49,10 @@ public class BasicApplication extends Application {
 
         // 注册Activity生命周期监听回调，此部分一定加上，因为有些版本不加的话多语言切换不回来
         registerActivityLifecycleCallbacks(callbacks);
+
+        // 启动MusicPlayService服务
+        Intent bindIntent = new Intent(context, MusicPlayService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -121,5 +130,24 @@ public class BasicApplication extends Application {
         /// 实测不调用MultiLanguageUtil.attachBaseContext(base) 也能正常执行
 //        super.attachBaseContext(base);
     }
+
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            DebugLog.debug("onServiceConnected");
+            musicService = ((MusicPlayService.MyBinder) service).getService(context);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicService = null;
+            DebugLog.debug("onServiceDisconnected");
+        }
+    };
+
+    public static MusicPlayService getMusicService() {
+        return musicService;
+    }
+
 }
 
