@@ -6,6 +6,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import com.example.mediaplayproject.base.BasicApplication;
 import com.example.mediaplayproject.bean.MediaFileBean;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
+import com.example.mediaplayproject.utils.MediaPlayWidgetProvider;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 import com.example.mediaplayproject.utils.ToolsUtils;
@@ -217,6 +219,12 @@ public class MusicPlayService extends Service {
             msg.setData(bundle);
             mHandler.sendMessage(msg);
             updateNotificationShow(mPosition, isPlayingStatus);
+
+            // 刷新桌面小部件
+            Intent updateWidgetIntent = new Intent(mContext, MediaPlayWidgetProvider.class);
+            updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            mContext.sendBroadcast(updateWidgetIntent);
+
             firstPlay = false;
         } else {
             DebugLog.debug("当前播放地址无效");
@@ -525,6 +533,11 @@ public class MusicPlayService extends Service {
 
         // 更新通知栏
         updateNotificationShow(-1, false);
+
+        // 刷新桌面小部件
+        Intent updateWidgetIntent = new Intent(mContext, MediaPlayWidgetProvider.class);
+        updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        mContext.sendBroadcast(updateWidgetIntent);
     }
 
     /**
