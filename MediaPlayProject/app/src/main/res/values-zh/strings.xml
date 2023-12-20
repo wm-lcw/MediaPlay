@@ -60,6 +60,7 @@
     <string name="clear_capture_tip">(删除MediaPlay/Capture目录下所有的截图文件)</string>
     <string name="clear_log_tip">(若log的开关为打开状态，当前log文件不会被删除)</string>
     <string name="log_switch_tip">(请保持开启状态，以便于工程师排查错误)</string>
+    <string name="lock_screen_switch_tip">(请确保锁屏权限已开启，点击这里进入权限页面)</string>
 
     <string name="favorite_music">您播放最多的歌曲是 %1$s , 共播放了 %2$d 次</string>
     <string name="favorite_artist">您最喜欢的歌手是 %1$s , 共播放了 %2$d 首TA的音乐</string>

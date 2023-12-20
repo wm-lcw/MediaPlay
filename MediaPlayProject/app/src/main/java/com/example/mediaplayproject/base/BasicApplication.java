@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 
+import com.example.mediaplayproject.service.LockScreenService;
 import com.example.mediaplayproject.service.MusicPlayService;
 import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
@@ -53,6 +54,10 @@ public class BasicApplication extends Application {
         // 启动MusicPlayService服务
         Intent bindIntent = new Intent(context, MusicPlayService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
+
+        // 启动锁屏服务
+        Intent lockScreenIntent = new Intent(context, LockScreenService.class);
+        startService(lockScreenIntent);
     }
 
     @Override

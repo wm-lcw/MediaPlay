@@ -60,6 +60,7 @@
     <string name="clear_capture_tip">(Delete all Capture files from the MediaPlay/Capture directory)</string>
     <string name="clear_log_tip">(If the log switch is enabled, the current log file will not be deleted)</string>
     <string name="log_switch_tip">(Keep it enabled for engineers to troubleshoot errors)</string>
+    <string name="lock_screen_switch_tip">(Make sure the lock screen permission is enabled, click here to access the permission page)</string>
 
     <string name="favorite_music">The song you play the most is %1$s , It was played %2$d times.</string>
     <string name="favorite_artist">Your favorite singer is %1$s ,You played a total of %2$d songs by this artist.</string>

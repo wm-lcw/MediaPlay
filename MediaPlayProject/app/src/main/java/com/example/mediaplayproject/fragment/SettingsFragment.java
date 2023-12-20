@@ -18,6 +18,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mediaplayproject.R;
@@ -42,6 +43,7 @@ public class SettingsFragment extends Fragment {
     private LinearLayout llClearTitle, llClearView, llClearCapture, llClearLog;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch swLog, swLockScreen;
+    private TextView tvLockScreenPermission;
 
     public SettingsFragment(Context context) {
         mContext = context;
@@ -71,11 +73,16 @@ public class SettingsFragment extends Fragment {
         llClearCapture = mView.findViewById(R.id.ll_clear_capture);
         llClearLog = mView.findViewById(R.id.ll_clear_log);
 
+        swLockScreen = mView.findViewById(R.id.sw_lock_screen);
+        tvLockScreenPermission = mView.findViewById(R.id.tv_lock_screen_permission);
+
         ivBack.setOnClickListener(mListener);
         llClearTitle.setOnClickListener(mListener);
         llClearCapture.setOnClickListener(mListener);
         llClearLog.setOnClickListener(mListener);
         swLog.setOnCheckedChangeListener(mCheckedChangeListener);
+        swLockScreen.setOnCheckedChangeListener(mCheckedChangeListener);
+        tvLockScreenPermission.setOnClickListener(mListener);
     }
 
     private void initData() {
@@ -83,6 +90,11 @@ public class SettingsFragment extends Fragment {
         boolean isOpenLog = (Boolean) SharedPreferencesUtil.getData(Constant.LOG_SWITCH, true);
         DebugLog.debug("isOpenLog " + isOpenLog);
         swLog.setChecked(isOpenLog);
+
+        // 锁屏开关
+        boolean lockScreenSwitch = (Boolean) SharedPreferencesUtil.getData(Constant.LOCK_SCREEN_SWITCH, false);
+        DebugLog.debug("lockScreenSwitch " + lockScreenSwitch);
+        swLockScreen.setChecked(lockScreenSwitch);
     }
 
     private final View.OnClickListener mListener = view -> {
@@ -94,6 +106,9 @@ public class SettingsFragment extends Fragment {
             showClearDialog(1);
         } else if (view == llClearLog) {
             showClearDialog(2);
+        } else if (view == tvLockScreenPermission){
+            // 启动锁屏权限申请界面
+
         }
     };
 
@@ -103,6 +118,12 @@ public class SettingsFragment extends Fragment {
             DebugLog.debug("set log switch " + isChecked + "; result: " + result);
             if (result) {
                 Toast.makeText(mContext, "设置成功，重启生效！", Toast.LENGTH_LONG).show();
+            }
+        } else if (buttonView == swLockScreen && buttonView.isPressed()){
+            boolean result = SharedPreferencesUtil.putData(Constant.LOCK_SCREEN_SWITCH, isChecked);
+            DebugLog.debug("set lockScreen switch " + isChecked + "; result: " + result);
+            if (result) {
+                Toast.makeText(mContext, "设置成功！", Toast.LENGTH_LONG).show();
             }
         }
     };
