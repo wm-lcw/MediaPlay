@@ -45,7 +45,6 @@ public class LockScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 应用在前台才能启动，在后台无法启动，原因后面再分析
         mContext = this;
         initWindow();
         setContentView(R.layout.activity_lock_screen);
@@ -88,7 +87,6 @@ public class LockScreenActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION); // 隐藏导航栏
 
         window.setNavigationBarColor(Color.TRANSPARENT);
-//        window.setStatusBarColor(Color.TRANSPARENT);
 
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);

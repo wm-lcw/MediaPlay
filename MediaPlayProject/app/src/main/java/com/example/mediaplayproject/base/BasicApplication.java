@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -57,7 +58,11 @@ public class BasicApplication extends Application {
 
         // 启动锁屏服务
         Intent lockScreenIntent = new Intent(context, LockScreenService.class);
-        startService(lockScreenIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(lockScreenIntent);
+        } else {
+            startService(lockScreenIntent);
+        }
     }
 
     @Override

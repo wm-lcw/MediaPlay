@@ -103,7 +103,6 @@ public class LockScreenView extends RelativeLayout {
             tvMusicArtist.setText(mPlayService.getMusicArtist());
             ivPlay.setImageResource(mPlayService.isPlaying()
                     ? R.mipmap.media_pause : R.mipmap.media_play);
-            DebugLog.debug("isPlaying " + mPlayService.isPlaying());
 
             ivPre.setEnabled(mPlayService.getPosition() != -1);
             ivPlay.setEnabled(mPlayService.getPosition() != -1);
@@ -132,7 +131,6 @@ public class LockScreenView extends RelativeLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final float x = ev.getX();
-        DebugLog.debug("x" + x);
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mStartX = x;
@@ -162,7 +160,6 @@ public class LockScreenView extends RelativeLayout {
 
     private void handleTouchResult(float destination) {
         float offsetX = destination - mStartX;
-        DebugLog.debug("offsetX = " +offsetX + " ;  mWindowWidth " + mWindowWidth);
         if (offsetX > mWindowWidth * 0.3) {
             // 超过阈值（屏幕宽度的0.3倍），结束锁屏activity
             handleTouchResult(mWindowWidth - getLeft(), true);
@@ -181,7 +178,6 @@ public class LockScreenView extends RelativeLayout {
      */
     @SuppressLint("ObjectAnimatorBinding")
     private void handleTouchResult(float destination, boolean finishActivity) {
-        DebugLog.debug("xx " + destination + "; finish " + finishActivity);
         ObjectAnimator animator = ObjectAnimator.ofFloat(this, "translationX", destination);
         animator.setDuration(250).start();
         if (finishActivity) {
@@ -215,7 +211,5 @@ public class LockScreenView extends RelativeLayout {
 
         }
     };
-
-
 
 }
