@@ -11,4 +11,98 @@
         android:textSize="@dimen/sp_25"
         android:layout_centerInParent="true"/>
 
+    <LinearLayout
+        android:id="@+id/ll_music_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ll_music_control"
+        android:layout_marginBottom="@dimen/dp_20"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tv_music_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/music_text"
+            android:textSize="@dimen/sp_23"/>
+
+        <TextView
+            android:id="@+id/tv_music_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_10"
+            android:text="@string/music_artist"
+            android:textSize="@dimen/sp_23"/>
+
+    </LinearLayout>
+
+
+    <!--底部控制栏-上下曲、暂停-->
+    <LinearLayout
+        android:id="@+id/ll_music_control"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_45"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:id="@+id/iv_loop"
+            android:src="@mipmap/media_loop"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:id="@+id/iv_pre"
+            android:src="@drawable/play_pre_style"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:id="@+id/iv_play"
+            android:src="@mipmap/media_play"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:id="@+id/iv_next"
+            android:src="@drawable/play_next_style"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+        <ImageView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:id="@+id/iv_like"
+            android:src="@mipmap/ic_list_like"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"/>
+    </LinearLayout>
+
+
+
 </RelativeLayout>

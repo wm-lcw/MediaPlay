@@ -16,13 +16,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.example.mediaplayproject.R;
@@ -34,7 +32,6 @@ import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MediaPlayWidgetProvider;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
-import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -224,6 +221,11 @@ public class MusicPlayService extends Service {
             Intent updateWidgetIntent = new Intent(mContext, MediaPlayWidgetProvider.class);
             updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             mContext.sendBroadcast(updateWidgetIntent);
+
+            // 刷新锁屏的UI
+            Intent updateLockIntent = new Intent();
+            updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
+            mContext.sendBroadcast(updateLockIntent);
 
             firstPlay = false;
         } else {
@@ -541,6 +543,11 @@ public class MusicPlayService extends Service {
         Intent updateWidgetIntent = new Intent(mContext, MediaPlayWidgetProvider.class);
         updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         mContext.sendBroadcast(updateWidgetIntent);
+
+        // 刷新锁屏的UI
+        Intent updateLockIntent = new Intent();
+        updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
+        mContext.sendBroadcast(updateLockIntent);
     }
 
     /**

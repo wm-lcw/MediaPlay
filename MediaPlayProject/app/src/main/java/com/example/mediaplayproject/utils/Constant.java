@@ -92,5 +92,7 @@ public class Constant {
 
     public static final String LOCK_SCREEN_SWITCH = "lockScreenSwitch";
 
+    public static final String REFRESH_PLAY_STATE_ACTION = "refresh.play.state.action";
+
     public static final int REQUEST_CODE_OPEN_DIRECTORY = 123;
 }

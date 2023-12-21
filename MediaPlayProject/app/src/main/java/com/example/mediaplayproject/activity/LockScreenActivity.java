@@ -2,18 +2,19 @@ package com.example.mediaplayproject.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
-import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.RelativeLayout;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.view.LockScreenView;
 
@@ -24,6 +25,7 @@ public class LockScreenActivity extends AppCompatActivity {
 
     private Context mContext;
     private LockScreenView mContentView;
+    private LockBroadcastReceiver mLockBroadcastReceiver;
 
 
     private final ViewTreeObserver.OnGlobalLayoutListener mOnGlobalLayoutListener
@@ -48,11 +50,26 @@ public class LockScreenActivity extends AppCompatActivity {
         initWindow();
         setContentView(R.layout.activity_lock_screen);
         mContentView = findViewById(R.id.lock_screen_view);
-        modifyMarginTop();
-
         mContentView.getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constant.REFRESH_PLAY_STATE_ACTION);
+        mLockBroadcastReceiver = new LockBroadcastReceiver();
+        registerReceiver(mLockBroadcastReceiver, intentFilter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mContentView.initData();
+    }
+
+    /**
+     * 初始化窗口
+     *
+     * @author wm
+     * @createTime 2023/12/20 18:02
+     */
     private void initWindow() {
         final Window window = getWindow();
         // 无标题
@@ -62,7 +79,8 @@ public class LockScreenActivity extends AppCompatActivity {
                 // 锁屏时仍显示
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE // 防止系统栏隐藏时activity大小发生变化
+        // 防止系统栏隐藏时activity大小发生变化
+        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 //                | View.SYSTEM_UI_FLAG_FULLSCREEN
 //                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN; // 全屏
 //                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // 沉浸式
@@ -74,30 +92,6 @@ public class LockScreenActivity extends AppCompatActivity {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    }
-
-    private void modifyMarginTop() {
-        int statusHeight = getStatusBarHeight();
-        DebugLog.debug(" 状态栏高度:" + statusHeight);
-        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mContentView.getLayoutParams();
-        layoutParams.topMargin = statusHeight + 5;
-        mContentView.setLayoutParams(layoutParams);
-    }
-
-    /**
-     *  获取状态栏高度
-     *  @author wm
-     *  @createTime 2023/12/20 16:17
-     * @return : int
-     */
-    @SuppressLint("InternalInsetResource")
-    private int getStatusBarHeight() {
-        int result = 0;
-         int resourceId = getResources().getIdentifier("status_bar_height","dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 
     @Override
@@ -113,4 +107,22 @@ public class LockScreenActivity extends AppCompatActivity {
 //        activityManager.moveTaskToFront(getTaskId(), 0);
     }
 
+    class LockBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            DebugLog.debug("action " + action);
+            if (Constant.REFRESH_PLAY_STATE_ACTION.equals(action)){
+                mContentView.initData();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mLockBroadcastReceiver != null){
+            unregisterReceiver(mLockBroadcastReceiver);
+        }
+    }
 }

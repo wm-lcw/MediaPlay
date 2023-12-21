@@ -9,9 +9,15 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.mediaplayproject.R;
+import com.example.mediaplayproject.base.BasicApplication;
+import com.example.mediaplayproject.service.MusicPlayService;
+import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 
 /**
@@ -26,24 +32,32 @@ public class LockScreenView extends RelativeLayout {
 
     private float mStartX, mWindowWidth;
     private Activity mActivity;
+    private View screenView;
+    private MusicPlayService mPlayService;
+    private TextView tvMusicName, tvMusicArtist;
+    private ImageView ivPlayMode, ivPre, ivPlay, ivNext, ivFavorite;
 
     public LockScreenView(Context context) {
         super(context);
+        init();
     }
 
     public LockScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        screenView = LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        init();
     }
 
     public LockScreenView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        screenView = LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        init();
     }
 
     public LockScreenView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        screenView = LayoutInflater.from(context).inflate(R.layout.lock_screen_view,this,true);
+        init();
     }
 
     public void setWindowWidth(int mWindowWidth) {
@@ -54,6 +68,67 @@ public class LockScreenView extends RelativeLayout {
         this.mActivity = activity;
     }
 
+    public void init(){
+        bindView();
+        initData();
+    }
+
+    private void bindView(){
+        tvMusicName = screenView.findViewById(R.id.tv_music_name);
+        tvMusicArtist = screenView.findViewById(R.id.tv_music_artist);
+
+        ivPlayMode = screenView.findViewById(R.id.iv_loop);
+        ivPre = screenView.findViewById(R.id.iv_pre);
+        ivPlay = screenView.findViewById(R.id.iv_play);
+        ivNext = screenView.findViewById(R.id.iv_next);
+        ivFavorite = screenView.findViewById(R.id.iv_like);
+
+        ivPlayMode.setOnClickListener(mListener);
+        ivPre.setOnClickListener(mListener);
+        ivPlay.setOnClickListener(mListener);
+        ivNext.setOnClickListener(mListener);
+        ivFavorite.setOnClickListener(mListener);
+    }
+
+    /**
+     *  初始化数据和状态
+     *  @author wm
+     *  @createTime 2023/12/21 12:36
+     */
+    public void initData(){
+        mPlayService = BasicApplication.getMusicService();
+
+        if (mPlayService != null){
+            tvMusicName.setText(mPlayService.getMusicTitle());
+            tvMusicArtist.setText(mPlayService.getMusicArtist());
+            ivPlay.setImageResource(mPlayService.isPlaying()
+                    ? R.mipmap.media_pause : R.mipmap.media_play);
+            DebugLog.debug("isPlaying " + mPlayService.isPlaying());
+
+            ivPre.setEnabled(mPlayService.getPosition() != -1);
+            ivPlay.setEnabled(mPlayService.getPosition() != -1);
+            ivNext.setEnabled(mPlayService.getPosition() != -1);
+            ivFavorite.setEnabled(mPlayService.getPosition() != -1);
+
+            int playMode = mPlayService.getPlayMode();
+            if (playMode == Constant.PLAY_MODE_SHUFFLE) {
+                ivPlayMode.setImageResource(R.mipmap.media_shuffle);
+            } else if (playMode == Constant.PLAY_MODE_SINGLE) {
+                ivPlayMode.setImageResource(R.mipmap.media_single);
+            } else {
+                ivPlayMode.setImageResource(R.mipmap.media_loop);
+            }
+            boolean isLike = mPlayService.isFavorite();
+            ivFavorite.setImageResource(isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
+        } else {
+            ivPre.setEnabled(false);
+            ivPlay.setEnabled(false);
+            ivNext.setEnabled(false);
+            ivFavorite.setEnabled(false);
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final float x = ev.getX();
@@ -120,5 +195,27 @@ public class LockScreenView extends RelativeLayout {
             });
         }
     }
+
+    private final View.OnClickListener mListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (view == ivPlayMode){
+                mPlayService.changePlayMode();
+                initData();
+            } else if (view == ivPre){
+                mPlayService.playPre();
+            } else if (view == ivPlay){
+                mPlayService.play();
+            } else if (view == ivNext){
+                mPlayService.playNext();
+            } else if (view == ivFavorite){
+                mPlayService.changFavoriteState();
+                initData();
+            }
+
+        }
+    };
+
+
 
 }
