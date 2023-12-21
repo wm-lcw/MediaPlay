@@ -407,20 +407,7 @@ public class MusicPlayFragment extends Fragment {
                 msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
                 mActivityHandle.sendMessage(msg);
             } else if (view == ivMediaLike) {
-                boolean isLike = musicInfo.get(mPosition).isLike();
-                ivMediaLike.setImageResource(!isLike ? R.mipmap.ic_list_like_choose : R.mipmap.ic_list_like);
-                musicInfo.get(mPosition).setLike(!isLike);
-                if (!isLike){
-                    // 加入收藏
-                    DataRefreshService.addMusicToFavoriteList(musicInfo.get(mPosition));
-                } else {
-                    // 取消收藏，需要传递当前的列表名去判断是否要刷新播放状态
-                    DataRefreshService.removeFavoriteMusic(musicListName, musicInfo.get(mPosition));
-                }
-                // 发送消息给Activity更新列表状态
-                Message msg = new Message();
-                msg.what = Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE;
-                mActivityHandle.sendMessage(msg);
+                musicService.changFavoriteState();
             }
         }
     };
@@ -565,10 +552,8 @@ public class MusicPlayFragment extends Fragment {
      *  @createTime 2023/9/17 12:47
      */
     private void changePlayMode() {
-        playMode++;
-        if (playMode > Constant.PLAY_MODE_SINGLE) {
-            playMode = Constant.PLAY_MODE_LOOP;
-        }
+        musicService.changePlayMode();
+        playMode = musicService.getPlayMode();
         if (playMode == Constant.PLAY_MODE_LOOP) {
             ivMediaLoop.setImageResource(R.mipmap.media_loop);
         } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
@@ -578,11 +563,6 @@ public class MusicPlayFragment extends Fragment {
         } else {
             ivMediaLoop.setImageResource(R.mipmap.media_loop);
             playMode = Constant.PLAY_MODE_LOOP;
-        }
-        //保存上次播放的播放模式
-        DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
-        if (musicService != null) {
-            musicService.setPlayMode(playMode);
         }
     }
 

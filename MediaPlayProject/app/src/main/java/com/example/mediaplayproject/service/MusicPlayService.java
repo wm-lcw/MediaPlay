@@ -342,6 +342,9 @@ public class MusicPlayService extends Service {
     }
 
     public int getPosition() {
+        if (musicInfo == null || musicInfo.size() <= 0){
+            return -1;
+        }
         return mPosition;
     }
 
@@ -591,6 +594,67 @@ public class MusicPlayService extends Service {
         rv.setBoolean(R.id.btn_play,"setEnabled",enable);
         rv.setBoolean(R.id.btn_play_prev,"setEnabled",enable);
         rv.setBoolean(R.id.btn_play_next,"setEnabled",enable);
+    }
+
+    public String getMusicTitle(){
+        String title = "";
+        if (musicInfo.size() > 0 && mPosition != -1){
+            title = musicInfo.get(mPosition).getTitle();
+        }
+        return title;
+    }
+
+    public String getMusicArtist(){
+        String artist = "";
+        if (musicInfo.size() > 0 && mPosition != -1){
+            artist = musicInfo.get(mPosition).getArtist();
+        }
+        return artist;
+    }
+
+    public void play(){
+        play(musicInfo.get(mPosition),firstPlay, mPosition);
+    }
+
+    /**
+     *  更改播放模式
+     *  playMode:播放模式 0->循环播放; 1->随机播放; 2->单曲播放;
+     *  @author wm
+     *  @createTime 2023/12/21 11:31
+     */
+    public void changePlayMode() {
+        playMode++;
+        if (playMode > Constant.PLAY_MODE_SINGLE) {
+            playMode = Constant.PLAY_MODE_LOOP;
+        }
+        // 保存上次播放的播放模式
+        DataRefreshService.setLastPlayInfo(musicListName,mPosition,musicInfo.get(mPosition).getId(),playMode);
+    }
+
+    /**
+     *  更改歌曲的收藏状态
+     *  @author wm
+     *  @createTime 2023/12/21 11:52
+     */
+    public void changFavoriteState(){
+        boolean isLike = musicInfo.get(mPosition).isLike();
+        musicInfo.get(mPosition).setLike(!isLike);
+        if (!isLike){
+            // 加入收藏
+            DataRefreshService.addMusicToFavoriteList(musicInfo.get(mPosition));
+        } else {
+            // 取消收藏，需要传递当前的列表名去判断是否要刷新播放状态
+            DataRefreshService.removeFavoriteMusic(musicListName, musicInfo.get(mPosition));
+        }
+        // 发送消息给Activity更新列表状态
+        Message msg = new Message();
+        msg.what = Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE;
+        mHandler.sendMessage(msg);
+
+    }
+
+    public boolean isFavorite(){
+        return musicInfo.get(mPosition).isLike();
     }
 
 }
