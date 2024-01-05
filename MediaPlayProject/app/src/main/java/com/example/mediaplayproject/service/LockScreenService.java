@@ -24,9 +24,6 @@ import com.example.mediaplayproject.utils.SharedPreferencesUtil;
 
 /**
  * @author wm
- * @Classname LockScreenService
- * @Description TODO
- * @Version 1.0.0
  * @Date 2023/12/20 11:08
  * @Created by wm
  */
@@ -43,30 +40,26 @@ public class LockScreenService extends Service {
         mScreenReceiver = new LockScreenReceiver();
         registerReceiver(mScreenReceiver, intentFilter);
 
-        // 调用startForeground() 方法
-        // 创建一个通知，创建通知前记得获取开启通知权限
-        startForeground(1, getNotification(this, "APP通知", "欢迎来到APP！"));
-
-        // 不创建通知, 这种处理方式App起不来
-//        startForeground(1, null);
+        // 如果是启动前台service，需要在service启动的5秒内显式调用startForeground()方法，否则会报错
+        // 创建一个锁屏通知（类似于锁屏时微信消息的通知），创建通知前需要先获取开启通知权限
+//        startForeground(1, getNotification(this));
     }
 
     /**
      *  创建锁屏服务的通知
      *  @author wm
      *  @createTime 2023/12/21 15:15
-     * @param context: 
-     * @param title: 
-     * @param text: 
-     * @return : android.app.Notification
+     *  @param context:上下文
+     *  @return : android.app.Notification
      */
-    private Notification getNotification(Context context, String title, String text) {
+    private Notification getNotification(Context context) {
         // 是否静音
         boolean isSilent = true;
         // 是否持续(为不消失的常驻通知)
         boolean isOngoing = true;
-        String channelName = "服务常驻通知";
-        String channelId = "Service_Id";
+        String channelName = "LockNotification";
+        String channelDescription = "锁屏";
+        String channelId = "lockServiceId";
         String category = Notification.CATEGORY_SERVICE;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent nfIntent = new Intent(context, MainActivity.class);
@@ -75,11 +68,8 @@ public class LockScreenService extends Service {
                 //设置PendingIntent
                 .setContentIntent(pendingIntent)
                 //设置状态栏内的小图标
-                .setSmallIcon(R.mipmap.ic_launcher)
-                //设置标题
-                .setContentTitle(title)
-                //设置内容
-                .setContentText(text)
+                .setSmallIcon(R.mipmap.ic_notify_icon)
+//                .setCustomContentView(new RemoteViews(this.getPackageName(), R.layout.layout_notify_view))
                 //设置通知公开可见
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 //设置持续(不消失的常驻通知)
@@ -88,11 +78,13 @@ public class LockScreenService extends Service {
                 .setCategory(category)
                 //优先级为：重要通知
                 .setPriority(NotificationCompat.PRIORITY_MAX);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // 安卓8.0以上系统要求通知设置Channel,否则会报错
             NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
             // 锁屏显示通知
             notificationChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            notificationChannel.setDescription(channelDescription);
             notificationManager.createNotificationChannel(notificationChannel);
             builder.setChannelId(channelId);
         }

@@ -58,11 +58,12 @@ public class BasicApplication extends Application {
 
         // 启动锁屏服务
         Intent lockScreenIntent = new Intent(context, LockScreenService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(lockScreenIntent);
-        } else {
-            startService(lockScreenIntent);
-        }
+        startService(lockScreenIntent);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(lockScreenIntent);
+//        } else {
+//            startService(lockScreenIntent);
+//        }
     }
 
     @Override

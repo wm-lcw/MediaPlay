@@ -16,12 +16,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -33,7 +30,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
@@ -117,30 +113,7 @@ public class MainActivity extends BasicActivity {
     private String currentMusicInfo = "";
     private String currentPlayTime = "00:00";
     private String mediaTime = "";
-
-
     private MusicPlayService musicService;
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            DebugLog.debug("onServiceConnected");
-            musicService = ((MusicPlayService.MyBinder) service).getService(mContext);
-            if (musicService != null) {
-                // service创建成功的时候立即初始化
-                musicService.initPlayData(musicInfo, mPosition, musicListName, playMode);
-                musicService.initPlayHelper(handler);
-                // 需要等musicService起来之后再给Fragment传参数
-                mainViewFragment.setDataFromMainActivity(musicService, handler);
-                musicPlayFragment.setDataFromMainActivity(musicService, handler, musicListName, mPosition);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicService = null;
-            DebugLog.debug("onServiceDisconnected");
-        }
-    };
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
