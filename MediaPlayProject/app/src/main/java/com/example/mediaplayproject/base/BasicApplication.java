@@ -57,8 +57,8 @@ public class BasicApplication extends Application {
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
 
         // 启动锁屏服务
-        Intent lockScreenIntent = new Intent(context, LockScreenService.class);
-        startService(lockScreenIntent);
+//        Intent lockScreenIntent = new Intent(context, LockScreenService.class);
+//        startService(lockScreenIntent);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //            startForegroundService(lockScreenIntent);
 //        } else {
