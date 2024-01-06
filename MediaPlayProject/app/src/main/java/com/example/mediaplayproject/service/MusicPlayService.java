@@ -184,27 +184,24 @@ public class MusicPlayService extends Service {
     public void play(MediaFileBean mediaFileBean, boolean isRestPlayer, int mPosition) {
         if (!TextUtils.isEmpty(mediaFileBean.getData())) {
             this.mPosition = mPosition;
-            // 记录当前的播放状态,用于给Activity发送Message
+            // 记录当前的播放状态, 用于更新Activity和通知栏的页面状态（避免此时player还没有来得及更新）
             boolean isPlayingStatus = false;
             // 当前若是播放，则进行暂停
             if (!isRestPlayer && helper.isPlaying()) {
                 pause();
             } else {
-                //首次播放歌曲、切换歌曲播放、继续播放
+                // 首次播放歌曲、切换歌曲播放、继续播放
                 helper.playByMediaFileBean(mediaFileBean, isRestPlayer);
                 isPlayingStatus = true;
                 // 在播放时保存信息
                 DataRefreshService.setLastPlayInfo(musicListName,mPosition,mediaFileBean.getId(),playMode);
             }
-            DebugLog.debug("isPlaying --- " + isPlaying());
-            // 发送Message给MusicPlayFragment，用于更新播放状态
+            firstPlay = false;
+
+            // 更新各个Fragment的播放状态
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_REFRESH_PLAY_STATE;
-            Bundle bundle = new Bundle();
-            bundle.putInt("position",mPosition);
-            bundle.putBoolean("isPlayingStatus", isPlayingStatus);
-            msg.setData(bundle);
-            mHandler.sendMessage(msg);
+            mHandler.sendMessageDelayed(msg, 300);
             updateNotificationShow(mPosition, isPlayingStatus);
 
             // 刷新桌面小部件
@@ -217,7 +214,6 @@ public class MusicPlayService extends Service {
             updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
             mContext.sendBroadcast(updateLockIntent);
 
-            firstPlay = false;
         } else {
 
             DebugLog.debug("当前播放地址无效");

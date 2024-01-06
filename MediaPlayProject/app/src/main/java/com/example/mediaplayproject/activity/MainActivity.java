@@ -388,18 +388,27 @@ public class MainActivity extends BasicActivity {
     protected void onResume() {
         super.onResume();
         DebugLog.debug("");
-        // 从service获取音量信息和当前音乐列表，应对息屏唤醒等的情况
-        if (musicService != null) {
-            isPlaying = musicService.isPlaying();
-            mPosition = musicService.getPosition();
-            playMode = musicService.getPlayMode();
-            musicListName = musicService.getMusicListName();
-        }
+        getInfoFromService();
     }
 
     @Override
     public int getLayoutId() {
         return R.layout.activity_main;
+    }
+
+    /**
+     *  从service获取音量信息和当前音乐列表，应对息屏唤醒等的情况
+     *  @author wm
+     *  @createTime 2024/1/5 17:03
+     */
+    private void getInfoFromService(){
+        if (musicService != null) {
+            isPlaying = musicService.isPlaying();
+            mPosition = musicService.getPosition();
+            playMode = musicService.getPlayMode();
+            musicListName = musicService.getMusicListName();
+            firstPlay = musicService.getFirstPlay();
+        }
     }
 
     /**
@@ -454,9 +463,7 @@ public class MainActivity extends BasicActivity {
             super.handleMessage(msg);
             if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_PLAY_STATE) {
                 // service发送的信息，更新播放状态
-                isPlaying = msg.getData().getBoolean("isPlayingStatus");
-                mPosition = msg.getData().getInt("position");
-                firstPlay = musicService.getFirstPlay();
+                getInfoFromService();
                 refreshFragmentStatus();
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE) {
@@ -490,8 +497,6 @@ public class MainActivity extends BasicActivity {
             }
         }
     };
-
-
 
     /**
      *  创建悬浮窗
