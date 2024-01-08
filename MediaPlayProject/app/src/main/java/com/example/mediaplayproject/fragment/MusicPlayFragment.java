@@ -426,7 +426,7 @@ public class MusicPlayFragment extends Fragment {
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             if (seekBar == sbProgress) {
-                musicService.removeMessage();
+                musicService.tempPauseSendMessage();
             }
         }
 

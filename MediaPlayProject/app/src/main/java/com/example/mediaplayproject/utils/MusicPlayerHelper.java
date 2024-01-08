@@ -130,11 +130,12 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @description 播放歌曲
      */
     public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull boolean isRestPlayer) {
+
         if (this.mediaFileBean != null && mediaFileBean == this.mediaFileBean && !isFirstPress){
             // 如果点击播放按钮时，音乐信息没变化，且有按压，证明是同一首歌曲，不需要重新开始播放
             player.start();
-            // 发送更新命令，用于更新播放器进度条
-            mHandler.sendEmptyMessage(MSG_CODE);
+            // 发送更新命令，用于更新播放器进度条,需要延迟一点再开始调用getDuration，因为资源可能还没加载完
+            mHandler.sendEmptyMessageDelayed(MSG_CODE, 500);
             return;
         }
         this.mediaFileBean = mediaFileBean;
@@ -155,8 +156,8 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
             player.start();
         }
         isFirstPress = false;
-        // 发送更新命令，用于更新播放器进度条
-        mHandler.sendEmptyMessage(MSG_CODE);
+        // 更新播放器进度条,需要延迟一点再开始调用getDuration，因为资源可能还没加载完
+        mHandler.sendEmptyMessageDelayed(MSG_CODE, 500);
     }
 
     /**
@@ -168,9 +169,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
             player.pause();
         }
         // 移除更新命令
-        if (mHandler.hasMessages(MSG_CODE)){
-            mHandler.removeMessages(MSG_CODE);
-        }
+        removeHandleMessage();
     }
 
     /**
@@ -186,9 +185,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         currentPlayTime = "00:00";
 
         // 移除更新命令
-        if (mHandler.hasMessages(MSG_CODE)){
-            mHandler.removeMessages(MSG_CODE);
-        }
+        removeHandleMessage();
     }
 
     /**
@@ -242,12 +239,23 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @author wm
      * @createTime 2023/8/20 21:49
      */
-    public void removeMessage() {
+    public void tempPauseSendMessage() {
         isPressed = true;
+        removeHandleMessage();
+    }
+
+    /**
+     *  移除Handler信息
+     *  @author wm
+     *  @createTime 2024/1/8 14:34
+     */
+    public void removeHandleMessage(){
         if(mHandler.hasMessages(MSG_CODE)){
             mHandler.removeMessages(MSG_CODE);
         }
     }
+
+
 
     /**
      * 根据拖动条变化，跳转歌曲的位置
@@ -267,9 +275,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         // 跳到该曲该秒
         player.seekTo((int) second);
         isFirstPress = false;
-        if(mHandler.hasMessages(MSG_CODE)){
-            mHandler.removeMessages(MSG_CODE);
-        }
+        removeHandleMessage();
         mHandler.sendEmptyMessage(MSG_CODE);
     }
 
@@ -311,6 +317,7 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                 // 如果播放且进度条未被按压
 //                if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
                 if (!weakReference.get().isPressed) {
+                    // 当点击下一曲后MediaPlayer已释放资源，下一曲资源还没有准备完成时，刚好handleMessage中调用了getDuration()就会发生错误
                     int position = weakReference.get().player.getCurrentPosition();
                     int duration = weakReference.get().player.getDuration();
                     if (duration > 0) {

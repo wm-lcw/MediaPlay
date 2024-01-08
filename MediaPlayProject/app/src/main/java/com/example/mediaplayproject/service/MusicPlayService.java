@@ -220,7 +220,6 @@ public class MusicPlayService extends Service {
             mContext.sendBroadcast(updateLockIntent);
 
         } else {
-
             DebugLog.debug("当前播放地址无效");
             Toast.makeText(mContext, "当前播放地址无效", Toast.LENGTH_SHORT).show();
         }
@@ -239,15 +238,16 @@ public class MusicPlayService extends Service {
      * @description 播放上一首
      */
     public void playPre() {
+        helper.removeHandleMessage();
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
         if (playMode == Constant.PLAY_MODE_LOOP || playMode == Constant.PLAY_MODE_SINGLE) {
-            //如果当前是第一首，则播放最后一首
+            // 如果当前是第一首，则播放最后一首
             if (mPosition <= 0) {
                 mPosition = musicInfo.size();
             }
             mPosition--;
         } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
-            //随机播放
+            // 随机播放
             mPosition = getRandomPosition();
         }
         dealToPlay();
@@ -258,15 +258,16 @@ public class MusicPlayService extends Service {
      * @description 播放下一首
      */
     public void playNext() {
+        helper.removeHandleMessage();
         //单曲播放和循环播放，都是按照音乐列表的顺序播放
         if (playMode == Constant.PLAY_MODE_LOOP || playMode == Constant.PLAY_MODE_SINGLE) {
             mPosition++;
-            //如果下一曲大于歌曲数量则取第一首
+            // 如果下一曲大于歌曲数量则取第一首
             if (mPosition >= musicInfo.size()) {
                 mPosition = 0;
             }
         } else if (playMode == Constant.PLAY_MODE_SHUFFLE) {
-            //随机播放
+            // 随机播放
             mPosition = getRandomPosition();
         }
         dealToPlay();
@@ -277,15 +278,16 @@ public class MusicPlayService extends Service {
      * @description 播放完毕后自动播放下一曲，用于回调
      */
     private void playNextEnd() {
+        helper.removeHandleMessage();
         //循环播放
         if (playMode == 0) {
             mPosition++;
-            //如果下一曲大于歌曲数量则取第一首
+            // 如果下一曲大于歌曲数量则取第一首
             if (mPosition >= musicInfo.size()) {
                 mPosition = 0;
             }
         } else if (playMode == 1) {
-            //随机播放
+            // 随机播放
             mPosition = getRandomPosition();
         }
         // 单曲播放，mPosition没有改变，直接重新开始播放
@@ -422,8 +424,8 @@ public class MusicPlayService extends Service {
      *  @author wm
      *  @createTime 2023/12/23 16:02
      */
-    public void removeMessage() {
-        helper.removeMessage();
+    public void tempPauseSendMessage() {
+        helper.tempPauseSendMessage();
     }
 
     /**
@@ -520,7 +522,6 @@ public class MusicPlayService extends Service {
                 //优先级
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
-        DebugLog.debug("position " + mPosition);
 
         // 获取remoteViews之后，再初始化通知栏的歌曲信息
         updateNotificationShow(mPosition, isPlaying());
