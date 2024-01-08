@@ -6,8 +6,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -303,4 +311,78 @@ public class ToolsUtils {
         return sdf.format(calendar.getTime());
     }
 
+    /**
+     *  获取歌曲专辑图片
+     *  @author wm
+     *  @createTime 2023/9/24 19:40
+     *  @param context: 上下文
+     *  @param dataPath: 音乐资源的路径
+     * @return : android.graphics.Bitmap
+     */
+    public static Bitmap getAlbumPicture(Context context, String dataPath) {
+        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(dataPath);
+        byte[] data = mmr.getEmbeddedPicture();
+        Bitmap albumPicture;
+        if (data != null) {
+            // 获取bitmap对象
+            albumPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+            // 获取宽高
+            int width = albumPicture.getWidth();
+            int height = albumPicture.getHeight();
+            // 创建操作图片用的Matrix对象
+            Matrix matrix = new Matrix();
+            // 计算缩放比例,数值越大，图片越清晰
+            float sx = ((float) 640 / width);
+            float sy = ((float) 640 / height);
+            // 设置缩放比例
+            matrix.postScale(sx, sy);
+            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+
+            /// 将专辑转为圆形的bitmap--start
+            // 创建一个正方形的Bitmap
+            Bitmap squareBitmap = Bitmap.createBitmap(albumPicture.getWidth(), albumPicture.getHeight(), Bitmap.Config.ARGB_8888);
+            // 创建画布，并将squareBitmap绘制到画布上
+            Canvas canvas = new Canvas(squareBitmap);
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            canvas.drawBitmap(albumPicture, 0, 0, paint);
+            // 获取图片的宽高中最小的值作为圆形半径
+            int radius = Math.min(albumPicture.getWidth(), albumPicture.getHeight()) / 2;
+            // 创建一个新的Bitmap，作为圆形图片
+            Bitmap circleBitmap = Bitmap.createBitmap(radius * 2, radius * 2, Bitmap.Config.ARGB_8888);
+            canvas.setBitmap(circleBitmap);
+            // 创建一个Path，并添加一个圆形的路径
+            Path path = new Path();
+            path.addCircle(radius, radius, radius, Path.Direction.CW);
+            // 裁剪画布为圆形路径
+            canvas.clipPath(path);
+            paint.reset();
+            paint.setAntiAlias(true);
+            // 将原图片绘制到圆形画布上
+            canvas.drawBitmap(squareBitmap, new Rect(0, 0, squareBitmap.getWidth(), squareBitmap.getHeight()), new Rect(0, 0, radius * 2, radius * 2), paint);
+            // 释放bitmap资源
+            albumPicture.recycle();
+            squareBitmap.recycle();
+            // 更新albumPicture为圆形图片
+            albumPicture = circleBitmap;
+            /// 将专辑转为圆形的bitmap--end
+        } else {
+            albumPicture = BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
+            //music是从歌曲文件读取不出来专辑图片时用来代替的默认专辑图片
+            int width = albumPicture.getWidth();
+            int height = albumPicture.getHeight();
+            // 创建操作图片用的Matrix对象
+            Matrix matrix = new Matrix();
+            // 计算缩放比例
+            float sx = ((float) 640 / width);
+            float sy = ((float) 640 / height);
+            // 设置缩放比例
+            matrix.postScale(sx, sy);
+            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+        }
+        return albumPicture;
+    }
 }
