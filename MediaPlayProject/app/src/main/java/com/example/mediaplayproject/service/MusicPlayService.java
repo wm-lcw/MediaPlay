@@ -133,6 +133,11 @@ public class MusicPlayService extends Service {
         mHandler = handler;
         helper = MusicPlayerHelper.getInstance();
         helper.initData(handler);
+        // 初始化时就将音乐信息传给helper，执行初始化操作
+        if(musicInfo.size() > 0){
+            helper.initMusic(musicInfo.get(mPosition));
+        }
+
         // 实现音乐播放完毕的回调函数，播放完毕后根据播放模式自动播放下一首
         helper.setOnCompletionListener(mp -> playNextEnd());
         isInitPlayHelper = true;

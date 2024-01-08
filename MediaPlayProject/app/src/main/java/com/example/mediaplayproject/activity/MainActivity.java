@@ -467,7 +467,7 @@ public class MainActivity extends BasicActivity {
                 refreshFragmentStatus();
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_LIST_STATE) {
-                // MusicPlayFragment发送的消息，播放页面收藏/取消收藏时刷新列表
+                // service发送的信息，收藏/取消收藏歌曲时，刷新列表
                 refreshFragmentStatus();
                 refreshListStatus();
             } else if (msg.what == Constant.HANDLER_MESSAGE_REFRESH_FROM_PLAY_HELPER) {

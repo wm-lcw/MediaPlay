@@ -41,6 +41,11 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     private int maxProgress = 100;
     private String currentPlayTime;
     private boolean isPressed = false;
+    /**
+     * 用于标志 进入应用音乐未播放时，拖动进度条
+     * 避免拖动进度条后，点击播放按钮歌曲又重新播放
+     * */
+    private boolean isFirstPress = true;
 
     private static MusicPlayerHelper instance = new MusicPlayerHelper();
 
@@ -63,6 +68,31 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
     }
 
     /**
+     *  初始化歌曲的信息
+     *  进入app时，如果音乐列表不为空，就直接初始化MediaPlay，而不是等到点击播放按钮时再初始化，
+     *  避免进入app时音乐还没开始播放，拖动进度条后，点击播放按钮歌曲又重新播放（因为此时会认为是首次播放，需要reset）
+     *  @author wm
+     *  @createTime 2024/1/8 10:34
+     *  @param mediaFileBean:
+     */
+    public void initMusic(MediaFileBean mediaFileBean){
+        this.mediaFileBean = mediaFileBean;
+        // 重置多媒体
+        player.reset();
+        // 设置数据源
+        if (!TextUtils.isEmpty(mediaFileBean.getData())) {
+            try {
+                player.setDataSource(mediaFileBean.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // 使用异步加载方式，不阻塞 UI 线程
+        player.prepareAsync();
+        pause();
+    }
+
+    /**
      * @createTime 2023/2/3 18:30
      * @description 缓存百分比
      */
@@ -81,14 +111,16 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         }
     }
 
-
     /**
      * @createTime 2023/2/3 18:33
      * @description 歌曲准备好之后开始播放
      */
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mp.start();
+        if (!isFirstPress){
+            // 如果是进入app音乐还没播放时拖动进度条，就不播放
+            mp.start();
+        }
     }
 
     /**
@@ -97,10 +129,17 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @createTime 2023/2/3 18:33
      * @description 播放歌曲
      */
-    public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull Boolean isRestPlayer) {
+    public void playByMediaFileBean(@NonNull MediaFileBean mediaFileBean, @NonNull boolean isRestPlayer) {
+        if (this.mediaFileBean != null && mediaFileBean == this.mediaFileBean && !isFirstPress){
+            // 如果点击播放按钮时，音乐信息没变化，且有按压，证明是同一首歌曲，不需要重新开始播放
+            player.start();
+            // 发送更新命令，用于更新播放器进度条
+            mHandler.sendEmptyMessage(MSG_CODE);
+            return;
+        }
         this.mediaFileBean = mediaFileBean;
         if (isRestPlayer) {
-            //重置多媒体
+            // 重置多媒体
             player.reset();
             // 设置数据源
             if (!TextUtils.isEmpty(mediaFileBean.getData())) {
@@ -115,7 +154,8 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         } else {
             player.start();
         }
-        //发送更新命令，用于更新播放器进度条
+        isFirstPress = false;
+        // 发送更新命令，用于更新播放器进度条
         mHandler.sendEmptyMessage(MSG_CODE);
     }
 
@@ -127,8 +167,10 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         if (player.isPlaying()) {
             player.pause();
         }
-        //移除更新命令
-        mHandler.removeMessages(MSG_CODE);
+        // 移除更新命令
+        if (mHandler.hasMessages(MSG_CODE)){
+            mHandler.removeMessages(MSG_CODE);
+        }
     }
 
     /**
@@ -136,15 +178,17 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      * @description 停止
      */
     public void stop() {
-        //音乐正在播放时才调用stop，未初始化的状态调用stop会报-38的错误；
+        // 音乐正在播放时才调用stop，未初始化的状态调用stop会报-38的错误；
         if (player != null && player.isPlaying()) {
             player.stop();
             player.reset();
         }
         currentPlayTime = "00:00";
 
-        //移除更新命令
-        mHandler.removeMessages(MSG_CODE);
+        // 移除更新命令
+        if (mHandler.hasMessages(MSG_CODE)){
+            mHandler.removeMessages(MSG_CODE);
+        }
     }
 
     /**
@@ -176,7 +220,6 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         mHandler.removeCallbacksAndMessages(null);
     }
 
-
     private OnCompletionListener mOnCompletionListener;
 
     /**
@@ -201,7 +244,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
      */
     public void removeMessage() {
         isPressed = true;
-        mHandler.removeMessages(MSG_CODE);
+        if(mHandler.hasMessages(MSG_CODE)){
+            mHandler.removeMessages(MSG_CODE);
+        }
     }
 
     /**
@@ -217,11 +262,15 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
         this.maxProgress = maxProgress;
         // 得到该首歌曲最长秒数
         int musicMax = player.getDuration();
-        //计算相对当前播放器歌曲的应播放时间
+        // 计算相对当前播放器歌曲的应播放时间
         float second = progress / (maxProgress * 1.0F) * musicMax;
         // 跳到该曲该秒
         player.seekTo((int) second);
-        mHandler.sendEmptyMessageDelayed(MSG_CODE, MSG_TIME);
+        isFirstPress = false;
+        if(mHandler.hasMessages(MSG_CODE)){
+            mHandler.removeMessages(MSG_CODE);
+        }
+        mHandler.sendEmptyMessage(MSG_CODE);
     }
 
     /**
@@ -259,8 +308,9 @@ public class MusicPlayerHelper implements MediaPlayer.OnBufferingUpdateListener,
                 String currentPlayingInfo = weakReference.get().getCurrentPlayingInfo();
                 String currentTime = weakReference.get().currentPlayTime;
                 String mediaTime = "";
-                //如果播放且进度条未被按压
-                if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
+                // 如果播放且进度条未被按压
+//                if (weakReference.get().player.isPlaying() && !weakReference.get().isPressed) {
+                if (!weakReference.get().isPressed) {
                     int position = weakReference.get().player.getCurrentPosition();
                     int duration = weakReference.get().player.getDuration();
                     if (duration > 0) {
