@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:orientation="horizontal">
+    android:layout_height="75dp"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_settings_item">
 
     <ImageView
         android:id="@+id/custom_song_icon"
         android:layout_width="64dp"
         android:layout_height="64dp"
+        android:layout_marginStart="@dimen/dp_5"
         android:layout_gravity="center_vertical"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_notify_icon" />
@@ -60,9 +62,6 @@
                     android:textColor="#333437"
                     android:textSize="15sp" />
             </LinearLayout>
-
-
-
 
             <LinearLayout
                 android:layout_marginTop="@dimen/dp_5"
