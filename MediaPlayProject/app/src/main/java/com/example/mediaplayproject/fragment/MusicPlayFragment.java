@@ -244,8 +244,12 @@ public class MusicPlayFragment extends Fragment {
             currentTime = "00:00";
         }
         // 设定音乐专辑图片
-        Bitmap musicPic = ToolsUtils.getAlbumPicture(mContext,musicInfo.get(mPosition).getData());
-        ivMusicPic.setImageBitmap(musicPic);
+        Bitmap musicPic = ToolsUtils.getAlbumPicture(mContext, musicInfo.get(mPosition).getData(), false);
+        if (musicPic != null){
+            ivMusicPic.setImageBitmap(musicPic);
+        } else {
+            ivMusicPic.setImageResource(R.mipmap.music);
+        }
 
         ivMediaPlay.setImageResource(isPlaying ? R.mipmap.media_pause : R.mipmap.media_play);
         // 设置旋转图标的状态

@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.widget.RemoteViews;
 
 import com.example.mediaplayproject.R;
@@ -183,6 +184,15 @@ public class MediaPlayWidgetProvider extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.tv_song_artist, musicService.getMusicArtist());
             remoteViews.setImageViewResource(R.id.btn_play,
                     isPlaying ? R.drawable.set_notify_pause_style : R.drawable.set_notify_play_style);
+            // 封面专辑
+            String musicPath = musicService.getMusicPath();
+            Bitmap bitmap = ToolsUtils.getAlbumPicture(musicService.getBaseContext(), musicPath, true);
+            if (bitmap != null){
+                remoteViews.setImageViewBitmap(R.id.custom_song_icon, bitmap);
+            } else {
+                remoteViews.setImageViewResource(R.id.custom_song_icon, R.mipmap.ic_notify_icon);
+            }
+
         } else {
             // 当前播放列表为空的情况
             remoteViews.setTextViewText(R.id.tv_song_title, "");
@@ -193,8 +203,7 @@ public class MediaPlayWidgetProvider extends AppWidgetProvider {
         remoteViews.setBoolean(R.id.btn_play_prev, "setEnabled", enable);
         remoteViews.setBoolean(R.id.btn_play_next, "setEnabled", enable);
 
-        //封面专辑
-//        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
+
 
     }
 }

@@ -317,72 +317,84 @@ public class ToolsUtils {
      *  @createTime 2023/9/24 19:40
      *  @param context: 上下文
      *  @param dataPath: 音乐资源的路径
-     * @return : android.graphics.Bitmap
+     *  @param isRemoteView: 是否用于通知栏图标， true:通知栏和小部件的图标； false:播放页的专辑图片
+     *                     通知栏的图标不用设置那么清晰，避免出现内存占用过高，最终触发异常
+     * @return : android.graphics.Bitmap, 可以为空
      */
-    public static Bitmap getAlbumPicture(Context context, String dataPath) {
-        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(dataPath);
-        byte[] data = mmr.getEmbeddedPicture();
-        Bitmap albumPicture;
-        if (data != null) {
-            // 获取bitmap对象
-            albumPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
-            // 获取宽高
-            int width = albumPicture.getWidth();
-            int height = albumPicture.getHeight();
-            // 创建操作图片用的Matrix对象
-            Matrix matrix = new Matrix();
-            // 计算缩放比例,数值越大，图片越清晰
-            float sx = ((float) 640 / width);
-            float sy = ((float) 640 / height);
-            // 设置缩放比例
-            matrix.postScale(sx, sy);
-            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
-            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+    public static Bitmap getAlbumPicture(Context context, String dataPath, boolean isRemoteView) {
+        try {
+            Bitmap albumPicture;
+            int multiple = 160;
+            if (!isRemoteView){
+                // 播放页的专辑图片，更改清晰度
+                multiple = 640;
+            }
+            android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(dataPath);
+            byte[] data = mmr.getEmbeddedPicture();
+            if (data != null) {
+                // 获取bitmap对象
+                albumPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+                // 获取宽高
+                int width = albumPicture.getWidth();
+                int height = albumPicture.getHeight();
+                // 创建操作图片用的Matrix对象
+                Matrix matrix = new Matrix();
+                // 计算缩放比例,数值越大，图片越清晰
+                float sx = ((float) multiple / width);
+                float sy = ((float) multiple / height);
+                // 设置缩放比例
+                matrix.postScale(sx, sy);
+                // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+                albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
 
-            /// 将专辑转为圆形的bitmap--start
-            // 创建一个正方形的Bitmap
-            Bitmap squareBitmap = Bitmap.createBitmap(albumPicture.getWidth(), albumPicture.getHeight(), Bitmap.Config.ARGB_8888);
-            // 创建画布，并将squareBitmap绘制到画布上
-            Canvas canvas = new Canvas(squareBitmap);
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            canvas.drawBitmap(albumPicture, 0, 0, paint);
-            // 获取图片的宽高中最小的值作为圆形半径
-            int radius = Math.min(albumPicture.getWidth(), albumPicture.getHeight()) / 2;
-            // 创建一个新的Bitmap，作为圆形图片
-            Bitmap circleBitmap = Bitmap.createBitmap(radius * 2, radius * 2, Bitmap.Config.ARGB_8888);
-            canvas.setBitmap(circleBitmap);
-            // 创建一个Path，并添加一个圆形的路径
-            Path path = new Path();
-            path.addCircle(radius, radius, radius, Path.Direction.CW);
-            // 裁剪画布为圆形路径
-            canvas.clipPath(path);
-            paint.reset();
-            paint.setAntiAlias(true);
-            // 将原图片绘制到圆形画布上
-            canvas.drawBitmap(squareBitmap, new Rect(0, 0, squareBitmap.getWidth(), squareBitmap.getHeight()), new Rect(0, 0, radius * 2, radius * 2), paint);
-            // 释放bitmap资源
-            albumPicture.recycle();
-            squareBitmap.recycle();
-            // 更新albumPicture为圆形图片
-            albumPicture = circleBitmap;
-            /// 将专辑转为圆形的bitmap--end
-        } else {
-            albumPicture = BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
-            //music是从歌曲文件读取不出来专辑图片时用来代替的默认专辑图片
-            int width = albumPicture.getWidth();
-            int height = albumPicture.getHeight();
-            // 创建操作图片用的Matrix对象
-            Matrix matrix = new Matrix();
-            // 计算缩放比例
-            float sx = ((float) 640 / width);
-            float sy = ((float) 640 / height);
-            // 设置缩放比例
-            matrix.postScale(sx, sy);
-            // 建立新的bitmap，其内容是对原bitmap的缩放后的图
-            albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+                /// 将专辑转为圆形的bitmap--start
+                // 创建一个正方形的Bitmap
+                Bitmap squareBitmap = Bitmap.createBitmap(albumPicture.getWidth(), albumPicture.getHeight(), Bitmap.Config.ARGB_8888);
+                // 创建画布，并将squareBitmap绘制到画布上
+                Canvas canvas = new Canvas(squareBitmap);
+                Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                canvas.drawBitmap(albumPicture, 0, 0, paint);
+                // 获取图片的宽高中最小的值作为圆形半径
+                int radius = Math.min(albumPicture.getWidth(), albumPicture.getHeight()) / 2;
+                // 创建一个新的Bitmap，作为圆形图片
+                Bitmap circleBitmap = Bitmap.createBitmap(radius * 2, radius * 2, Bitmap.Config.ARGB_8888);
+                canvas.setBitmap(circleBitmap);
+                // 创建一个Path，并添加一个圆形的路径
+                Path path = new Path();
+                path.addCircle(radius, radius, radius, Path.Direction.CW);
+                // 裁剪画布为圆形路径
+                canvas.clipPath(path);
+                paint.reset();
+                paint.setAntiAlias(true);
+                // 将原图片绘制到圆形画布上
+                canvas.drawBitmap(squareBitmap, new Rect(0, 0, squareBitmap.getWidth(), squareBitmap.getHeight()), new Rect(0, 0, radius * 2, radius * 2), paint);
+                // 释放bitmap资源
+                albumPicture.recycle();
+                squareBitmap.recycle();
+                // 更新albumPicture为圆形图片
+                albumPicture = circleBitmap;
+                /// 将专辑转为圆形的bitmap--end
+            } else {
+                albumPicture = BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
+                //music是从歌曲文件读取不出来专辑图片时用来代替的默认专辑图片
+                int width = albumPicture.getWidth();
+                int height = albumPicture.getHeight();
+                // 创建操作图片用的Matrix对象
+                Matrix matrix = new Matrix();
+                // 计算缩放比例
+                float sx = ((float) multiple / width);
+                float sy = ((float) multiple / height);
+                // 设置缩放比例
+                matrix.postScale(sx, sy);
+                // 建立新的bitmap，其内容是对原bitmap的缩放后的图
+                albumPicture = Bitmap.createBitmap(albumPicture, 0, 0, width, height, matrix, false);
+            }
+            return albumPicture;
+        } catch (Exception exception){
+            DebugLog.error("error " + exception);
+            return null;
         }
-        return albumPicture;
     }
 }

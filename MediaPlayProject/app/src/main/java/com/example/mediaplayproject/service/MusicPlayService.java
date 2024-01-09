@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.MediaPlayWidgetProvider;
 import com.example.mediaplayproject.utils.MusicPlayerHelper;
 import com.example.mediaplayproject.utils.SharedPreferencesUtil;
+import com.example.mediaplayproject.utils.ToolsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -214,10 +216,10 @@ public class MusicPlayService extends Service {
             updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             mContext.sendBroadcast(updateWidgetIntent);
 
-            // 刷新锁屏的UI
-            Intent updateLockIntent = new Intent();
-            updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
-            mContext.sendBroadcast(updateLockIntent);
+//            // 刷新锁屏的UI
+//            Intent updateLockIntent = new Intent();
+//            updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
+//            mContext.sendBroadcast(updateLockIntent);
 
         } else {
             DebugLog.debug("当前播放地址无效");
@@ -409,7 +411,7 @@ public class MusicPlayService extends Service {
      *  获取歌手名
      *  @author wm
      *  @createTime 2024/1/5 15:19
-     * @return : java.lang.String
+     *  @return : java.lang.String
      */
     public String getMusicArtist(){
         String artist = "";
@@ -417,6 +419,20 @@ public class MusicPlayService extends Service {
             artist = musicInfo.get(mPosition).getArtist();
         }
         return artist;
+    }
+
+    /**
+     *  获取歌曲的路径
+     *  @author wm
+     *  @createTime 2024/1/9 15:12
+     *  @return : java.lang.String
+     */
+    public String getMusicPath(){
+        String path = "";
+        if (musicInfo.size() > 0 && mPosition != -1){
+            path = musicInfo.get(mPosition).getData();
+        }
+        return path;
     }
 
     /**
@@ -507,7 +523,7 @@ public class MusicPlayService extends Service {
 
         // 创建通知栏信息
         notification = new NotificationCompat.Builder(this, "notificationServiceId")
-                //设置图标
+                // 设置图标(这里缺少图标会报错)
                 .setSmallIcon(R.mipmap.ic_notify_icon)
                 .setWhen(System.currentTimeMillis())
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -645,10 +661,10 @@ public class MusicPlayService extends Service {
         updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         mContext.sendBroadcast(updateWidgetIntent);
 
-        // 刷新锁屏的UI
-        Intent updateLockIntent = new Intent();
-        updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
-        mContext.sendBroadcast(updateLockIntent);
+//        // 刷新锁屏的UI
+//        Intent updateLockIntent = new Intent();
+//        updateLockIntent.setAction(Constant.REFRESH_PLAY_STATE_ACTION);
+//        mContext.sendBroadcast(updateLockIntent);
     }
 
     /**
@@ -657,6 +673,7 @@ public class MusicPlayService extends Service {
      * @param changeToPlay 接下来的状态； true播放，false暂停
      */
     public void updateNotificationShow(int position, boolean changeToPlay) {
+        DebugLog.debug(" position " + position);
         boolean listNotNull = position != -1;
         if (changeToPlay) {
             remoteViews.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
@@ -668,7 +685,14 @@ public class MusicPlayService extends Service {
             remoteViews.setTextViewText(R.id.tv_song_artist, musicInfo.get(position).getArtist());
 //            remoteViews.setImageViewResource(R.id.btn_play,
 //                    isPlaying() ? R.drawable.set_notify_pause_style : R.drawable.set_notify_play_style);
-
+            // 封面专辑，频繁地调用setImageViewBitmap更新图片，会导致通知栏挂掉（每设置一次都会将其存储起来）
+            // 暂时的解决方案是：适当压缩图片尺寸，减小内存占用
+            Bitmap bitmap = ToolsUtils.getAlbumPicture(this, musicInfo.get(position).getData(), true);
+            if (bitmap != null){
+                remoteViews.setImageViewBitmap(R.id.custom_song_icon, bitmap);
+            } else {
+                remoteViews.setImageViewResource(R.id.custom_song_icon, R.mipmap.ic_notify_icon);
+            }
         } else {
             remoteViews.setTextViewText(R.id.tv_song_title, "");
             remoteViews.setTextViewText(R.id.tv_song_artist, "");
@@ -680,37 +704,8 @@ public class MusicPlayService extends Service {
         remoteViews.setBoolean(R.id.btn_play_prev, "setEnabled", listNotNull);
         remoteViews.setBoolean(R.id.btn_play_next, "setEnabled", listNotNull);
 
-        // 封面专辑
-//        remoteViews.setImageViewBitmap(R.id.iv_album_cover, MusicUtils.getAlbumPicture(this, mList.get(position).getPath(), 0));
-
         // 发送通知
         notificationManager.notify(NOTIFICATION_ID, notification);
-    }
-
-    /**
-     *  设定通知栏的状态
-     *  @author wm
-     *  @createTime 2023/8/31 18:47
-     * @param enable: true 可用； false不可用
-     */
-    private void setNotificationEnable(RemoteViews rv, boolean enable){
-        if (enable){
-            rv.setTextViewText(R.id.tv_song_title, musicInfo.get(mPosition).getTitle());
-            rv.setTextViewText(R.id.tv_song_artist, musicInfo.get(mPosition).getArtist());
-            if (isPlaying()) {
-                rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_pause_style);
-            } else {
-                rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
-            }
-        } else {
-            // 当前播放列表为空的情况
-            rv.setTextViewText(R.id.tv_song_title,"");
-            rv.setTextViewText(R.id.tv_song_artist, "");
-            rv.setImageViewResource(R.id.btn_play, R.drawable.set_notify_play_style);
-        }
-        rv.setBoolean(R.id.btn_play,"setEnabled",enable);
-        rv.setBoolean(R.id.btn_play_prev,"setEnabled",enable);
-        rv.setBoolean(R.id.btn_play_next,"setEnabled",enable);
     }
 
     @Override
