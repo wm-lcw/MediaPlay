@@ -57,6 +57,7 @@ import com.example.mediaplayproject.utils.Constant;
 import com.example.mediaplayproject.utils.DebugLog;
 import com.example.mediaplayproject.utils.ToolsUtils;
 import com.example.mediaplayproject.view.CustomizeEditText;
+import com.example.mediaplayproject.view.PlayControllerView;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -220,17 +221,35 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         musicListViewPager = mainView.findViewById(R.id.main_view_pager);
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         navView = mainView.findViewById(R.id.nav_view);
-        tvCurrentMusicInfo = mainView.findViewById(R.id.tv_current_music_info);
+
         customizeEditText = mainView.findViewById(R.id.custom_edit_text);
         searchEditText = customizeEditText.getEditText();
         ivSearch = customizeEditText.getSearchImageView();
         ivSettings = mainView.findViewById(R.id.iv_setting);
-        ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
-        ivMusicList = mainView.findViewById(R.id.iv_current_list);
+
         ivDiscovery = mainView.findViewById(R.id.iv_discovery);
         ivPersonal = mainView.findViewById(R.id.iv_personal);
         ivTools = mainView.findViewById(R.id.iv_tools);
-        ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
+
+
+        PlayControllerView playControllerView = mainView.findViewById(R.id.ll_simple_play_view);
+        playControllerView.setOnClickListener(simplePlayViewListener);
+        ivPlayRevolve = playControllerView.findViewById(R.id.iv_play_revolve);
+        tvCurrentMusicInfo = playControllerView.findViewById(R.id.tv_current_music_info);
+        ivPlayMusic = playControllerView.findViewById(R.id.iv_play_music);
+        ivMusicList = playControllerView.findViewById(R.id.iv_current_list);
+        playControllerView.setControllerCallback(new PlayControllerView.PlayControllerCallback() {
+            @Override
+            public void controlPlayNextOrPre(boolean isNext) {
+                if (isNext){
+                    musicService.playNext();
+                } else {
+                    musicService.playPre();
+                }
+            }
+        });
+
+
         ivSettings.setOnClickListener(mListener);
         ivSearch.setOnClickListener(mListener);
         ivPlayMusic.setOnClickListener(mListener);
@@ -249,8 +268,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
 //        navView.getMenu().getItem(0).setChecked(true);
         }
 
-        LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
-        llSimplePlayView.setOnClickListener(simplePlayViewListener);
 
         // 初始化主页ViewPager
         discoveryFragment = DiscoveryFragment.getInstance(mContext);
