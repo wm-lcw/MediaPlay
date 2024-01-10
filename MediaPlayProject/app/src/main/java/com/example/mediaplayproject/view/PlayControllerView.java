@@ -28,6 +28,7 @@ public class PlayControllerView extends LinearLayout {
     private Scroller scroller;
     private PlayControllerCallback mControllerCallback;
     private float mStartX;
+    private static final int MOVE_DESTINATION = 100;
 
     /**
      * 这个构造方法要加上，否则可能会出错
@@ -189,7 +190,7 @@ public class PlayControllerView extends LinearLayout {
      */
     private void handleTouchResult(float destination) {
         float offsetX = destination - mStartX;
-        if (Math.abs(offsetX) > 100) {
+        if (Math.abs(offsetX) > MOVE_DESTINATION) {
             // 如果移动距离足够了，就处理切换歌曲的事件
             if (offsetX > 0) {
                 // 向右滑动，切换到上一首歌曲
@@ -198,9 +199,11 @@ public class PlayControllerView extends LinearLayout {
                 // 向左滑动，切换到下一首歌曲
                 onSwipeLeft();
             }
+
         }
+
         // 内容回到原位
-        ObjectAnimator animator = ObjectAnimator.ofFloat(this, "translationX", -getLeft());
+        ObjectAnimator animator = ObjectAnimator.ofFloat(this, "translationX", 0);
         animator.setDuration(250).start();
     }
 }

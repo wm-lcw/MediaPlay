@@ -221,23 +221,22 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         musicListViewPager = mainView.findViewById(R.id.main_view_pager);
         drawerLayout = mainView.findViewById(R.id.drawer_layout);
         navView = mainView.findViewById(R.id.nav_view);
-
         customizeEditText = mainView.findViewById(R.id.custom_edit_text);
         searchEditText = customizeEditText.getEditText();
         ivSearch = customizeEditText.getSearchImageView();
         ivSettings = mainView.findViewById(R.id.iv_setting);
-
         ivDiscovery = mainView.findViewById(R.id.iv_discovery);
         ivPersonal = mainView.findViewById(R.id.iv_personal);
         ivTools = mainView.findViewById(R.id.iv_tools);
 
+        LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
+        llSimplePlayView.setOnClickListener(simplePlayViewListener);
+        ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
+        ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
+        ivMusicList = mainView.findViewById(R.id.iv_current_list);
 
-        PlayControllerView playControllerView = mainView.findViewById(R.id.ll_simple_play_view);
-        playControllerView.setOnClickListener(simplePlayViewListener);
-        ivPlayRevolve = playControllerView.findViewById(R.id.iv_play_revolve);
+        PlayControllerView playControllerView = mainView.findViewById(R.id.ll_play_controller_view);
         tvCurrentMusicInfo = playControllerView.findViewById(R.id.tv_current_music_info);
-        ivPlayMusic = playControllerView.findViewById(R.id.iv_play_music);
-        ivMusicList = playControllerView.findViewById(R.id.iv_current_list);
         playControllerView.setControllerCallback(new PlayControllerView.PlayControllerCallback() {
             @Override
             public void controlPlayNextOrPre(boolean isNext) {
@@ -248,7 +247,6 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
                 }
             }
         });
-
 
         ivSettings.setOnClickListener(mListener);
         ivSearch.setOnClickListener(mListener);

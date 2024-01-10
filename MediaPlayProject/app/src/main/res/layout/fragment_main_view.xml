@@ -78,14 +78,45 @@
             android:orientation="vertical">
             <!--底部播放状态栏-->
             <LinearLayout
+                android:id="@+id/ll_simple_play_view"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_75"
+                android:orientation="horizontal"
                 android:background="@drawable/bg_music_list_view">
+
+                <ImageView
+                    android:id="@+id/iv_play_revolve"
+                    android:layout_width="38dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:src="@mipmap/ic_play_revolve_nor" />
+
                 <com.example.mediaplayproject.view.PlayControllerView
-                    android:id="@+id/ll_simple_play_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:id="@+id/ll_play_controller_view"
+                    android:layout_width="@dimen/dp_170"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="@dimen/dp_20"/>
+
+                <ImageView
+                    android:id="@+id/iv_play_music"
+                    android:layout_width="@dimen/dp_38"
+                    android:layout_height="@dimen/dp_38"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_25"
+                    android:src="@mipmap/ic_main_view_play_grey" />
+
+                <ImageView
+                    android:id="@+id/iv_current_list"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/dp_20"
+                    android:background="@drawable/main_view_list_icon_style" />
+
             </LinearLayout>
+
             <!--功能状态栏-->
             <LinearLayout
                 android:id="@+id/ll_function_view"
