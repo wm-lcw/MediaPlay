@@ -88,11 +88,11 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/ll_music_pic"
+        android:id="@+id/rl_music_info_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_top_title"
-        android:layout_margin="@dimen/dp_100">
+        android:layout_above="@+id/ll_play_seekbar_view">
 
         <ImageView
             android:id="@+id/iv_music_pic"
@@ -100,6 +100,23 @@
             android:layout_height="@dimen/dp_200"
             android:layout_centerInParent="true"
             android:background="@drawable/music" />
+
+        <!--音乐的详细信息/歌词-->
+        <LinearLayout
+            android:id="@+id/ll_music_info_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/tv_music_info_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/music_text"/>
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 

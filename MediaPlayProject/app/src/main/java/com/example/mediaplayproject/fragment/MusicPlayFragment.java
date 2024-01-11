@@ -31,6 +31,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -57,6 +59,8 @@ public class MusicPlayFragment extends Fragment {
     private SeekBar sbVolume, sbProgress;
     private int maxVolume = 150;
     private TextView tvCurrentMusicInfo, tvCurrentPlayTime, tvMediaTime;
+    private RelativeLayout rlMusicInfoView;
+    private LinearLayout llMusicInfo;
     private String currentTime = "00:00";
     private boolean mRegistered = false, firstPlay = true, isPlaying = false;
     private AudioManager mAudioManager;
@@ -153,6 +157,8 @@ public class MusicPlayFragment extends Fragment {
         ivBack = playView.findViewById(R.id.iv_play_view_back);
         ivMore = playView.findViewById(R.id.iv_play_view_more);
         ivMute = playView.findViewById(R.id.iv_mute);
+        rlMusicInfoView = playView.findViewById(R.id.rl_music_info_view);
+        llMusicInfo = playView.findViewById(R.id.ll_music_info_view);
         ivMusicPic = playView.findViewById(R.id.iv_music_pic);
         ivMediaLoop = playView.findViewById(R.id.iv_loop);
         ivMediaPre = playView.findViewById(R.id.iv_pre);
@@ -166,6 +172,7 @@ public class MusicPlayFragment extends Fragment {
         tvCurrentPlayTime = playView.findViewById(R.id.tv_music_current_time);
         tvMediaTime = playView.findViewById(R.id.tv_music_time);
 
+        rlMusicInfoView.setOnClickListener(mListener);
         ivBack.setOnClickListener(mListener);
         ivMore.setOnClickListener(mListener);
         ivMute.setOnClickListener(mListener);
@@ -338,6 +345,9 @@ public class MusicPlayFragment extends Fragment {
                 mActivityHandle.sendMessage(msg);
             } else if (view == ivMediaLike) {
                 musicService.changFavoriteState();
+            } else if (view == rlMusicInfoView){
+                llMusicInfo.setVisibility(ivMusicPic.getVisibility());
+                ivMusicPic.setVisibility(ivMusicPic.getVisibility()==View.VISIBLE ? View.GONE : View.VISIBLE);
             }
         }
     };
