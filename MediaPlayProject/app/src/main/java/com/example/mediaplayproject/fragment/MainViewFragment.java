@@ -93,7 +93,7 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
     private CustomizeEditText customizeEditText;
     private ImageView ivSettings, ivSearch, ivPlayMusic, ivMusicList, ivDiscovery, ivPersonal, ivTools, ivPlayRevolve;
     private TextView tvCurrentMusicInfo;
-
+    private PlayControllerView playControllerView;
 
     private List<MediaFileBean> musicInfo = new ArrayList<>();
     private List<MediaFileBean> defaultList = new ArrayList<>();
@@ -229,22 +229,19 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
         ivPersonal = mainView.findViewById(R.id.iv_personal);
         ivTools = mainView.findViewById(R.id.iv_tools);
 
-        LinearLayout llSimplePlayView = mainView.findViewById(R.id.ll_simple_play_view);
-        llSimplePlayView.setOnClickListener(simplePlayViewListener);
+
         ivPlayRevolve = mainView.findViewById(R.id.iv_play_revolve);
         ivPlayMusic = mainView.findViewById(R.id.iv_play_music);
         ivMusicList = mainView.findViewById(R.id.iv_current_list);
-
-        PlayControllerView playControllerView = mainView.findViewById(R.id.ll_play_controller_view);
+        ivPlayRevolve.setOnClickListener(mListener);
+        playControllerView = mainView.findViewById(R.id.ll_play_controller_view);
+        playControllerView.setOnClickListener(mListener);
         tvCurrentMusicInfo = playControllerView.findViewById(R.id.tv_current_music_info);
-        playControllerView.setControllerCallback(new PlayControllerView.PlayControllerCallback() {
-            @Override
-            public void controlPlayNextOrPre(boolean isNext) {
-                if (isNext){
-                    musicService.playNext();
-                } else {
-                    musicService.playPre();
-                }
+        playControllerView.setControllerCallback(isNext -> {
+            if (isNext){
+                musicService.playNext();
+            } else {
+                musicService.playPre();
             }
         });
 
@@ -456,19 +453,10 @@ public class MainViewFragment extends Fragment implements NavigationView.OnNavig
             Message msg = new Message();
             msg.what = Constant.HANDLER_MESSAGE_SHOW_LIST_FRAGMENT;
             mActivityHandle.sendMessage(msg);
+        } else if (view == ivPlayRevolve || view == playControllerView ){
+            ToolsUtils.getInstance().changeFragment(mContext, Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG);
         }
     };
-
-    private final View.OnClickListener simplePlayViewListener = view -> {
-        if (view instanceof ImageView) {
-            // 点击底部播放控制栏，若是点击到自定义的按钮(ImageView)就不处理，在其他地方单独处理
-            return;
-        }
-
-        // 点击到其他区域，就跳转进去MusicPlayFragment页面
-        ToolsUtils.getInstance().changeFragment(mContext, Constant.MUSIC_PLAY_FRAGMENT_ACTION_FLAG);
-    };
-
 
     /**
      *  Navigation侧滑栏的item点击事件监听

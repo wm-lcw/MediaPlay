@@ -3,6 +3,7 @@ package com.example.mediaplayproject.view;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -29,6 +30,9 @@ public class PlayControllerView extends LinearLayout {
     private PlayControllerCallback mControllerCallback;
     private float mStartX;
     private static final int MOVE_DESTINATION = 100;
+    private static final long JUDGE_ONCLICK_TIME = 50L;
+    private long startTouchTime;
+    private Context mContext;
 
     /**
      * 这个构造方法要加上，否则可能会出错
@@ -155,6 +159,7 @@ public class PlayControllerView extends LinearLayout {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mStartX = x;
+                startTouchTime = SystemClock.currentThreadTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
                 moveContent(x);
@@ -162,6 +167,12 @@ public class PlayControllerView extends LinearLayout {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 handleTouchResult(x);
+                long endTouchTime = SystemClock.currentThreadTimeMillis();
+                if (endTouchTime-startTouchTime < JUDGE_ONCLICK_TIME){
+                    DebugLog.debug("touch time < 50ms");
+                    this.playControllerView.performClick();
+                    return false;
+                }
                 break;
             default:
                 break;
